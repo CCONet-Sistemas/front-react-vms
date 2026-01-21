@@ -1,6 +1,7 @@
 import type { Route } from './+types/_app.recordings';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Film } from 'lucide-react';
+import { ProtectedRoute } from '~/components/common';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -11,7 +12,8 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function RecordingsPage() {
   return (
-    <div className="space-y-6">
+    <ProtectedRoute resource='recording' action='read'>
+       <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Recordings</h1>
         <p className="text-muted-foreground">
@@ -34,5 +36,6 @@ export default function RecordingsPage() {
         </CardContent>
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }

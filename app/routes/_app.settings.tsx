@@ -8,8 +8,8 @@ import { cn } from '~/lib/utils';
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: 'Settings | VMS' },
-    { name: 'description', content: 'System settings - Video Management System' },
+    { title: 'Configurações | VMS' },
+    { name: 'description', content: 'Configurações do sistema - Sistema de Gerenciamento de Vídeo' },
   ];
 }
 
@@ -18,17 +18,17 @@ export default function SettingsPage() {
   const user = useAuthStore((state) => state.user);
 
   const themeOptions = [
-    { value: 'light' as const, label: 'Light', icon: Sun },
-    { value: 'dark' as const, label: 'Dark', icon: Moon },
-    { value: 'system' as const, label: 'System', icon: Monitor },
+    { value: 'light' as const, label: 'Claro', icon: Sun },
+    { value: 'dark' as const, label: 'Escuro', icon: Moon },
+    { value: 'system' as const, label: 'Sistema', icon: Monitor },
   ];
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">
-          Manage your account and application preferences
+          Gerencie sua conta e preferências do aplicativo
         </p>
       </div>
 
@@ -38,16 +38,16 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              <CardTitle>Profile</CardTitle>
+              <CardTitle>Perfil</CardTitle>
             </div>
             <CardDescription>
-              Manage your profile information
+              Gerencie as informações do seu perfil
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Name</label>
+                <label className="text-sm font-medium">Nome</label>
                 <p className="text-sm text-muted-foreground mt-1">{user?.name || '-'}</p>
               </div>
               <div>
@@ -55,7 +55,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground mt-1">{user?.email || '-'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium">Role</label>
+                <label className="text-sm font-medium">Função</label>
                 <p className="text-sm text-muted-foreground mt-1 capitalize">{user?.role || '-'}</p>
               </div>
             </div>
@@ -67,15 +67,15 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Sun className="h-5 w-5" />
-              <CardTitle>Appearance</CardTitle>
+              <CardTitle>Aparência</CardTitle>
             </div>
             <CardDescription>
-              Customize the look of the application
+              Personalize a aparência do aplicativo
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div>
-              <label className="text-sm font-medium">Theme</label>
+              <label className="text-sm font-medium">Tema</label>
               <div className="flex gap-2 mt-2">
                 {themeOptions.map((option) => (
                   <Button
@@ -99,14 +99,14 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              <CardTitle>Security</CardTitle>
+              <CardTitle>Segurança</CardTitle>
             </div>
             <CardDescription>
-              Manage your security preferences
+              Gerencie suas preferências de segurança
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline">Change Password</Button>
+            <Button variant="outline">Alterar Senha</Button>
           </CardContent>
         </Card>
 
@@ -115,15 +115,15 @@ export default function SettingsPage() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
-              <CardTitle>Notifications</CardTitle>
+              <CardTitle>Notificações</CardTitle>
             </div>
             <CardDescription>
-              Configure notification preferences
+              Configure suas preferências de notificação
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Notification settings coming soon
+              Configurações de notificação em breve
             </p>
           </CardContent>
         </Card>

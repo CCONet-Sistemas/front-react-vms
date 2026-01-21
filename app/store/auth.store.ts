@@ -4,11 +4,13 @@ import type { User } from '~/types';
 
 interface AuthState {
   user: User | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
 
   // Actions
   setUser: (user: User) => void;
-  login: (user: User) => void;
+  setAccessToken: (token: string) => void;
+  login: (user: User, accessToken: string) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
 }
@@ -17,19 +19,24 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+      accessToken: null,
       isAuthenticated: false,
 
       setUser: (user) => set({ user, isAuthenticated: true }),
 
-      login: (user) =>
+      setAccessToken: (accessToken) => set({ accessToken }),
+
+      login: (user, accessToken) =>
         set({
           user,
+          accessToken,
           isAuthenticated: true,
         }),
 
       logout: () =>
         set({
           user: null,
+          accessToken: null,
           isAuthenticated: false,
         }),
 
@@ -42,6 +49,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'vms-auth-storage',
       partialize: (state) => ({
         user: state.user,
+        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

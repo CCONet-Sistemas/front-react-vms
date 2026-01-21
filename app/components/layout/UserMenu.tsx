@@ -97,7 +97,7 @@ export function UserMenu() {
             role="menuitem"
           >
             <User className="h-4 w-4" />
-            My Profile
+            Perfil
           </Link>
 
           <Link
@@ -110,7 +110,7 @@ export function UserMenu() {
             role="menuitem"
           >
             <Settings className="h-4 w-4" />
-            Settings
+            Configurações
           </Link>
 
           <div className="border-t mt-1 pt-1">
@@ -123,7 +123,7 @@ export function UserMenu() {
               role="menuitem"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              Sair
             </button>
           </div>
         </div>

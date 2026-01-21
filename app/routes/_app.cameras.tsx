@@ -2,6 +2,7 @@ import type { Route } from './+types/_app.cameras';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
 import { Plus, Camera } from 'lucide-react';
+import { ProtectedRoute } from '~/components/common';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -12,7 +13,8 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function CamerasPage() {
   return (
-    <div className="space-y-6">
+    <ProtectedRoute resource='camera' action='read'>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Cameras</h1>
@@ -45,5 +47,6 @@ export default function CamerasPage() {
         </CardContent>
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }

@@ -19,6 +19,20 @@ const processQueue = (error: unknown = null) => {
 };
 
 export function setupInterceptors() {
+
+  // Request interceptor - add Authorization header
+  apiClient.interceptors.request.use(
+    (config) => {
+      const accessToken = useAuthStore.getState().accessToken;
+
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
   // Response interceptor - handle 401 errors
   apiClient.interceptors.response.use(
     (response) => response,
@@ -41,7 +55,9 @@ export function setupInterceptors() {
 
         try {
           // Tenta refresh - o cookie é enviado automaticamente
-          await apiClient.post('/authentication/refresh');
+          const { data } = await apiClient.post<{ accessToken: string }>('/authentication/refresh');
+          // Salva o novo accessToken
+          useAuthStore.getState().setAccessToken(data.accessToken);
 
           processQueue();
           return apiClient(originalRequest);

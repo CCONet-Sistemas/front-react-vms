@@ -1,24 +1,47 @@
+export interface UserRoles {
+  name: string[];
+  permissions: Permission[];
+}
+
 export interface User {
-  id: string;
-  email: string;
+  uuid: string;
   name: string;
-  role: UserRole;
+  email: string;
+  groupId: number;
+  roles: UserRoles;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type UserRole = 'admin' | 'operator' | 'viewer';
+// Resources
+export type Resource =
+  | 'user'
+  | 'camera'
+  | 'stream'
+  | 'video'
+  | 'recording'
+  | 'event'
+  | 'notification'
+  | 'configuration'
+  | 'backup'
+  | 'media_core'
+  | 'role';
+
+// Actions
+export type Action = 'create' | 'read' | 'update' | 'delete' | 'execute';
+
+// Permission format: "resource:action"
+export type Permission = `${Resource}:${Action}`;
 
 export interface CreateUserDto {
   email: string;
   name: string;
   password: string;
-  role: UserRole;
 }
 
 export interface UpdateUserDto {
   email?: string;
   name?: string;
   password?: string;
-  role?: UserRole;
 }

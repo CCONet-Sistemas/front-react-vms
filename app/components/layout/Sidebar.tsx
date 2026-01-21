@@ -14,10 +14,10 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Cameras', path: '/cameras', icon: Camera },
-  { label: 'Live View', path: '/live-view', icon: Video },
-  { label: 'Recordings', path: '/recordings', icon: Film },
-  { label: 'Events', path: '/events', icon: Bell },
-  { label: 'Settings', path: '/settings', icon: Settings },
+  { label: 'Visualização ao Vivo', path: '/live-view', icon: Video },
+  { label: 'Gravações', path: '/recordings', icon: Film },
+  { label: 'Eventos', path: '/events', icon: Bell },
+  { label: 'Configurações', path: '/settings', icon: Settings },
 ];
 
 export function Sidebar() {

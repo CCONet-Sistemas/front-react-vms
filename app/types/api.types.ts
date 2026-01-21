@@ -29,7 +29,14 @@ export interface LoginDto {
   password: string;
 }
 
-// Resposta do login - tokens são setados via cookies HTTP-only
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  type: 'Bearer';
+  expiresIn: number;
+}
+
 export interface LoginResponse {
   user: import('./user.types').User;
+  tokens: AuthTokens;
 }

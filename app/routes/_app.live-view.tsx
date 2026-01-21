@@ -1,6 +1,7 @@
 import type { Route } from './+types/_app.live-view';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Video } from 'lucide-react';
+import { ProtectedRoute } from '~/components/common';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -11,7 +12,8 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function LiveViewPage() {
   return (
-    <div className="space-y-6">
+    <ProtectedRoute resource='camera' action='read'>
+      <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Live View</h1>
         <p className="text-muted-foreground">
@@ -34,5 +36,6 @@ export default function LiveViewPage() {
         </CardContent>
       </Card>
     </div>
+    </ProtectedRoute>
   );
 }
