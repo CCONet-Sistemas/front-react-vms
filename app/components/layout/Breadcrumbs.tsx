@@ -1,0 +1,70 @@
+import { Link, useLocation } from 'react-router';
+import { ChevronRight, Home } from 'lucide-react';
+import { cn } from '~/lib/utils';
+
+interface BreadcrumbItem {
+  label: string;
+  path: string;
+}
+
+const routeLabels: Record<string, string> = {
+  dashboard: 'Dashboard',
+  cameras: 'Cameras',
+  'live-view': 'Live View',
+  recordings: 'Recordings',
+  events: 'Events',
+  settings: 'Settings',
+};
+
+export function Breadcrumbs() {
+  const location = useLocation();
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+
+  const breadcrumbs: BreadcrumbItem[] = pathSegments.map((segment, index) => {
+    const path = '/' + pathSegments.slice(0, index + 1).join('/');
+    const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    return { label, path };
+  });
+
+  if (breadcrumbs.length === 0) {
+    return null;
+  }
+
+  return (
+    <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-sm">
+      <Link
+        to="/dashboard"
+        className={cn(
+          'flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors',
+          breadcrumbs.length === 1 && breadcrumbs[0].path === '/dashboard' && 'text-foreground font-medium'
+        )}
+      >
+        <Home className="h-4 w-4" />
+        <span className="sr-only sm:not-sr-only">Home</span>
+      </Link>
+
+      {breadcrumbs.map((crumb, index) => {
+        const isLast = index === breadcrumbs.length - 1;
+        const isDashboard = crumb.path === '/dashboard';
+
+        if (isDashboard) return null;
+
+        return (
+          <div key={crumb.path} className="flex items-center gap-1">
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            {isLast ? (
+              <span className="font-medium text-foreground">{crumb.label}</span>
+            ) : (
+              <Link
+                to={crumb.path}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {crumb.label}
+              </Link>
+            )}
+          </div>
+        );
+      })}
+    </nav>
+  );
+}
