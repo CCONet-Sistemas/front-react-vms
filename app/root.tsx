@@ -10,7 +10,7 @@ import {
 
 import type { Route } from './+types/root';
 import { setupInterceptors } from '~/services/api';
-import './app.css';
+import './assets/css/app.css';
 
 // Setup API interceptors once on app load
 setupInterceptors();

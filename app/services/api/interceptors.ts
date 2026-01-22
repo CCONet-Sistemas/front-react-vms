@@ -62,6 +62,7 @@ export function setupInterceptors() {
           processQueue();
           return apiClient(originalRequest);
         } catch (refreshError) {
+
           processQueue(refreshError);
           // Refresh falhou, faz logout
           useAuthStore.getState().logout();

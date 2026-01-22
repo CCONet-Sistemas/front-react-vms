@@ -1,52 +1,91 @@
+import { Link, useSearchParams } from 'react-router';
 import type { Route } from './+types/_app.cameras';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Button } from '~/components/ui/button';
-import { Plus, Camera } from 'lucide-react';
-import { ProtectedRoute } from '~/components/common';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ProtectedRoute, ProtectedFeature } from '~/components/common';
+import { CameraGrid, useCameras } from '~/features/cameras';
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: 'Cameras | VMS' },
-    { name: 'description', content: 'Manage cameras - Video Management System' },
+    { title: 'Câmeras | VMS' },
+    { name: 'description', content: 'Gerenciar câmeras - Video Management System' },
   ];
 }
 
-export default function CamerasPage() {
-  return (
-    <ProtectedRoute resource='camera' action='read'>
-      <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Cameras</h1>
-          <p className="text-muted-foreground">
-            Manage and configure your cameras
-          </p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Camera
-        </Button>
-      </div>
+const ITEMS_PER_PAGE = 12;
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Camera List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Camera className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No cameras configured</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Add your first camera to get started
+export default function CamerasPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get('page')) || 1;
+
+  const { data, isLoading, error } = useCameras({ page, limit: ITEMS_PER_PAGE });
+
+  const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 0;
+
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({ page: String(newPage) });
+  };
+
+  return (
+    <ProtectedRoute resource="camera" action="read">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Câmeras</h1>
+            <p className="text-muted-foreground">
+              Gerencie e configure suas câmeras
             </p>
-            <Button className="mt-4">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Camera
-            </Button>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <ProtectedFeature permission="camera:create">
+            <Link to="/camera">
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar
+            </Link>
+          </ProtectedFeature>
+        </div>
+
+        {/* Error state */}
+        {error && (
+          <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
+            <p className="text-sm text-destructive">
+              Erro ao carregar câmeras. Tente novamente.
+            </p>
+          </div>
+        )}
+
+        {/* Camera Grid */}
+        <CameraGrid cameras={data?.data ?? []} isLoading={isLoading} />
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Página {page} de {totalPages} ({data?.total} câmeras)
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= totalPages}
+              >
+                Próxima
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </ProtectedRoute>
   );
 }
