@@ -58,7 +58,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-64 border-r bg-card',
+          'fixed top-0 left-0 z-50 h-full w-64 border-r',
           'flex flex-col',
           'transition-transform duration-300 ease-in-out',
           'lg:translate-x-0 lg:z-30',
@@ -66,7 +66,7 @@ export function Sidebar() {
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b px-4">
+        <div className="flex h-16 items-center justify-between border-b px-4 bg-header-aside">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <Video className="h-5 w-5 text-primary-foreground" />

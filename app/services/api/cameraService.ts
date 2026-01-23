@@ -35,7 +35,7 @@ export const cameraService = {
   },
 
   update: async (uuid: string, payload: UpdateCameraDto): Promise<Camera> => {
-    const { data } = await apiClient.patch<Camera>(`/camera/${uuid}`, payload);
+    const { data } = await apiClient.put<Camera>(`/camera/${uuid}`, payload);
     return data;
   },
 

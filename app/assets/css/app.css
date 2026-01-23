@@ -78,6 +78,22 @@
   --color-error-80: #f99f9f;
   --color-error-90: #fad1d1;
 
+  /* Success (Green - HSL 142) */
+  --color-success-20: #0a3d1f;
+  --color-success-30: #0f5c2e;
+  --color-success-40: #157a3d;
+  --color-success-50: #1a994c;
+  --color-success-80: #86e5a8;
+  --color-success-90: #c3f2d3;
+
+  /* Warning (Amber - HSL 38) */
+  --color-warning-20: #4d3106;
+  --color-warning-30: #7a4e09;
+  --color-warning-40: #a6690c;
+  --color-warning-50: #d4850f;
+  --color-warning-80: #f5ce8a;
+  --color-warning-90: #fae7c5;
+
   /* Border Radius */
   --radius: 0.5rem;
 
@@ -111,14 +127,27 @@
   --color-destructive-container: #fad1d1;
   --color-destructive-container-foreground: #900909;
 
+  /* Success */
+  --color-success: #157a3d;
+  --color-success-foreground: #ffffff;
+  --color-success-container: #c3f2d3;
+  --color-success-container-foreground: #0f5c2e;
+
+  /* Warning */
+  --color-warning: #a6690c;
+  --color-warning-foreground: #ffffff;
+  --color-warning-container: #fae7c5;
+  --color-warning-container-foreground: #7a4e09;
+
   /* Surfaces */
-  --color-background: #f2f4f7;
+  --color-background: #ffffff;
   --color-background-bright: #f9fafc;
   --color-background-dim: #edeef0;
   --color-foreground: #17181a;
 
   /* Surface Containers */
-  --color-surface: #ffffff;
+  --color-surface: #f2f4f7;
+  --color-surface-lowest: #ffffff;
   --color-surface-low: #f0f4fa;
   --color-surface-container: #e9edf5;
   --color-surface-high: #e1e7f0;
@@ -152,6 +181,14 @@
   /* On Surface */
   --color-on-surface: #17181a;
   --color-on-surface-variant: #45484d;
+
+  /* Sidebar */
+  --color-sidebar: #ced2d9;
+  --color-sidebar-foreground: #17181a;
+
+  /* Header */
+  --color-header: #f2f4f7;
+  --color-header-foreground: #17181a;
 }
 
 /* ===== DARK THEME ===== */
@@ -180,6 +217,18 @@
   --color-destructive-container: #900909;
   --color-destructive-container-foreground: #fad1d1;
 
+  /* Success */
+  --color-success: #86e5a8;
+  --color-success-foreground: #0a3d1f;
+  --color-success-container: #0f5c2e;
+  --color-success-container-foreground: #c3f2d3;
+
+  /* Warning */
+  --color-warning: #f5ce8a;
+  --color-warning-foreground: #4d3106;
+  --color-warning-container: #7a4e09;
+  --color-warning-container-foreground: #fae7c5;
+
   /* Surfaces */
   --color-background: #111317;
   --color-background-bright: #404347;
@@ -188,9 +237,11 @@
 
   /* Surface Containers */
   --color-surface: #17181a;
+  --color-surface-lowest: #0a0c0d;
   --color-surface-low: #0a0c0d;
   --color-surface-container: #25272b;
   --color-surface-high: #2d3036;
+
   --color-surface-highest: #383f45;
 
   /* Card */
@@ -221,6 +272,14 @@
   /* On Surface */
   --color-on-surface: #dce0e5;
   --color-on-surface-variant: #ced2d9;
+
+  /* Sidebar */
+  --color-sidebar: #25272b;
+  --color-sidebar-foreground: #dce0e5;
+
+  /* Header */
+  --color-header: #111317;
+  --color-header-foreground: #f2f4f7;
 }
 
 /* ===== BASE STYLES ===== */
@@ -229,13 +288,79 @@
 }
 
 aside {
-  background-color: var(--color-background);
+  background-color: var(--color-surface);
+  color: var(--color-sidebar-foreground);
+}
+
+/* Main content variants */
+.main-content {
   color: var(--color-foreground);
+}
+
+.main-content-list {
+  background-color: var(--color-surface-lowest);
+}
+
+.main-content-form {
+  background-color: var(--color-surface-container);
+}
+.bg-header-aside,
+header {
+  background-color: var(--color-surface);
+  color: var(--color-foreground);
+}
+
+.bg-content-header {
+  background-color: var(--color-header);
+  color: var(--color-header-foreground);
 }
 
 .user-menu {
   background-color: var(--color-popover);
   color: var(--color-popover-foreground);
+}
+
+.bg-success {
+  background-color: var(--color-success-container);
+  color: var(--color-success-container-foreground);
+}
+
+.bg-warning {
+  background-color: var(--color-warning-container);
+  color: var(--color-warning-container-foreground);
+}
+
+.bg-error {
+  background-color: var(--color-destructive-container);
+  color: var(--color-destructive-container-foreground);
+}
+
+.bg-destructive {
+  background-color: var(--color-destructive-container);
+  color: var(--color-destructive-container-foreground);
+}
+
+.bg-secondary {
+  background-color: var(--color-secondary-container);
+  color: var(--color-secondary-container-foreground);
+}
+
+.bg-starting {
+  background-color: var(--color-warning-20);
+  color: var(--color-warning-foreground);
+}
+
+input {
+  height: 62px;
+  gap: 10px;
+  opacity: 1;
+  border-bottom-width: 1px;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 body {

@@ -1,9 +1,9 @@
-import * as React from "react";
-import { cn } from "~/lib/utils";
+import * as React from 'react';
+import { cn } from '~/lib/utils';
 
 interface FormSectionProps extends React.HTMLAttributes<HTMLElement> {
-  title: string;
-  children: React.ReactNode;
+  title?: string;
+  children?: React.ReactNode;
 }
 
 const FormSection = React.forwardRef<HTMLElement, FormSectionProps>(
@@ -12,20 +12,22 @@ const FormSection = React.forwardRef<HTMLElement, FormSectionProps>(
       <section
         ref={ref}
         className={cn(
-          "rounded-lg border border-section-border bg-section p-5",
+          'rounded-lg border border-section-border bg-section p-5 main-content-list',
           className
         )}
         {...props}
       >
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {title}
-        </h2>
+        {title && (
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {title}
+          </h2>
+        )}
         {children}
       </section>
     );
   }
 );
 
-FormSection.displayName = "FormSection";
+FormSection.displayName = 'FormSection';
 
 export { FormSection };

@@ -24,7 +24,7 @@ export function setupInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
       const accessToken = useAuthStore.getState().accessToken;
-
+      console.log('Attaching access token to request:', accessToken);
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
@@ -57,8 +57,9 @@ export function setupInterceptors() {
           // Tenta refresh - o cookie é enviado automaticamente
           const { data } = await apiClient.post<{ accessToken: string }>('/authentication/refresh');
           // Salva o novo accessToken
-          useAuthStore.getState().setAccessToken(data.accessToken);
 
+          useAuthStore.getState().setAccessToken(data.accessToken);
+          console.log('Access token refreshed:', data.accessToken);
           processQueue();
           return apiClient(originalRequest);
         } catch (refreshError) {

@@ -16,9 +16,7 @@ export function MainLayout() {
 
       {/* Main content area */}
       <main className="lg:pl-64 pt-16">
-        <div className="p-4 md:p-6 lg:p-8">
-          <Outlet />
-        </div>
+        <Outlet />
       </main>
     </div>
   );
