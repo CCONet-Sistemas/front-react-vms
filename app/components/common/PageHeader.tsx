@@ -5,7 +5,8 @@ import { Plus } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import type { Permission } from '~/types';
 import type { StreamStatusConfig } from '~/features/cameras/constants';
-import { Button } from '../ui';
+import { Button, Label, Select } from '../ui';
+import { FormSection } from '../ui/form-section';
 
 interface PageHeaderProps {
   title: string;
@@ -59,6 +60,7 @@ export function PageHeader({
           </Link>
         </ProtectedFeature>
       )}
+
       {status && (
         <div className="mt-2">
           <Badge variant={status.variant} className="gap-1">

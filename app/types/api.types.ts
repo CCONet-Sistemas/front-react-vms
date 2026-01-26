@@ -36,7 +36,6 @@ export interface AuthTokens {
   expiresIn: number;
 }
 
-export interface LoginResponse {
-  user: import('./user.types').User;
-  tokens: AuthTokens;
+export interface LoginResponse extends AuthTokens {
+  // A resposta do login retorna os tokens diretamente no nível raiz
 }

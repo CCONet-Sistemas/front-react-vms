@@ -24,7 +24,7 @@ export function setupInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
       const accessToken = useAuthStore.getState().accessToken;
-      console.log('Attaching access token to request:', accessToken);
+      console.log('Request Interceptor: Current Access Token:', useAuthStore.getState().accessToken);
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }

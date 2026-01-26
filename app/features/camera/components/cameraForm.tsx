@@ -10,6 +10,7 @@ import { cameraSchema, type CameraFormData } from '../schemas/camera.schema';
 import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCameras';
 import { useNavigate } from 'react-router';
 import { Select } from '~/components/ui/select';
+import { Toaster } from '~/components/ui/sonner';
 
 export default function CameraForm({ camera }: { camera?: CameraType }) {
   const navigate = useNavigate();
@@ -62,11 +63,9 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           uuid: camera.uuid,
           data: data as any,
         });
-        console.log('Camera updated:', data);
-        alert('Câmera atualizada com sucesso!');
+        <Toaster />;
       } else {
         await createMutation.mutateAsync(data as any);
-        console.log('Camera created:', data);
       }
       // navigate('/cameras');
     } catch (error) {

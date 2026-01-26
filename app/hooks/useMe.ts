@@ -1,10 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { userService } from '~/services/api';
 import { useAuthStore } from '~/store/auth.store';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function useMe() {
   const { setUser, isAuthenticated } = useAuthStore();
+  const setUserRef = useRef(setUser);
+
+  // Mantém a referência atualizada
+  useEffect(() => {
+    setUserRef.current = setUser;
+  }, [setUser]);
 
   const query = useQuery({
     queryKey: ['user', 'me'],
@@ -15,9 +21,17 @@ export function useMe() {
 
   useEffect(() => {
     if (query.data) {
-      setUser(query.data);
+      console.log('useMe - Setting user data:', query.data);
+      setUserRef.current(query.data);
+
+      // Verificar se foi setado
+      const state = useAuthStore.getState();
+      console.log('Auth store after setUser:', {
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
+      });
     }
-  }, [query.data, setUser]);
+  }, [query.data]);
 
   return query;
 }

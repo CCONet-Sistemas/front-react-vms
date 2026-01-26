@@ -25,7 +25,8 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -38,25 +39,26 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     if (leftIcon || rightIcon) {
       return (
-        <div className="relative">
+        <div
+          className={cn(
+            'relative flex items-center input-icon-wrapper',
+            leftIcon && 'has-left-icon',
+            rightIcon && 'has-right-icon'
+          )}
+        >
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="text-muted-foreground border-t border-b border-l left-icon">
               {leftIcon}
             </div>
           )}
           <input
             type={type}
-            className={cn(
-              inputVariants({ variant: inputVariant, inputSize }),
-              leftIcon && 'pl-10',
-              rightIcon && 'pr-10',
-              className
-            )}
+            className={cn(inputVariants({ variant: inputVariant, inputSize }), className)}
             ref={ref}
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="text-muted-foreground border-t border-b border-r right-icon">
               {rightIcon}
             </div>
           )}

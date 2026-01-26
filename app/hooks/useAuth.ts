@@ -10,8 +10,26 @@ export function useAuth() {
   const login = useCallback(
     async (credentials: LoginDto) => {
       const response = await apiClient.post<LoginResponse>('/authentication', credentials);
-      const { user, tokens } = response.data;
+      const tokens = response.data;
+
+      console.log('Login response tokens:', tokens);
+
+      // Buscar dados do usuário
+      const userResponse = await apiClient.get('/users/me', {
+        headers: { Authorization: `Bearer ${tokens.accessToken}` }
+      });
+      const user = userResponse.data;
+
+      console.log('User data:', user);
       storeLogin(user, tokens.accessToken);
+
+      // Verificar se foi setado
+      const state = useAuthStore.getState();
+      console.log('Auth store after login:', {
+        user: state.user,
+        isAuthenticated: state.isAuthenticated
+      });
+
       navigate('/dashboard');
       return user;
     },
