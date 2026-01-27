@@ -24,7 +24,6 @@ export function setupInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
       const accessToken = useAuthStore.getState().accessToken;
-      console.log('Request Interceptor: Current Access Token:', useAuthStore.getState().accessToken);
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
@@ -59,7 +58,6 @@ export function setupInterceptors() {
           // Salva o novo accessToken
 
           useAuthStore.getState().setAccessToken(data.accessToken);
-          console.log('Access token refreshed:', data.accessToken);
           processQueue();
           return apiClient(originalRequest);
         } catch (refreshError) {

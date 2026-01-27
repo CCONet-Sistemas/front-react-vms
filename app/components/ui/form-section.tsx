@@ -12,7 +12,7 @@ const FormSection = React.forwardRef<HTMLElement, FormSectionProps>(
       <section
         ref={ref}
         className={cn(
-          'rounded-lg border border-section-border bg-section p-5 main-content-list',
+          'rounded-lg border border-section-border bg-section p-5 main-content-list bg-form-section',
           className
         )}
         {...props}

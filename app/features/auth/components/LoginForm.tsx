@@ -37,24 +37,16 @@ export function LoginForm() {
       const response = await apiClient.post<LoginResponse>('/authentication', data);
       const tokens = response.data;
 
-      console.log('LoginForm - Response tokens:', tokens);
-
       // Buscar dados do usuário após login com o token
       const userResponse = await apiClient.get('/users/me', {
-        headers: { Authorization: `Bearer ${tokens.accessToken}` }
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
       });
       const user = userResponse.data;
 
-      console.log('LoginForm - User data:', user);
       login(user, tokens.accessToken);
 
       // Verificar se foi setado
       const state = useAuthStore.getState();
-      console.log('LoginForm - Auth store after login:', {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        hasAccessToken: !!state.accessToken,
-      });
 
       navigate('/dashboard');
     } catch (err) {

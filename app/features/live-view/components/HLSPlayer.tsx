@@ -95,7 +95,6 @@ export function HLSPlayer({
         hls.on(Hls.Events.ERROR, (_, data) => {
           // Handle 401 - refresh token and retry
           if (data.response?.code === 401) {
-            console.log('HLS: Unauthorized (401), refreshing token...');
             // refreshToken().then(() => {
             //   hls.startLoad();
             // });

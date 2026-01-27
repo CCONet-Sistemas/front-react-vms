@@ -53,7 +53,7 @@ export function PageHeader({
       {to && linkText && permission && (
         <ProtectedFeature permission={permission}>
           <Link to={to}>
-            <Button className="bt-primary" variant={'secondary'}>
+            <Button variant="secondary">
               <Plus className="h-4 w-4 mr-2" />
               {linkText}
             </Button>

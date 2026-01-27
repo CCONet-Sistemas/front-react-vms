@@ -371,6 +371,11 @@ aside {
   background-color: var(--color-surface-container);
 }
 
+.bg-form-section {
+  background-color: var(--color-surface-high);
+  color: var(--color-foreground);
+}
+
 .bg-header-aside,
 .bg-modal,
 header {
@@ -418,7 +423,8 @@ header {
   color: var(--color-warning-foreground);
 }
 
-input {
+input,
+select {
   height: 62px;
   gap: 10px;
   opacity: 1;

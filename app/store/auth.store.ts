@@ -23,17 +23,14 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setUser: (user) => {
-        console.log('AuthStore.setUser called with:', user);
         set({ user, isAuthenticated: true });
       },
 
       setAccessToken: (accessToken) => {
-        console.log('AuthStore.setAccessToken called');
         set({ accessToken });
       },
 
       login: (user, accessToken) => {
-        console.log('AuthStore.login called with:', { user, accessToken: accessToken?.substring(0, 20) + '...' });
         set({
           user,
           accessToken,

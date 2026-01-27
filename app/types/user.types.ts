@@ -38,10 +38,28 @@ export interface CreateUserDto {
   email: string;
   name: string;
   password: string;
+  groupId?: number;
+  roleIds?: string[];
+  isActive?: boolean;
 }
 
 export interface UpdateUserDto {
   email?: string;
   name?: string;
   password?: string;
+  groupId?: number;
+  roleIds?: string[];
+  isActive?: boolean;
+}
+
+export interface UserFilters {
+  search?: string;
+  activeOnly?: boolean;
+}
+
+export interface UserListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  activeOnly?: boolean;
 }

@@ -21,15 +21,11 @@ export function useMe() {
 
   useEffect(() => {
     if (query.data) {
-      console.log('useMe - Setting user data:', query.data);
       setUserRef.current(query.data);
 
       // Verificar se foi setado
       const state = useAuthStore.getState();
-      console.log('Auth store after setUser:', {
-        user: state.user,
-        isAuthenticated: state.isAuthenticated
-      });
+
     }
   }, [query.data]);
 

@@ -1,29 +1,89 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, useLocation } from 'react-router';
-import { LayoutDashboard, Camera, Video, Film, Bell, Settings, X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  Camera,
+  Video,
+  Film,
+  Bell,
+  Settings,
+  Users,
+  X,
+  ChevronDown,
+  ChevronRight,
+} from 'lucide-react';
 import { useUIStore } from '~/store';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
 interface NavItem {
   label: string;
-  path: string;
+  path?: string; // Opcional para menus que só têm submenus
   icon: React.ComponentType<{ className?: string }>;
+  relatedPaths?: string[]; // Caminhos relacionados que também devem ativar este item
+  subItems?: NavItem[]; // Submenus
 }
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { label: 'Cameras', path: '/cameras', icon: Camera },
+  {
+    label: 'Cameras',
+    subItems: [
+      { label: 'Listar Câmeras', path: '/cameras', icon: Camera },
+      { label: 'Adicionar Câmera', path: '/camera', icon: Camera, relatedPaths: ['/camera'] },
+    ],
+    path: '/cameras',
+    icon: Camera,
+    relatedPaths: ['/camera'],
+  },
   { label: 'Visualização ao Vivo', path: '/live-view', icon: Video },
-  { label: 'Gravações', path: '/recordings', icon: Film },
-  { label: 'Eventos', path: '/events', icon: Bell },
-  { label: 'Configurações', path: '/settings', icon: Settings },
+  { label: 'Gravações', path: '/recordings', icon: Film, relatedPaths: ['/recording'] },
+  { label: 'Eventos', path: '/events', icon: Bell, relatedPaths: ['/event'] },
+  { label: 'Usuários', path: '/users', icon: Users, relatedPaths: ['/user'] },
+  { label: 'Configurações', path: '/settings', icon: Settings, relatedPaths: ['/setting'] },
 ];
 
 export function Sidebar() {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const location = useLocation();
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+
+  // Toggle submenu expansion
+  const toggleMenu = (label: string) => {
+    setExpandedMenus((prev) =>
+      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
+    );
+  };
+
+  // Check if menu item is active
+  const isItemActive = (item: NavItem): boolean => {
+    if (!item.path) return false;
+
+    return (
+      location.pathname === item.path ||
+      location.pathname.startsWith(item.path + '/') ||
+      item.relatedPaths?.some(
+        (relatedPath) =>
+          location.pathname === relatedPath || location.pathname.startsWith(relatedPath + '/')
+      ) ||
+      false
+    );
+  };
+
+  // Check if any subitem is active
+  const hasActiveSubItem = (item: NavItem): boolean => {
+    return item.subItems?.some((subItem) => isItemActive(subItem)) || false;
+  };
+
+  // Auto-expand menu if a subitem is active
+  useEffect(() => {
+    navItems.forEach((item) => {
+      if (item.subItems && hasActiveSubItem(item) && !expandedMenus.includes(item.label)) {
+        setExpandedMenus((prev) => [...prev, item.label]);
+      }
+    });
+  }, [location.pathname]);
 
   // Close sidebar on mobile when route changes
   useEffect(() => {
@@ -91,25 +151,83 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
-                      'transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                    )
-                  }
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
+            {navItems.map((item) => {
+              const isActive = isItemActive(item);
+              const hasSubItems = item.subItems && item.subItems.length > 0;
+              const isExpanded = expandedMenus.includes(item.label);
+              const hasActiveChild = hasActiveSubItem(item);
+
+              return (
+                <li key={item.label}>
+                  {/* Menu principal */}
+                  {hasSubItems ? (
+                    // Item com submenus - apenas expande/colapsa
+                    <button
+                      onClick={() => toggleMenu(item.label)}
+                      className={cn(
+                        'w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium',
+                        'transition-colors',
+                        hasActiveChild
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-5 w-5" />
+                        {item.label}
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                  ) : (
+                    // Item sem submenus - navega normalmente
+                    <NavLink
+                      to={item.path!}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
+                        'transition-colors',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {item.label}
+                    </NavLink>
+                  )}
+
+                  {/* Submenus */}
+                  {hasSubItems && isExpanded && (
+                    <ul className="mt-1 ml-4 space-y-1 border-l pl-4">
+                      {item.subItems!.map((subItem) => {
+                        const isSubActive = isItemActive(subItem);
+
+                        return (
+                          <li key={subItem.label}>
+                            <NavLink
+                              to={subItem.path!}
+                              className={cn(
+                                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm',
+                                'transition-colors',
+                                isSubActive
+                                  ? 'bg-primary/10 text-primary font-medium'
+                                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                              )}
+                            >
+                              <subItem.icon className="h-4 w-4" />
+                              {subItem.label}
+                            </NavLink>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </nav>
 

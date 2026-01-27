@@ -1,5 +1,6 @@
-import type { Route } from "../+types/root";
-import CameraForm from "~/features/camera/components/cameraForm";
+import { PageContent, PageHeader } from '~/components/common';
+import type { Route } from '../+types/root';
+import CameraForm from '~/features/camera/components/cameraForm';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -10,12 +11,9 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function NewCameraPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Nova Câmera</h1>
-        <p className="text-muted-foreground">Configure uma nova câmera no sistema</p>
-      </div>
+    <PageContent className="container mx-auto py-8 px-4">
+      <PageHeader title="Nova Câmera" description="Adicionar nova câmera na aplicação" />
       <CameraForm />
-    </div>
+    </PageContent>
   );
 }

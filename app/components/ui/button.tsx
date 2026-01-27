@@ -2,6 +2,7 @@ import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@radix-ui/react-tooltip';
 
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
@@ -40,13 +41,52 @@ export interface ButtonProps
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  tooltip?: boolean;
+  tooltipText?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { className, variant, size, isLoading, leftIcon, rightIcon, children, disabled, ...props },
+    {
+      className,
+      variant,
+      size,
+      isLoading,
+      leftIcon,
+      rightIcon,
+      children,
+      disabled,
+      tooltip = false,
+      tooltipText,
+      ...props
+    },
     ref
   ) => {
+    if (tooltip && tooltipText) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              className={cn(buttonVariants({ variant, size, className }))}
+              ref={ref}
+              disabled={disabled || isLoading}
+              {...props}
+            >
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : leftIcon}
+              {children}
+              {!isLoading && rightIcon}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent
+            className="z-50 overflow-hidden rounded-md border bg-popover px-3 py-1.5 text-sm text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95"
+            sideOffset={5}
+          >
+            {tooltipText}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }))}
