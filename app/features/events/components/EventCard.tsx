@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Check, Clock, Eye, ImageOff, Link, Video } from 'lucide-react';
+import { Check, Clock, Eye, Video } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
+import { useAuthImage } from '~/hooks';
 import { statusConfig } from '../constants/eventTypes';
 import type { Event } from '~/types';
 
@@ -67,6 +68,10 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
     const StatusIcon = status.icon;
     const isNew = event.status === 'new';
 
+    // Load thumbnail with authentication
+    const thumbnailUrl = `/events/fullcam/videos/${event.uuid}/thumbnail`;
+    const { imageUrl, isLoading: isLoadingThumbnail } = useAuthImage(thumbnailUrl);
+
     const handleClick = () => {
       onView?.(event);
     };
@@ -106,11 +111,24 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
           </div>
         )}
 
-        {/* Thumbnail placeholder */}
+        {/* Thumbnail */}
         <div className={cn(thumbnailVariants({ variant }))}>
-          <div className="absolute inset-0 flex items-center justify-center bg-muted">
-            <Video className="h-8 w-8 text-muted-foreground/50" />
-          </div>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={event.reason}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-muted">
+              {isLoadingThumbnail ? (
+                <div className="h-6 w-6 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+              ) : (
+                <Video className="h-8 w-8 text-muted-foreground/50" />
+              )}
+            </div>
+          )}
 
           {/* Status badge overlay on thumbnail */}
           <div className="absolute top-2 right-2">
@@ -148,7 +166,7 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                 {event.reason}
               </h3>
               <p className="text-xs text-muted-foreground truncate mt-0.5">
-                Câmera: {event.cameraId}
+                Câmera: {event.cameraName}
               </p>
             </div>
           </div>
@@ -178,6 +196,17 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                 variant === 'grid' && 'opacity-0 group-hover:opacity-100 transition-opacity'
               )}
             >
+              {onView && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs flex-1"
+                  onClick={handleClick}
+                >
+                  <Eye className="h-3 w-3 mr-1" />
+                  Ver
+                </Button>
+              )}
               {onView && (
                 <Button
                   variant="outline"

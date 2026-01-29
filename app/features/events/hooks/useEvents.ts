@@ -39,6 +39,18 @@ export function useUpdateEventStatus() {
   });
 }
 
+export function useAcknowledgeEvent() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (uuid: string) => eventService.acknowledge(uuid),
+    onSuccess: (_, uuid) => {
+      queryClient.invalidateQueries({ queryKey: eventKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: eventKeys.detail(uuid) });
+    },
+  });
+}
+
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
 

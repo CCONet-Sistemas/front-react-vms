@@ -9,7 +9,7 @@ import {
   EventFilters,
   EventList,
   useEvents,
-  useUpdateEventStatus,
+  useAcknowledgeEvent,
   type ViewMode,
 } from '~/features/events';
 import type { Event, EventFilters as EventFiltersType } from '~/types';
@@ -34,16 +34,20 @@ export default function EventsPage() {
   const limit = Number(searchParams.get('limit')) || DEFAULT_LIMIT;
   const search = searchParams.get('search') || undefined;
   const status = (searchParams.get('status') as EventFiltersType['status']) || undefined;
+  const cameraId = searchParams.get('cameraId') || undefined;
+  const startDate = searchParams.get('startDate') || undefined;
+  const endDate = searchParams.get('endDate') || undefined;
 
   // Filters state derived from URL
-  const filters: EventFiltersType = { search, status };
+  const filters: EventFiltersType = { search, status, cameraId, startDate, endDate };
 
   // Queries and mutations
   const { data, isLoading, error } = useEvents({ page, limit, ...filters });
-  const updateEventStatus = useUpdateEventStatus();
+  const acknowledgeEvent = useAcknowledgeEvent();
   const navigate = useNavigate();
   const events = data?.data ?? [];
-  const meta = data?.meta;
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 0;
 
   // Calculate stats
   const newCount = events.filter((e) => e.status === 'new').length;
@@ -78,6 +82,9 @@ export default function EventsPage() {
     updateParams({
       search: newFilters.search,
       status: newFilters.status,
+      cameraId: newFilters.cameraId,
+      startDate: newFilters.startDate,
+      endDate: newFilters.endDate,
       page: '1', // Reset to first page when filters change
     });
   };
@@ -93,7 +100,7 @@ export default function EventsPage() {
 
   const handleAcknowledgeEvent = async (event: Event) => {
     try {
-      await updateEventStatus.mutateAsync({ uuid: event.uuid, status: 'acknowledged' });
+      await acknowledgeEvent.mutateAsync(event.uuid);
       toast.success('Evento confirmado com sucesso!');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Ocorreu um erro';
@@ -118,7 +125,7 @@ export default function EventsPage() {
                 <Bell className="h-4 w-4 text-primary" />
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-primary">{meta?.total ?? 0}</p>
+                <p className="text-2xl font-bold text-primary">{total}</p>
               </CardContent>
             </Card>
 
@@ -170,12 +177,12 @@ export default function EventsPage() {
           />
 
           {/* Pagination */}
-          {meta && meta.totalPages > 0 && (
+          {totalPages > 0 && (
             <Pagination
-              page={meta.page}
-              totalPages={meta.totalPages}
-              total={meta.total}
-              limit={meta.limit}
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              limit={limit}
               onPageChange={handlePageChange}
               onLimitChange={handleLimitChange}
             />

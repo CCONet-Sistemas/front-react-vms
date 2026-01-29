@@ -17,6 +17,11 @@ export const eventService = {
     return data;
   },
 
+  acknowledge: async (uuid: string): Promise<Event> => {
+    const { data } = await apiClient.patch<Event>(`/events/${uuid}/acknowledge`);
+    return data;
+  },
+
   delete: async (uuid: string): Promise<void> => {
     await apiClient.delete(`/events/${uuid}`);
   },
