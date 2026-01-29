@@ -9,6 +9,7 @@ import type {
 export interface CameraListParams {
   page?: number;
   limit?: number;
+  search?: string;
 }
 
 export const cameraService = {

@@ -1,9 +1,14 @@
-import { Link, useSearchParams } from 'react-router';
+import { useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router';
 import type { Route } from './+types/_app.cameras';
-import { Button } from '~/components/ui/button';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ProtectedRoute, ProtectedFeature, PageHeader, PageContent } from '~/components/common';
-import { CameraGrid, useCameras } from '~/features/cameras';
+import { ProtectedRoute, PageHeader, PageContent, Pagination } from '~/components/common';
+import {
+  CameraFilters,
+  CameraList,
+  useCameras,
+  type CameraFiltersType,
+  type ViewMode,
+} from '~/features/cameras';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -12,23 +17,68 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
-const ITEMS_PER_PAGE = 12;
+const DEFAULT_LIMIT = 12;
 
 export default function CamerasPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    (searchParams.get('view') as ViewMode) || 'grid'
+  );
+
+  // Get params from URL
   const page = Number(searchParams.get('page')) || 1;
+  const limit = Number(searchParams.get('limit')) || DEFAULT_LIMIT;
+  const search = searchParams.get('search') || undefined;
 
-  const { data, isLoading, error } = useCameras({ page, limit: ITEMS_PER_PAGE });
+  // Filters state derived from URL
+  const filters: CameraFiltersType = { search };
 
-  const totalPages = data ? Math.ceil(data.total / ITEMS_PER_PAGE) : 0;
+  const { data, isLoading, error } = useCameras({ page, limit, search });
+  const cameras = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / limit);
+
+  // Update URL params
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const newParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      });
+
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
   const handlePageChange = (newPage: number) => {
-    setSearchParams({ page: String(newPage) });
+    updateParams({ page: String(newPage) });
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    updateParams({ limit: String(newLimit), page: '1' });
+  };
+
+  const handleFilterChange = (newFilters: CameraFiltersType) => {
+    updateParams({
+      search: newFilters.search,
+      page: '1',
+    });
+  };
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    updateParams({ view: mode });
   };
 
   return (
-    <PageContent variant="list">
-      <ProtectedRoute resource="camera" action="read">
+    <ProtectedRoute resource="camera" action="read">
+      <PageContent variant="list">
         <div className="space-y-6">
           {/* Header */}
           <PageHeader
@@ -39,6 +89,14 @@ export default function CamerasPage() {
             permission="camera:create"
           />
 
+          {/* Filters */}
+          <CameraFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+          />
+
           {/* Error state */}
           {error && (
             <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
@@ -46,39 +104,22 @@ export default function CamerasPage() {
             </div>
           )}
 
-          {/* Camera Grid */}
-          <CameraGrid cameras={data?.data ?? []} isLoading={isLoading} />
+          {/* Camera List */}
+          <CameraList cameras={cameras} isLoading={isLoading} variant={viewMode} />
 
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Página {page} de {totalPages} ({data?.total} câmeras)
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page <= 1}
-                >
-                  <ChevronLeft className="h-4 w-4 mr-1" />
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page >= totalPages}
-                >
-                  Próxima
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </div>
+          {totalPages > 0 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              limit={limit}
+              onPageChange={handlePageChange}
+              onLimitChange={handleLimitChange}
+            />
           )}
         </div>
-      </ProtectedRoute>
-    </PageContent>
+      </PageContent>
+    </ProtectedRoute>
   );
 }

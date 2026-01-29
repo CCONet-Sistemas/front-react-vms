@@ -1,34 +1,62 @@
-import { useState } from 'react';
-import { Check, Camera, Search, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, Camera, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Badge } from '~/components/ui/badge';
 import { cn } from '~/lib/utils';
+import { useCameras } from '~/features/cameras';
 import type { Camera as CameraType } from '~/types';
 
+const ITEMS_PER_PAGE = 10;
+
 interface CameraSelectorProps {
-  cameras: CameraType[];
   selectedCameras: (CameraType | null)[];
   onSelectionChange: (cameras: (CameraType | null)[]) => void;
   maxCameras: number;
   isOpen: boolean;
   onClose: () => void;
+  initialCameras?: CameraType[]; // For auto-fill functionality
 }
 
 export function CameraSelector({
-  cameras,
   selectedCameras,
   onSelectionChange,
   maxCameras,
   isOpen,
   onClose,
+  initialCameras = [],
 }: CameraSelectorProps) {
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
 
-  const filteredCameras = cameras.filter((camera) =>
-    camera.name.toLowerCase().includes(search.toLowerCase())
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset page when search changes
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setSearch('');
+      setDebouncedSearch('');
+      setPage(1);
+      setEditingSlot(null);
+    }
+  }, [isOpen]);
+
+  const { data, isLoading } = useCameras(
+    { page, limit: ITEMS_PER_PAGE, search: debouncedSearch || undefined },
   );
+
+  const cameras = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   const selectedUuids = selectedCameras.filter(Boolean).map((c) => c!.uuid);
 
@@ -63,9 +91,11 @@ export function CameraSelector({
   };
 
   const handleAutoFill = () => {
+    // Use initialCameras if available, otherwise use current page cameras
+    const sourceCameras = initialCameras.length > 0 ? initialCameras : cameras;
     const newSelection: (CameraType | null)[] = [];
     for (let i = 0; i < maxCameras; i++) {
-      newSelection.push(cameras[i] || null);
+      newSelection.push(sourceCameras[i] || null);
     }
     onSelectionChange(newSelection);
   };
@@ -78,7 +108,7 @@ export function CameraSelector({
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-modal bg-surface rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col m-4">
+      <div className="relative bg-modal bg-surface rounded-lg shadow-xl w-full max-w-4xl min-h-[500px] max-h-[90vh] overflow-hidden flex flex-col m-4">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">Configurar Mosaico</h2>
@@ -153,24 +183,31 @@ export function CameraSelector({
           </div>
 
           {/* Available cameras list */}
-          <div className="w-1/2 p-4 overflow-y-auto">
+          <div className="w-1/2 p-4 flex flex-col">
             <div className="mb-4">
-              <h3 className="text-sm font-medium mb-2">Câmeras Disponíveis</h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium">Câmeras Disponíveis</h3>
+                <span className="text-xs text-muted-foreground">{total} câmeras</span>
+              </div>
               <Input
                 placeholder="Buscar câmera..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                leftIcon={<Search className="h-4 w-4 " />}
+                leftIcon={<Search className="h-4 w-4" />}
               />
             </div>
 
-            <div className="space-y-1">
-              {filteredCameras.length === 0 ? (
+            <div className="flex-1 overflow-y-auto space-y-1">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-pulse text-sm text-muted-foreground">Carregando...</div>
+                </div>
+              ) : cameras.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
                   Nenhuma câmera encontrada
                 </p>
               ) : (
-                filteredCameras.map((camera) => {
+                cameras.map((camera) => {
                   const isSelected = selectedUuids.includes(camera.uuid);
                   const isOnline = camera.streamStatus?.state === 'streaming';
 
@@ -199,6 +236,33 @@ export function CameraSelector({
                 })
               )}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t mt-4">
+                <span className="text-xs text-muted-foreground">
+                  Página {page} de {totalPages}
+                </span>
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

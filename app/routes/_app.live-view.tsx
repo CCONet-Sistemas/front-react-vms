@@ -20,8 +20,36 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
+const STORAGE_KEY = 'vms-live-view-config';
+
+interface LiveViewConfig {
+  gridSize: GridSize;
+  selectedCameras: (Pick<Camera, 'uuid' | 'name'> | null)[];
+}
+
+function loadConfig(): LiveViewConfig | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error('Failed to load live view config:', e);
+  }
+  return null;
+}
+
+function saveConfig(config: LiveViewConfig) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  } catch (e) {
+    console.error('Failed to save live view config:', e);
+  }
+}
+
 export default function LiveViewPage() {
   const { data, isLoading } = useCameras({ limit: 100 });
+  const [isInitialized, setIsInitialized] = useState(false);
   const [gridSize, setGridSize] = useState<GridSize>('2x2');
   const [selectedCameras, setSelectedCameras] = useState<(Camera | null)[]>([]);
   const [showSelector, setShowSelector] = useState(false);
@@ -35,30 +63,71 @@ export default function LiveViewPage() {
   const currentGridConfig = gridOptions.find((o) => o.value === gridSize);
   const maxCameras = currentGridConfig?.total ?? 4;
 
-  // Auto-fill cameras when data loads or grid size changes
+  // Initialize from localStorage when cameras load
   useEffect(() => {
-    if (cameras.length > 0 && selectedCameras.filter(Boolean).length === 0) {
+    if (cameras.length === 0 || isInitialized) return;
+
+    const config = loadConfig();
+
+    // Restore grid size first
+    const savedGridSize = config?.gridSize ?? '2x2';
+    setGridSize(savedGridSize);
+
+    // Get maxCameras for the restored grid size
+    const restoredGridConfig = gridOptions.find((o) => o.value === savedGridSize);
+    const restoredMaxCameras = restoredGridConfig?.total ?? 4;
+
+    // Create a map for faster lookup - to get full camera data if available
+    const cameraMap = new Map(cameras.map((c) => [c.uuid, c]));
+
+    if (config?.selectedCameras && config.selectedCameras.some((cam) => cam !== null)) {
+      // Restore saved cameras - use full data if available, otherwise use saved minimal data
+      const restoredCameras: (Camera | null)[] = config.selectedCameras.map((saved) => {
+        if (!saved) return null;
+        // Try to get full camera data, fallback to saved minimal data
+        return cameraMap.get(saved.uuid) ?? (saved as Camera);
+      });
+
+      // Adjust to maxCameras
+      const adjusted = restoredCameras.slice(0, restoredMaxCameras);
+      while (adjusted.length < restoredMaxCameras) {
+        adjusted.push(null);
+      }
+      setSelectedCameras(adjusted);
+    } else {
       // Auto-fill with first N cameras
-      const initialCameras: (Camera | null)[] = Array.from({ length: maxCameras }, (_, i) =>
-        cameras[i] ?? null
+      const initialCameras: (Camera | null)[] = Array.from(
+        { length: restoredMaxCameras },
+        (_, i) => cameras[i] ?? null
       );
       setSelectedCameras(initialCameras);
     }
-  }, [cameras, maxCameras]);
+    setIsInitialized(true);
+  }, [cameras, isInitialized]);
 
-  // Adjust selected cameras when grid size changes
+  // Adjust selected cameras when grid size changes (after initialization)
   useEffect(() => {
+    if (!isInitialized) return;
     setSelectedCameras((prev) => {
       if (prev.length < maxCameras) {
-        // Add empty slots
         return [...prev, ...Array(maxCameras - prev.length).fill(null)];
       } else if (prev.length > maxCameras) {
-        // Trim excess
         return prev.slice(0, maxCameras);
       }
       return prev;
     });
-  }, [maxCameras]);
+  }, [maxCameras, isInitialized]);
+
+  // Save config to localStorage when it changes (after initialization)
+  useEffect(() => {
+    if (!isInitialized) return;
+    saveConfig({
+      gridSize,
+      selectedCameras: selectedCameras.map((c) =>
+        c ? { uuid: c.uuid, name: c.name } : null
+      ),
+    });
+  }, [gridSize, selectedCameras, isInitialized]);
 
   // Listen for fullscreen changes
   useEffect(() => {
@@ -164,12 +233,12 @@ export default function LiveViewPage() {
 
         {/* Camera Selector Modal */}
         <CameraSelector
-          cameras={cameras}
           selectedCameras={selectedCameras}
           onSelectionChange={handleSelectionChange}
           maxCameras={maxCameras}
           isOpen={showSelector}
           onClose={() => setShowSelector(false)}
+          initialCameras={cameras}
         />
 
         {/* Single Camera Fullscreen Modal */}
