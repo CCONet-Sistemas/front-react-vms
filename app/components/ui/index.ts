@@ -33,6 +33,15 @@ export {
   DialogTitle,
   DialogDescription,
 } from './dialog';
+export {
+  FlexList,
+  flexListVariants,
+  FlexListEmpty,
+  FlexListSkeleton,
+  type FlexListProps,
+  type FlexListEmptyProps,
+  type FlexListSkeletonProps,
+} from './flex-list';
 export { FormField } from './form-field';
 export { Input, inputVariants } from './input';
 export { Label, labelVariants } from './label';

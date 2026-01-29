@@ -1,41 +1,187 @@
+import { useState, useCallback } from 'react';
+import { redirect, useNavigate, useSearchParams } from 'react-router';
 import type { Route } from './+types/_app.events';
-import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
-import { Bell } from 'lucide-react';
-import { ProtectedRoute } from '~/components/common';
+import { toast } from 'sonner';
+import { Bell, CheckCheck } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, Button } from '~/components/ui';
+import { PageContent, PageHeader, Pagination, ProtectedRoute } from '~/components/common';
+import {
+  EventFilters,
+  EventList,
+  useEvents,
+  useUpdateEventStatus,
+  type ViewMode,
+} from '~/features/events';
+import type { Event, EventFilters as EventFiltersType } from '~/types';
 
 export function meta(_args: Route.MetaArgs) {
   return [
-    { title: 'Events | VMS' },
-    { name: 'description', content: 'View events - Video Management System' },
+    { title: 'Eventos | VMS' },
+    { name: 'description', content: 'Visualizar eventos - Video Management System' },
   ];
 }
 
-export default function EventsPage() {
-  return (
-    <ProtectedRoute resource='event' action='read'>
-      <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Events</h1>
-        <p className="text-muted-foreground">
-          View motion detection and system events
-        </p>
-      </div>
+const DEFAULT_LIMIT = 12;
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Log</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Bell className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No events recorded</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Events will appear here as they occur
-            </p>
+export default function EventsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    (searchParams.get('view') as ViewMode) || 'grid'
+  );
+
+  // Get params from URL
+  const page = Number(searchParams.get('page')) || 1;
+  const limit = Number(searchParams.get('limit')) || DEFAULT_LIMIT;
+  const search = searchParams.get('search') || undefined;
+  const status = (searchParams.get('status') as EventFiltersType['status']) || undefined;
+
+  // Filters state derived from URL
+  const filters: EventFiltersType = { search, status };
+
+  // Queries and mutations
+  const { data, isLoading, error } = useEvents({ page, limit, ...filters });
+  const updateEventStatus = useUpdateEventStatus();
+  const navigate = useNavigate();
+  const events = data?.data ?? [];
+  const meta = data?.meta;
+
+  // Calculate stats
+  const newCount = events.filter((e) => e.status === 'new').length;
+
+  // Update URL params
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const newParams = new URLSearchParams(searchParams);
+
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') {
+          newParams.delete(key);
+        } else {
+          newParams.set(key, value);
+        }
+      });
+
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handlePageChange = (newPage: number) => {
+    updateParams({ page: String(newPage) });
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    updateParams({ limit: String(newLimit), page: '1' });
+  };
+
+  const handleFilterChange = (newFilters: EventFiltersType) => {
+    updateParams({
+      search: newFilters.search,
+      status: newFilters.status,
+      page: '1', // Reset to first page when filters change
+    });
+  };
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    updateParams({ view: mode });
+  };
+
+  const handleViewEvent = (event: Event) => {
+    navigate(`/event/${event.uuid}`);
+  };
+
+  const handleAcknowledgeEvent = async (event: Event) => {
+    try {
+      await updateEventStatus.mutateAsync({ uuid: event.uuid, status: 'acknowledged' });
+      toast.success('Evento confirmado com sucesso!');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Ocorreu um erro';
+      toast.error('Erro ao confirmar evento', { description: message });
+    }
+  };
+
+  return (
+    <ProtectedRoute resource="event" action="read">
+      <PageContent>
+        <div className="space-y-6">
+          {/* Header */}
+          <PageHeader title="Eventos" description="Eventos capturados pelas câmeras." />
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total de Eventos
+                </CardTitle>
+                <Bell className="h-4 w-4 text-primary" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-primary">{meta?.total ?? 0}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Novos</CardTitle>
+                <span className="flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-foreground">{newCount}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="flex items-center justify-center">
+              <CardContent className="pt-6">
+                <Button variant="outline" size="sm" disabled={newCount === 0} className="gap-2">
+                  <CheckCheck className="h-4 w-4" />
+                  Marcar todos como vistos
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+
+          {/* Filters */}
+          <EventFilters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+          />
+
+          {/* Error state */}
+          {error && (
+            <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
+              <p className="text-sm text-destructive">Erro ao carregar eventos. Tente novamente.</p>
+            </div>
+          )}
+
+          {/* Events List */}
+          <EventList
+            events={events}
+            isLoading={isLoading}
+            variant={viewMode}
+            onViewEvent={handleViewEvent}
+            onAcknowledgeEvent={handleAcknowledgeEvent}
+          />
+
+          {/* Pagination */}
+          {meta && meta.totalPages > 0 && (
+            <Pagination
+              page={meta.page}
+              totalPages={meta.totalPages}
+              total={meta.total}
+              limit={meta.limit}
+              onPageChange={handlePageChange}
+              onLimitChange={handleLimitChange}
+            />
+          )}
+        </div>
+      </PageContent>
     </ProtectedRoute>
   );
 }
