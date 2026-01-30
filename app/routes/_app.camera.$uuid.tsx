@@ -3,7 +3,7 @@ import type { Route } from '../+types/root';
 import CameraForm from '~/features/camera/components/cameraForm';
 import { Badge } from '~/components/ui/badge';
 import type { StreamState } from '~/types';
-import { PageContent, PageHeader } from '~/components/common';
+import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
 import { streamStatusConfig } from '~/features/cameras/constants';
 
 export function meta(_args: Route.MetaArgs) {
@@ -32,14 +32,16 @@ export default function EditCameraPage({ params }: Route.ComponentProps) {
   const status = streamStatusConfig[streamState] ?? streamStatusConfig.stopped;
 
   return (
-    <PageContent variant="form">
-      <PageHeader
-        title="Editar câmera"
-        description={`Atualize as configurações da câmera`}
-        status={status}
-      />
+    <ProtectedRoute resource="camera" action="read">
+      <PageContent variant="form">
+        <PageHeader
+          title="Editar câmera"
+          description={`Atualize as configurações da câmera`}
+          status={status}
+        />
 
-      <CameraForm camera={camera} />
-    </PageContent>
+        <CameraForm camera={camera} />
+      </PageContent>
+    </ProtectedRoute>
   );
 }

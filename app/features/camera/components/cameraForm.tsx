@@ -11,6 +11,7 @@ import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCa
 import { useNavigate } from 'react-router';
 import { Select } from '~/components/ui/select';
 import { Toaster } from '~/components/ui/sonner';
+import { ProtectedFeature } from '~/components/common';
 
 export default function CameraForm({ camera }: { camera?: CameraType }) {
   const navigate = useNavigate();
@@ -266,9 +267,11 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
         <Button type="button" variant="outline" onClick={() => navigate('/cameras')}>
           Cancelar
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Salvando...' : isEditMode ? 'Atualizar' : 'Criar Câmera'}
-        </Button>
+        <ProtectedFeature resource="camera" action={isEditMode ? 'update' : 'create'}>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : isEditMode ? 'Atualizar' : 'Criar Câmera'}
+          </Button>
+        </ProtectedFeature>
       </div>
     </form>
   );

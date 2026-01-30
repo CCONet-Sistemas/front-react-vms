@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import {
   LayoutDashboard,
@@ -8,20 +8,25 @@ import {
   Bell,
   Settings,
   Users,
+  Shield,
   X,
   ChevronDown,
   ChevronRight,
+  User,
 } from 'lucide-react';
 import { useUIStore } from '~/store';
+import { usePermissions } from '~/hooks/usePermissions';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
+import type { Permission } from '~/types';
 
 interface NavItem {
   label: string;
-  path?: string; // Opcional para menus que só têm submenus
+  path?: string;
   icon: React.ComponentType<{ className?: string }>;
-  relatedPaths?: string[]; // Caminhos relacionados que também devem ativar este item
-  subItems?: NavItem[]; // Submenus
+  relatedPaths?: string[];
+  subItems?: NavItem[];
+  permission?: Permission;
 }
 
 const navItems: NavItem[] = [
@@ -29,18 +34,70 @@ const navItems: NavItem[] = [
   {
     label: 'Cameras',
     subItems: [
-      { label: 'Listar Câmeras', path: '/cameras', icon: Camera },
-      { label: 'Adicionar Câmera', path: '/camera', icon: Camera, relatedPaths: ['/camera'] },
+      { label: 'Listar Câmeras', path: '/cameras', icon: Camera, permission: 'camera:read' },
+      {
+        label: 'Adicionar Câmera',
+        path: '/camera',
+        icon: Camera,
+        relatedPaths: ['/camera'],
+        permission: 'camera:create',
+      },
     ],
     path: '/cameras',
     icon: Camera,
     relatedPaths: ['/camera'],
+    permission: 'camera:read',
   },
-  { label: 'Visualização ao Vivo', path: '/live-view', icon: Video },
-  { label: 'Gravações', path: '/recordings', icon: Film, relatedPaths: ['/recording'] },
-  { label: 'Eventos', path: '/events', icon: Bell, relatedPaths: ['/event'] },
-  { label: 'Usuários', path: '/users', icon: Users, relatedPaths: ['/user'] },
-  { label: 'Configurações', path: '/settings', icon: Settings, relatedPaths: ['/setting'] },
+  { label: 'Visualização ao Vivo', path: '/live-view', icon: Video, permission: 'stream:read' },
+  {
+    label: 'Gravações',
+    path: '/recordings',
+    icon: Film,
+    relatedPaths: ['/recording'],
+    permission: 'recording:read',
+  },
+  {
+    label: 'Eventos',
+    path: '/events',
+    icon: Bell,
+    relatedPaths: ['/event'],
+    permission: 'event:read',
+  },
+  {
+    label: 'Usuários',
+    path: '/users',
+    icon: Users,
+    relatedPaths: ['/user'],
+    permission: 'user:read',
+  },
+  {
+    label: 'Configurações',
+    subItems: [
+      {
+        label: 'Configurações de perfil',
+        path: '/settings/profile',
+        icon: User,
+        permission: 'configuration:read',
+      },
+      {
+        label: 'Perfis de acesso',
+        path: '/settings/roles',
+        icon: Shield,
+        relatedPaths: ['/role'],
+        permission: 'role:read',
+      },
+      {
+        label: 'Backup e Restauração',
+        path: '/settings/backup',
+        icon: Settings,
+        permission: 'backup:read',
+      },
+    ],
+    path: '/settings',
+    icon: Settings,
+    relatedPaths: ['/setting'],
+    permission: 'configuration:read',
+  },
 ];
 
 export function Sidebar() {
@@ -48,6 +105,39 @@ export function Sidebar() {
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
+  const { hasPermission, isAdmin } = usePermissions();
+
+  // Filter nav items based on permissions
+  const filteredNavItems = useMemo(() => {
+    return (
+      navItems
+        .filter((item) => {
+          // If no permission required, show the item
+          if (!item.permission) return true;
+          // Admin has access to everything
+          if (isAdmin) return true;
+          // Check if user has the required permission
+          return hasPermission(item.permission);
+        })
+        .map((item) => {
+          // Filter subitems based on permissions
+          if (item.subItems) {
+            const filteredSubItems = item.subItems.filter((subItem) => {
+              if (!subItem.permission) return true;
+              if (isAdmin) return true;
+              return hasPermission(subItem.permission);
+            });
+            return { ...item, subItems: filteredSubItems };
+          }
+          return item;
+        })
+        // Remove parent items that have no visible subitems
+        .filter((item) => {
+          if (item.subItems && item.subItems.length === 0) return false;
+          return true;
+        })
+    );
+  }, [hasPermission, isAdmin]);
 
   // Toggle submenu expansion
   const toggleMenu = (label: string) => {
@@ -78,12 +168,12 @@ export function Sidebar() {
 
   // Auto-expand menu if a subitem is active
   useEffect(() => {
-    navItems.forEach((item) => {
+    filteredNavItems.forEach((item) => {
       if (item.subItems && hasActiveSubItem(item) && !expandedMenus.includes(item.label)) {
         setExpandedMenus((prev) => [...prev, item.label]);
       }
     });
-  }, [location.pathname]);
+  }, [location.pathname, filteredNavItems]);
 
   // Close sidebar on mobile when route changes
   useEffect(() => {
@@ -151,7 +241,7 @@ export function Sidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            {navItems.map((item) => {
+            {filteredNavItems.map((item) => {
               const isActive = isItemActive(item);
               const hasSubItems = item.subItems && item.subItems.length > 0;
               const isExpanded = expandedMenus.includes(item.label);

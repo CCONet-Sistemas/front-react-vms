@@ -12,7 +12,18 @@ export {
   AlertDialogCancel,
 } from './alert-dialog';
 export { Badge, badgeVariants } from './badge';
+export { Checkbox, type CheckboxProps } from './checkbox';
 export { Button, buttonVariants } from './button';
+export { Combobox, type ComboboxOption, type ComboboxProps } from './combobox';
+export {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from './command';
 export {
   Card,
   CardHeader,
@@ -52,6 +63,7 @@ export {
 export { FormField } from './form-field';
 export { Input, inputVariants } from './input';
 export { Label, labelVariants } from './label';
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
 export { Select, SelectOption, selectVariants } from './select';
 export {
   Table,

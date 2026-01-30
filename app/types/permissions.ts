@@ -19,3 +19,18 @@ export interface RolePermissions {
   updatedAt: string;
   permissions: Permission[];
 }
+
+export interface CreateRoleDto {
+  name: string;
+  description?: string;
+  hierarchy?: number;
+  isActive?: boolean;
+  permissions: string[];
+}
+
+export interface UpdateRoleDto {
+  description?: string;
+  hierarchy?: number;
+  isActive?: boolean;
+  permissions?: string[];
+}

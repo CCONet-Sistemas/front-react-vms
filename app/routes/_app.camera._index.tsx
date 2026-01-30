@@ -1,4 +1,4 @@
-import { PageContent, PageHeader } from '~/components/common';
+import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
 import type { Route } from '../+types/root';
 import CameraForm from '~/features/camera/components/cameraForm';
 
@@ -11,9 +11,11 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function NewCameraPage() {
   return (
-    <PageContent className="container mx-auto py-8 px-4">
-      <PageHeader title="Nova Câmera" description="Adicionar nova câmera na aplicação" />
-      <CameraForm />
-    </PageContent>
+    <ProtectedRoute resource="camera" action="create">
+      <PageContent className="container mx-auto py-8 px-4">
+        <PageHeader title="Nova Câmera" description="Adicionar nova câmera na aplicação" />
+        <CameraForm />
+      </PageContent>
+    </ProtectedRoute>
   );
 }
