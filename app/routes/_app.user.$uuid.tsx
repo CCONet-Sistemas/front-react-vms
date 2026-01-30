@@ -1,6 +1,5 @@
 import { PageContent, PageHeader } from '~/components/common';
 import type { Route } from '../+types/root';
-import CameraForm from '~/features/camera/components/cameraForm';
 import UserForm from '~/features/user/components/UserForm';
 import { useUser } from '~/features/users';
 

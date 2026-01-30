@@ -4,7 +4,9 @@ import { z } from 'zod';
 const baseUserSchema = z.object({
   email: z.string().min(1, 'Email é obrigatório').email('Email inválido'),
   name: z.string().min(1, 'Nome é obrigatório'),
-  roles: z.array(z.string()).optional(),
+  roleId: z.string().optional(),
+  groupId: z.coerce.number().optional(),
+  isActive: z.boolean().optional().default(true),
 });
 
 // Validação de senha forte

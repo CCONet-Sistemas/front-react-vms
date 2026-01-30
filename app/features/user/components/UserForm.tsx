@@ -2,8 +2,8 @@ import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { FormSection } from '~/components/ui/form-section';
-import { User } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { User, Shield } from 'lucide-react';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -14,7 +14,9 @@ import {
   type UpdateUserFormData,
 } from '~/features/user/schemas/user.schema';
 import { useCreateUser, useUpdateUser } from '~/features/users';
-import { FormField, Select } from '~/components/ui';
+import { useUserRolesPermissions } from '~/features/user/hooks/usePermissions';
+import { useGroups } from '~/features/groups';
+import { FormField, Select, Combobox } from '~/components/ui';
 import type { User as UserType } from '~/types';
 
 export default function UserForm({ user }: { user?: UserType }) {
@@ -22,10 +24,13 @@ export default function UserForm({ user }: { user?: UserType }) {
   const isEditMode = !!user;
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
+  const { data: roles, isLoading: isLoadingRoles } = useUserRolesPermissions();
+  const { data: groupsData, isLoading: isLoadingGroups } = useGroups();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<UserFormData | UpdateUserFormData>({
     resolver: zodResolver(isEditMode ? updateUserSchema : createUserSchema),
@@ -35,12 +40,18 @@ export default function UserForm({ user }: { user?: UserType }) {
           email: user.email,
           password: '',
           repeat_password: '',
+          roleId: user.roles?.name?.[0] || '',
+          groupId: user.groupId,
+          isActive: user.isActive ?? true,
         }
       : {
           name: '',
           email: '',
           password: '',
           repeat_password: '',
+          roleId: '',
+          groupId: undefined,
+          isActive: true,
         },
   });
 
@@ -51,6 +62,9 @@ export default function UserForm({ user }: { user?: UserType }) {
         const updateData = {
           name: data.name,
           email: data.email,
+          roleIds: data.roleId ? [data.roleId] : undefined,
+          groupId: data.groupId,
+          isActive: data.isActive,
           ...(data.password && data.password.length > 0 ? { password: data.password } : {}),
         };
 
@@ -64,6 +78,9 @@ export default function UserForm({ user }: { user?: UserType }) {
           name: data.name,
           email: data.email,
           password: data.password!,
+          roleIds: data.roleId ? [data.roleId] : undefined,
+          groupId: data.groupId,
+          isActive: data.isActive,
         });
         toast.success('Usuário criado com sucesso!');
       }
@@ -92,7 +109,7 @@ export default function UserForm({ user }: { user?: UserType }) {
             <Label htmlFor="name" className="text-form-label">
               Nome
             </Label>
-            <Input id="name" placeholder="ReoLinkWireless" {...register('name')} />
+            <Input id="name" placeholder="Nome completo" {...register('name')} />
             {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </FormField>
 
@@ -100,7 +117,7 @@ export default function UserForm({ user }: { user?: UserType }) {
             <Label htmlFor="email" className="text-form-label">
               Email
             </Label>
-            <Input id="email" placeholder="start" {...register('email')} />
+            <Input id="email" placeholder="email@exemplo.com" {...register('email')} />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </FormField>
 
@@ -110,7 +127,7 @@ export default function UserForm({ user }: { user?: UserType }) {
             </Label>
             <Input
               id="password"
-              placeholder="h264"
+              placeholder="Mínimo 6 caracteres"
               {...register('password')}
               type="password"
               autoComplete="off"
@@ -126,7 +143,7 @@ export default function UserForm({ user }: { user?: UserType }) {
             </Label>
             <Input
               id="repeat_password"
-              placeholder="h264"
+              placeholder="Confirme a senha"
               {...register('repeat_password')}
               type="password"
             />
@@ -139,24 +156,95 @@ export default function UserForm({ user }: { user?: UserType }) {
       </FormSection>
 
       {/* ===================== */}
-      {/* ACTIONS */}
+      {/* CONFIGURAÇÕES DE PERFIL */}
       {/* ===================== */}
-      {/* <FormSection title="Configurações de perfil">
-        <FormField className="space-y-2">
-          <Label htmlFor="role" className="text-form-label">
-            Perfil
-          </Label>
-          <Select id="role" {...register('role')}>
-            {roles &&
-              roles.map((role) => (
-                <option key={role.id} value={role.name}>
-                  {role.description}
-                </option>
-              ))}
-          </Select>
-          {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
-        </FormField>
-      </FormSection> */}
+      <FormSection title="Configurações de perfil">
+        <div className="mb-3 flex items-center gap-2 text-primary">
+          <Shield className="h-4 w-4" />
+          <span className="text-xs font-medium">Perfil e permissões</span>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField className="space-y-2">
+            <Label htmlFor="roleId" className="text-form-label">
+              Perfil de acesso
+            </Label>
+            <Controller
+              name="roleId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  id="roleId"
+                  disabled={isLoadingRoles}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  <option value="">Selecione um perfil</option>
+                  {roles?.map((role) => (
+                    <option key={role.id} value={role.name}>
+                      {role.description || role.name}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            />
+            {errors.roleId && (
+              <p className="text-sm text-destructive">{errors.roleId.message}</p>
+            )}
+          </FormField>
+
+          <FormField className="space-y-2">
+            <Label htmlFor="groupId" className="text-form-label">
+              Grupo/Entidade
+            </Label>
+            <Controller
+              name="groupId"
+              control={control}
+              render={({ field }) => (
+                <Combobox
+                  options={
+                    groupsData?.data?.map((group) => ({
+                      value: String(group.id),
+                      label: group.name,
+                    })) || []
+                  }
+                  value={field.value ? String(field.value) : ''}
+                  onChange={(value) => field.onChange(value ? Number(value) : undefined)}
+                  placeholder="Selecione um grupo"
+                  searchPlaceholder="Buscar grupo..."
+                  emptyMessage="Nenhum grupo encontrado."
+                  disabled={isLoadingGroups}
+                />
+              )}
+            />
+            {errors.groupId && (
+              <p className="text-sm text-destructive">{errors.groupId.message}</p>
+            )}
+          </FormField>
+
+          <FormField className="space-y-2">
+            <Label htmlFor="isActive" className="text-form-label">
+              Status
+            </Label>
+            <Controller
+              name="isActive"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  id="isActive"
+                  value={field.value ? 'true' : 'false'}
+                  onChange={(e) => field.onChange(e.target.value === 'true')}
+                >
+                  <option value="true">Ativo</option>
+                  <option value="false">Inativo</option>
+                </Select>
+              )}
+            />
+            {errors.isActive && (
+              <p className="text-sm text-destructive">{errors.isActive.message}</p>
+            )}
+          </FormField>
+        </div>
+      </FormSection>
 
       {/* ===================== */}
       {/* ACTIONS */}
