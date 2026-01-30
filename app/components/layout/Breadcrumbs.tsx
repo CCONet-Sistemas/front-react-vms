@@ -15,6 +15,7 @@ const routeLabels: Record<string, string> = {
   'live-view': 'Visualização ao Vivo',
   recordings: 'Gravações',
   events: 'Eventos',
+  event: 'Eventos',
   settings: 'Configurações',
   users: 'Usuários',
   user: 'Usuário',
@@ -29,6 +30,9 @@ const dynamicLabels: Record<string, Record<string, string>> = {
   user: {
     new: 'Novo Usuário',
     default: 'Editar Usuário',
+  },
+  event: {
+    default: 'Detalhes do Evento',
   },
 };
 

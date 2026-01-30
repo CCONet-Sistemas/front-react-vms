@@ -131,7 +131,9 @@ export default function EventsPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Novos</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Novos por página
+                </CardTitle>
                 <span className="flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -139,15 +141,6 @@ export default function EventsPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-foreground">{newCount}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="flex items-center justify-center">
-              <CardContent className="pt-6">
-                <Button variant="outline" size="sm" disabled={newCount === 0} className="gap-2">
-                  <CheckCheck className="h-4 w-4" />
-                  Marcar todos como vistos
-                </Button>
               </CardContent>
             </Card>
           </div>

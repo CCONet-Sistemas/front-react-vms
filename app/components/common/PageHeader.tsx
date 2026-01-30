@@ -5,8 +5,7 @@ import { Plus } from 'lucide-react';
 import { Badge } from '~/components/ui/badge';
 import type { Permission } from '~/types';
 import type { StreamStatusConfig } from '~/features/cameras/constants';
-import { Button, Label, Select } from '../ui';
-import { FormSection } from '../ui/form-section';
+import { Button } from '../ui';
 
 interface PageHeaderProps {
   title: string;

@@ -2,12 +2,18 @@ import { useParams, Link } from 'react-router';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
 import { Button } from '~/components/ui/button';
-import { useEvent } from '~/features/events/hooks';
+import { useEvent, useAcknowledgeEvent } from '~/features/events/hooks';
 import { EventDetail } from '~/features/events/components/EventDetail';
+import type { Event } from '~/types';
 
 export default function EventDetailPage() {
   const { uuid } = useParams<{ uuid: string }>();
   const { data: event, isLoading, error } = useEvent(uuid ?? '');
+  const acknowledgeEvent = useAcknowledgeEvent();
+
+  const handleAcknowledge = (eventToAcknowledge: Event) => {
+    acknowledgeEvent.mutate(eventToAcknowledge.uuid);
+  };
 
   return (
     <ProtectedRoute resource="event" action="read">
@@ -36,7 +42,13 @@ export default function EventDetailPage() {
           </div>
         )}
 
-        {event && <EventDetail event={event} />}
+        {event && (
+          <EventDetail
+            event={event}
+            onAcknowledge={handleAcknowledge}
+            isAcknowledging={acknowledgeEvent.isPending}
+          />
+        )}
       </PageContent>
     </ProtectedRoute>
   );

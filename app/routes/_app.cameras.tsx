@@ -22,7 +22,7 @@ const DEFAULT_LIMIT = 12;
 export default function CamerasPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<ViewMode>(
-    (searchParams.get('view') as ViewMode) || 'grid'
+    (searchParams.get('view') as ViewMode) || 'list'
   );
 
   // Get params from URL

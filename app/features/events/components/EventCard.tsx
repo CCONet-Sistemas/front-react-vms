@@ -5,7 +5,7 @@ import { cn } from '~/lib/utils';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { useAuthImage } from '~/hooks';
-import { statusConfig } from '../constants/eventTypes';
+import { eventDetection, statusConfig } from '../constants/eventTypes';
 import type { Event } from '~/types';
 
 const eventCardVariants = cva(
@@ -163,7 +163,7 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                   variant === 'grid' ? 'text-sm' : 'text-sm sm:text-base'
                 )}
               >
-                {event.reason}
+                {eventDetection[event.reason]}
               </h3>
               <p className="text-xs text-muted-foreground truncate mt-0.5">
                 Câmera: {event.cameraName}
@@ -207,17 +207,7 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
                   Ver
                 </Button>
               )}
-              {onView && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs flex-1"
-                  onClick={handleClick}
-                >
-                  <Eye className="h-3 w-3 mr-1" />
-                  Ver
-                </Button>
-              )}
+
               {onAcknowledge && event.status !== 'acknowledged' && (
                 <Button
                   variant="outline"

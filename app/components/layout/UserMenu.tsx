@@ -62,7 +62,7 @@ export function UserMenu() {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full bg-user flex items-center justify-center">
           <span className="text-sm font-medium text-primary-foreground">
             {user?.name ? getInitials(user.name) : 'U'}
           </span>

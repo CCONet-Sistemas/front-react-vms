@@ -155,6 +155,7 @@
   --color-surface-container: #e9edf5;
   --color-surface-high: #e1e7f0;
   --color-surface-highest: #dce0e5;
+  --color-surface-blue: #155dfc;
 
   /* Card */
   --color-card: #ffffff;
@@ -356,6 +357,16 @@
 aside {
   background-color: var(--color-surface);
   color: var(--color-sidebar-foreground);
+}
+
+aside .bg-primary {
+  background-color: var(--color-surface-high);
+  color: var(--color-foreground);
+}
+
+.bg-user {
+  background-color: var(--color-surface-blue);
+  color: var(--color-foreground);
 }
 
 /* Main content variants */

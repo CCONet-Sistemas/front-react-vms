@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Camera, Calendar, Shield, Tag } from 'lucide-react';
+import { Camera, Calendar, Shield, Tag, Check, Loader2, X } from 'lucide-react';
 import { Card, CardContent } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { apiClient } from '~/services/api';
@@ -7,9 +7,12 @@ import { EventVideoPlayer } from './EventVideoPlayer';
 import { EventVideoList } from './EventVideoList';
 import { statusConfig } from '../constants/eventTypes';
 import type { Event, EventVideo } from '~/types';
+import { Button } from '~/components/ui/button';
 
 export interface EventDetailProps {
   event: Event;
+  onAcknowledge?: (event: Event) => void;
+  isAcknowledging?: boolean;
 }
 
 function buildVideoStreamUrl(videoUuid: string): string {
@@ -18,6 +21,10 @@ function buildVideoStreamUrl(videoUuid: string): string {
 
 function buildVideoDownloadUrl(videoUuid: string): string {
   return `/events/fullcam/videos/${videoUuid}/download`;
+}
+
+function buildVideoThumbnailUrl(videoUuid: string): string {
+  return `/events/fullcam/videos/${videoUuid}/thumbnail`;
 }
 
 function formatDate(dateString: string): string {
@@ -31,7 +38,7 @@ function formatDate(dateString: string): string {
   });
 }
 
-export function EventDetail({ event }: EventDetailProps) {
+export function EventDetail({ event, onAcknowledge, isAcknowledging }: EventDetailProps) {
   const readyVideos = event.videos.filter((v) => v.status === 'ready');
   const [selectedVideo, setSelectedVideo] = React.useState<EventVideo | null>(
     readyVideos[0] ?? null
@@ -78,6 +85,7 @@ export function EventDetail({ event }: EventDetailProps) {
               {selectedVideo ? (
                 <EventVideoPlayer
                   src={buildVideoStreamUrl(selectedVideo.uuid)}
+                  thumbnailUrl={buildVideoThumbnailUrl(event.uuid)}
                   onEnded={handleVideoEnded}
                   className="aspect-video"
                 />
@@ -108,7 +116,7 @@ export function EventDetail({ event }: EventDetailProps) {
       {/* Event Info */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted">
                 <Camera className="h-5 w-5 text-muted-foreground" />
@@ -151,6 +159,40 @@ export function EventDetail({ event }: EventDetailProps) {
                 <p className="text-sm font-medium">{formatDate(event.timestamp)}</p>
               </div>
             </div>
+            {onAcknowledge && event.status !== 'acknowledged' && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-muted">
+                  <X className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <Button
+                    variant="warning"
+                    onClick={() => onAcknowledge(event)}
+                    disabled={isAcknowledging}
+                  >
+                    {isAcknowledging ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Confirmando...
+                      </>
+                    ) : (
+                      <>Confirmar</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+            {event.status === 'acknowledged' && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-10 w-10 rounded-full bg-success/10">
+                  <Check className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <p className="text-sm font-medium text-success">Confirmado</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reason */}
