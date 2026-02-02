@@ -29,7 +29,6 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const { hasPermission, hasAnyPermission, hasAllPermissions, canAccess } = usePermissions();
   let hasAccess = false;
-  console.log('ProtectedRoute check:', { permission, resource, action, anyOf, allOf });
   if (permission) {
     hasAccess = hasPermission(permission);
   } else if (resource && action) {

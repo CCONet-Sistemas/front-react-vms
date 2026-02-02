@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { useMe } from '~/hooks/useMe';
 import { useTheme } from '~/hooks/useTheme';
+import { useRealtimeSync } from '~/hooks/useRealtimeSync';
 import { wsManager } from '~/services/websocket';
 
 export function MainLayout() {
@@ -17,6 +18,9 @@ export function MainLayout() {
   useEffect(() => {
     wsManager.connect();
   }, []);
+
+  // Sync WebSocket events to stores and query cache
+  useRealtimeSync();
 
   return (
     <div className="min-h-screen bg-background">

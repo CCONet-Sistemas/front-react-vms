@@ -3,6 +3,7 @@ import { useUIStore } from '~/store';
 import { useTheme } from '~/hooks/useTheme';
 import { Breadcrumbs } from './Breadcrumbs';
 import { UserMenu } from './UserMenu';
+import { NotificationsDropdown } from './NotificationsDropdown';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 
@@ -34,6 +35,8 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        <NotificationsDropdown />
+
         <Button
           variant="ghost"
           size="icon"

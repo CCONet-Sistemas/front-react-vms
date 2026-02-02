@@ -16,7 +16,7 @@ import './assets/css/app.css';
 // Setup API interceptors once on app load
 setupInterceptors();
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,

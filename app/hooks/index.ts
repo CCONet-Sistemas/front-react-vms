@@ -5,3 +5,4 @@ export { useMe } from './useMe';
 export { usePermissions } from './usePermissions';
 export { useTheme } from './useTheme';
 export { useWebSocket, useWebSocketEvent } from './useWebSocket';
+export { useRealtimeSync } from './useRealtimeSync';

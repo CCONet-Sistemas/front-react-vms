@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cameraService, type CameraListParams } from '~/services/api/cameraService';
+import { useCameraStatusStore, selectCameraStatus } from '~/store/camera-status.store';
+import type { StreamStatus } from '~/types/camera.types';
 
 export const cameraKeys = {
   all: ['cameras'] as const,
@@ -27,12 +29,23 @@ export function useCamera(uuid: string) {
 }
 
 export function useCameraStatus(uuid: string) {
-  return useQuery({
+  // Get realtime status from store (updated via WebSocket)
+  const realtimeStatus = useCameraStatusStore(selectCameraStatus(uuid));
+
+  const query = useQuery({
     queryKey: cameraKeys.status(uuid),
     queryFn: () => cameraService.getStatus(uuid),
     enabled: !!uuid,
-    refetchInterval: 10000, // Refresh status every 10 seconds
+    staleTime: 30000, // Status is kept fresh via WebSocket
   });
+
+  // Prefer realtime status from store if available, fallback to query data
+  const status: StreamStatus | undefined = realtimeStatus ?? query.data;
+
+  return {
+    ...query,
+    data: status,
+  };
 }
 
 export function useCreateCamera() {

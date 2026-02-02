@@ -4,3 +4,4 @@ export * from './camera.types';
 export * from './event.types';
 export * from './group.types';
 export * from './permissions';
+export * from './notification.types';
