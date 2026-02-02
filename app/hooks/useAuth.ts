@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuthStore } from '~/store';
 import { apiClient } from '~/services/api';
+import { wsManager } from '~/services/websocket';
 import type { LoginDto, LoginResponse } from '~/types';
 
 export function useAuth() {
@@ -37,6 +38,7 @@ export function useAuth() {
     } catch {
       // Ignore logout errors
     } finally {
+      wsManager.disconnect();
       storeLogout();
       navigate('/login');
     }
