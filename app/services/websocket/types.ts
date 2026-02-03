@@ -41,20 +41,13 @@ export type VideoEventType =
   | 'video:compress:completed';
 
 // Detection event types
-export type DetectionEventType =
-  | 'event:detected'
-  | 'motion:detected'
-  | 'detector:trigger';
+export type DetectionEventType = 'event:detected' | 'motion:detected' | 'detector:trigger';
 
 // System event types
 export type SystemEventType = 'system:status' | 'disk:usage';
 
 // Sync event types
-export type SyncEventType =
-  | 'sync:started'
-  | 'sync:progress'
-  | 'sync:completed'
-  | 'sync:failed';
+export type SyncEventType = 'sync:started' | 'sync:progress' | 'sync:completed' | 'sync:failed';
 
 // Notification severity
 export type NotificationSeverity = 'info' | 'warning' | 'error' | 'critical';
@@ -67,7 +60,15 @@ export interface CameraEventPayload {
   type: CameraEventType;
   timestamp: string;
   data: {
-    state?: 'created' | 'starting' | 'streaming' | 'degraded' | 'retrying' | 'paused' | 'offline' | 'stopped';
+    state?:
+      | 'created'
+      | 'starting'
+      | 'streaming'
+      | 'degraded'
+      | 'retrying'
+      | 'paused'
+      | 'offline'
+      | 'stopped';
     isHealthy?: boolean;
     fps?: string;
     bitrate?: number;
@@ -139,13 +140,13 @@ export interface SystemEventPayload {
   };
 }
 
-// sync:event payload (FullCam sync)
+// sync:event payload
 export interface SyncEventPayload {
   type: SyncEventType;
   cameraId: string;
   timestamp: string;
   data: {
-    cameraId: number;
+    cameraId: string;
     cameraExternalId: string;
     jobId: string;
     message: string;

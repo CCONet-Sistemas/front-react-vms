@@ -12,7 +12,7 @@ export function meta(_args: Route.MetaArgs) {
 export default function NewCameraPage() {
   return (
     <ProtectedRoute resource="camera" action="create">
-      <PageContent className="container mx-auto py-8 px-4">
+      <PageContent variant="form">
         <PageHeader title="Nova Câmera" description="Adicionar nova câmera na aplicação" />
         <CameraForm />
       </PageContent>

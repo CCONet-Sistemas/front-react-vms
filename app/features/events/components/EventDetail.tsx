@@ -16,15 +16,15 @@ export interface EventDetailProps {
 }
 
 function buildVideoStreamUrl(videoUuid: string): string {
-  return `/events/fullcam/videos/${videoUuid}/stream`;
+  return `/events/videos/${videoUuid}/stream`;
 }
 
 function buildVideoDownloadUrl(videoUuid: string): string {
-  return `/events/fullcam/videos/${videoUuid}/download`;
+  return `/events/videos/${videoUuid}/download`;
 }
 
 function buildVideoThumbnailUrl(videoUuid: string): string {
-  return `/events/fullcam/videos/${videoUuid}/thumbnail`;
+  return `/events/videos/${videoUuid}/thumbnail`;
 }
 
 function formatDate(dateString: string): string {

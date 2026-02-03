@@ -121,7 +121,7 @@ export function useRealtimeSync() {
           metadata: {
             eventUuid: event.uuid,
             cameraUuid: cameraId,
-            actionUrl: `/events/${event.uuid}`,
+            actionUrl: `/event/${event.uuid}`,
           },
         };
 
@@ -160,7 +160,7 @@ export function useRealtimeSync() {
           metadata: {
             eventUuid: data.uuid,
             cameraUuid: cameraId,
-            actionUrl: `/events/${data.uuid}`,
+            actionUrl: `/event/${data.uuid}`,
           },
         };
 
@@ -180,7 +180,7 @@ export function useRealtimeSync() {
     }
   }, []);
 
-  // Handle sync events (FullCam sync)
+  // Handle sync events
   const handleSyncEvent = useCallback(
     (payload: SyncEventPayload) => {
       const { cameraId, type, timestamp, data } = payload;

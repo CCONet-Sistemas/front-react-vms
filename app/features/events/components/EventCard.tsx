@@ -69,7 +69,7 @@ const EventCard = React.forwardRef<HTMLDivElement, EventCardProps>(
     const isNew = event.status === 'new';
 
     // Load thumbnail with authentication
-    const thumbnailUrl = `/events/fullcam/videos/${event.uuid}/thumbnail`;
+    const thumbnailUrl = `/events/videos/${event.uuid}/thumbnail`;
     const { imageUrl, isLoading: isLoadingThumbnail } = useAuthImage(thumbnailUrl);
 
     const handleClick = () => {
