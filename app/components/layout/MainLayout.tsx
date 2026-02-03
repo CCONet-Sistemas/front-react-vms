@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { Toaster } from '~/components/ui/sonner';
 import { useMe } from '~/hooks/useMe';
 import { useTheme } from '~/hooks/useTheme';
 import { useRealtimeSync } from '~/hooks/useRealtimeSync';
+import { useNotificationToasts } from '~/hooks/useNotificationToasts';
 import { wsManager } from '~/services/websocket';
 
 export function MainLayout() {
@@ -22,6 +24,9 @@ export function MainLayout() {
   // Sync WebSocket events to stores and query cache
   useRealtimeSync();
 
+  // Handle notification toasts and sounds
+  useNotificationToasts();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
@@ -31,6 +36,9 @@ export function MainLayout() {
       <main className="lg:pl-64 pt-16">
         <Outlet />
       </main>
+
+      {/* Toast notifications */}
+      <Toaster />
     </div>
   );
 }

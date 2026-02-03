@@ -11,11 +11,19 @@ import {
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import type { RolePermissions } from '~/types/permissions';
+import path from 'path';
 
 interface RolesListProps {
   roles: RolePermissions[];
   isLoading?: boolean;
 }
+
+const ROLES_LABELS = [
+  { key: 'admin', label: 'Administrador' },
+  { key: 'operator', label: 'Operador' },
+  { key: 'manager', label: 'Gerente' },
+  { key: 'user', label: 'Usuário' },
+];
 
 export function RolesList({ roles, isLoading }: RolesListProps) {
   const formatDate = (dateString: string) => {
@@ -24,6 +32,11 @@ export function RolesList({ roles, isLoading }: RolesListProps) {
       month: '2-digit',
       year: 'numeric',
     });
+  };
+
+  const getRoleLabel = (roleKey: string) => {
+    const role = ROLES_LABELS.find((r) => r.key === roleKey);
+    return role ? role.label : roleKey;
   };
 
   if (isLoading) {
@@ -65,7 +78,7 @@ export function RolesList({ roles, isLoading }: RolesListProps) {
                     ) : (
                       <Shield className="h-4 w-4 text-primary" />
                     )}
-                    <span>{role.name}</span>
+                    <span>{getRoleLabel(role.name)}</span>
                     {role.isSystem && (
                       <Badge variant="outline" className="text-xs">
                         Sistema
@@ -105,7 +118,7 @@ export function RolesList({ roles, isLoading }: RolesListProps) {
                     tooltipText="Editar perfil"
                     asChild
                   >
-                    <Link to={`/role/${role.id}`}>
+                    <Link to={{ pathname: `/settings/role/${role.id}` }}>
                       <Pencil className="h-4 w-4" />
                     </Link>
                   </Button>

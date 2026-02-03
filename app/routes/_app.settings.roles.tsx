@@ -11,7 +11,7 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function RolesPage() {
   const { data: roles, isLoading, error } = useRoles();
-
+  console.log('RolesPage render', { roles, isLoading, error });
   return (
     <ProtectedRoute resource="role" action="read">
       <PageContent variant="list">
@@ -19,7 +19,7 @@ export default function RolesPage() {
           <PageHeader
             title="Perfis de Acesso"
             description="Gerencie os perfis e permissões do sistema"
-            to="/role"
+            to={'/settings/role'}
             linkText="Novo perfil"
             permission="role:create"
           />

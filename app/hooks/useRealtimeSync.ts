@@ -154,7 +154,7 @@ export function useRealtimeSync() {
           id: `event-${data.uuid}`,
           type: 'event',
           title: 'Evento disponível',
-          message: `Câmera ${cameraId}`,
+          message: `Evento de câmera está pronto para visualização.`,
           timestamp,
           read: false,
           metadata: {

@@ -42,10 +42,7 @@ export default function EditRolePage() {
   return (
     <ProtectedRoute resource="role" action="update">
       <PageContent variant="form">
-        <PageHeader
-          title="Editar Perfil"
-          description={`Editando: ${role.name}`}
-        />
+        <PageHeader title="Editar Perfil" description={`Editando: ${role.name}`} />
         <RoleForm role={role} />
       </PageContent>
     </ProtectedRoute>
