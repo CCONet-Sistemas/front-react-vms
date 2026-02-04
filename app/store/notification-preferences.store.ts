@@ -24,7 +24,7 @@ export interface DetectionTypeSettings extends NotificationTypeSettings {
 }
 
 // When to notify about camera events
-export type EventNotifyTiming = 'detection' | 'video_ready' | 'both';
+export type EventNotifyTiming = 'detection' | 'video_ready' | 'both' | 'never';
 
 // Camera-specific overrides
 export interface CameraNotificationOverride {

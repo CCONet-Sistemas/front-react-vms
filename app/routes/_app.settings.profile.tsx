@@ -53,6 +53,11 @@ const EVENT_NOTIFY_TIMING_OPTIONS: { value: EventNotifyTiming; label: string; to
       label: 'Notificar quando o evento ocorrer',
       tooltip: 'Notificar quando o evento ocorrer',
     },
+    {
+      value: 'never',
+      label: 'Nunca',
+      tooltip: 'Nunca notificar sobre eventos da câmera',
+    },
   ];
 
 const SEVERITY_OPTIONS: { value: SoundSeverity; label: string }[] = [
