@@ -3,6 +3,11 @@ import { useWebSocketEvent } from './useWebSocket';
 import { useCameraStatusStore } from '~/store/camera-status.store';
 import { useRealtimeEventsStore } from '~/store/realtime-events.store';
 import { useNotificationsStore } from '~/store/notifications.store';
+import {
+  useNotificationPreferencesStore,
+  getEffectiveDetectionSettings,
+} from '~/store/notification-preferences.store';
+import type { EventDetectionType } from '~/store/notification-preferences.store';
 import { queryClient } from '~/root';
 import { cameraKeys } from '~/features/cameras/hooks/useCameras';
 import type {
@@ -17,6 +22,31 @@ import type { Event } from '~/types/event.types';
 import type { Notification, NotificationType } from '~/types/notification.types';
 import type { Camera, StreamStatus } from '~/types/camera.types';
 
+// Map detection reasons to detection types
+const DETECTION_TYPE_MAP: Record<string, EventDetectionType> = {
+  motion: 'motion',
+  'detecção de movimento': 'motion',
+  tampering: 'tampering',
+  'violação de câmera': 'tampering',
+  line_crossing: 'line_crossing',
+  'cruzamento de linha': 'line_crossing',
+  intrusion: 'intrusion',
+  intrusão: 'intrusion',
+  face_recognition: 'face_recognition',
+  'reconhecimento facial': 'face_recognition',
+};
+
+// Extract detection type from reason string
+function extractDetectionType(reason: string): EventDetectionType | null {
+  const lowerReason = reason.toLowerCase();
+  for (const [key, value] of Object.entries(DETECTION_TYPE_MAP)) {
+    if (lowerReason.includes(key)) {
+      return value;
+    }
+  }
+  return null;
+}
+
 // Map notification severity to notification type
 const severityToType: Record<string, NotificationType> = {
   info: 'info',
@@ -29,6 +59,30 @@ export function useRealtimeSync() {
   const updateCameraStatus = useCameraStatusStore((s) => s.updateStatus);
   const addEvent = useRealtimeEventsStore((s) => s.addEvent);
   const addNotification = useNotificationsStore((s) => s.addNotification);
+
+  // Get notification preferences
+  const eventNotifyTiming = useNotificationPreferencesStore((s) => s.eventNotifyTiming);
+  const preferencesState = useNotificationPreferencesStore((s) => s);
+
+  // Helper to check if notification should be created based on detection settings
+  const shouldNotifyDetection = useCallback(
+    (reason: string, cameraId: string): boolean => {
+      const detectionType = extractDetectionType(reason);
+      if (!detectionType) {
+        // Unknown detection type, allow notification
+        return true;
+      }
+
+      const effectiveSettings = getEffectiveDetectionSettings(
+        preferencesState,
+        cameraId,
+        detectionType
+      );
+
+      return effectiveSettings.enabled;
+    },
+    [preferencesState]
+  );
 
   // Handle camera events (status, started, stopped, etc.)
   const handleCameraEvent = useCallback(
@@ -89,12 +143,14 @@ export function useRealtimeSync() {
       const { cameraId, type, timestamp, data } = payload;
 
       if (type === 'event:detected' && data.eventUuid) {
+        const reason = data.reason ?? data.objectType ?? 'Detecção';
+
         const event: Event = {
           uuid: data.eventUuid,
           cameraUuid: cameraId,
           cameraName: '', // Will be enriched by the query
           status: 'new',
-          reason: data.reason ?? data.objectType ?? 'Detecção',
+          reason,
           confidence: data.confidence ?? 0,
           timestamp,
           videos: [],
@@ -110,25 +166,34 @@ export function useRealtimeSync() {
           refetchType: 'none',
         });
 
-        // Create notification for the new event
-        const notification: Notification = {
-          id: `event-${event.uuid}`,
-          type: 'event',
-          title: `Evento: ${event.reason}`,
-          message: `Câmera: ${cameraId}`,
-          timestamp,
-          read: false,
-          metadata: {
-            eventUuid: event.uuid,
-            cameraUuid: cameraId,
-            actionUrl: `/event/${event.uuid}`,
-          },
-        };
+        // Check if we should notify on detection based on eventNotifyTiming
+        const shouldNotifyOnDetection =
+          eventNotifyTiming === 'detection' || eventNotifyTiming === 'both';
 
-        addNotification(notification);
+        // Check if this detection type is enabled for this camera
+        const isDetectionEnabled = shouldNotifyDetection(reason, cameraId);
+
+        // Only create notification if timing and detection settings allow
+        if (shouldNotifyOnDetection && isDetectionEnabled) {
+          const notification: Notification = {
+            id: `event-${event.uuid}`,
+            type: 'event',
+            title: `Evento: ${reason}`,
+            message: `Câmera: ${cameraId}`,
+            timestamp,
+            read: false,
+            metadata: {
+              eventUuid: event.uuid,
+              cameraUuid: cameraId,
+              actionUrl: `/event/${event.uuid}`,
+            },
+          };
+
+          addNotification(notification);
+        }
       }
     },
-    [addEvent, addNotification]
+    [addEvent, addNotification, eventNotifyTiming, shouldNotifyDetection]
   );
 
   // Handle video events
@@ -150,24 +215,30 @@ export function useRealtimeSync() {
 
       // Event is now ready (video downloaded, status changed from pending to new)
       if (type === 'video:completed' && data.uuid) {
-        const notification: Notification = {
-          id: `event-${data.uuid}`,
-          type: 'event',
-          title: 'Evento disponível',
-          message: `Evento de câmera está pronto para visualização.`,
-          timestamp,
-          read: false,
-          metadata: {
-            eventUuid: data.uuid,
-            cameraUuid: cameraId,
-            actionUrl: `/event/${data.uuid}`,
-          },
-        };
+        // Check if we should notify on video_ready based on eventNotifyTiming
+        const shouldNotifyOnVideoReady =
+          eventNotifyTiming === 'video_ready' || eventNotifyTiming === 'both';
 
-        addNotification(notification);
+        if (shouldNotifyOnVideoReady) {
+          const notification: Notification = {
+            id: `video-ready-${data.uuid}`,
+            type: 'event',
+            title: 'Evento disponível',
+            message: `Evento de câmera está pronto para visualização.`,
+            timestamp,
+            read: false,
+            metadata: {
+              eventUuid: data.uuid,
+              cameraUuid: cameraId,
+              actionUrl: `/event/${data.uuid}`,
+            },
+          };
+
+          addNotification(notification);
+        }
       }
     },
-    [addNotification]
+    [addNotification, eventNotifyTiming]
   );
 
   // Handle system events
