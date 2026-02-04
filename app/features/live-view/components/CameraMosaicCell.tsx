@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Maximize2, Volume2, VolumeX, Video } from 'lucide-react';
-import { HLSPlayer } from './HLSPlayer';
+import { VideoPlayer } from './VideoPlayer';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
@@ -55,7 +55,13 @@ export function CameraMosaicCell({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Video player */}
-      <HLSPlayer src={hlsUrl} muted={muted} className="w-full h-full" />
+      <VideoPlayer
+        camera={camera}
+        src={hlsUrl}
+        muted={muted}
+        className="w-full h-full"
+        enableFallback={false}
+      />
 
       {/* Camera name overlay */}
       <div className="absolute top-0 left-0 right-0 p-2 bg-gradient-to-b from-black/70 to-transparent">

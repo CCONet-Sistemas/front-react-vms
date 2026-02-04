@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
-import { HLSPlayer } from './HLSPlayer';
+import { VideoPlayer } from './VideoPlayer';
 import type { Camera } from '~/types';
 
 interface CameraFullscreenModalProps {
@@ -63,8 +63,8 @@ export function CameraFullscreenModal({
 
   if (!isOpen || !camera) return null;
 
-  // Build HLS URL the same way as CameraMosaicCell
-  const streamUrl = camera.streamStatus?.hlsUrl || `${import.meta.env.VITE_API_URL}/stream/${camera.uuid}/hls`;
+  // Build stream URL - VideoPlayer will handle type detection
+  const streamUrl = `${import.meta.env.VITE_API_URL}/stream/${camera.uuid}/hls`;
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -91,11 +91,13 @@ export function CameraFullscreenModal({
 
       {/* Video */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <HLSPlayer
+        <VideoPlayer
+          camera={camera}
           src={streamUrl}
           autoPlay
           muted
           className="w-full h-full object-contain"
+          enableFallback={false}
         />
       </div>
 

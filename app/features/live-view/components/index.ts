@@ -3,5 +3,8 @@ export { CameraMosaic } from './CameraMosaic';
 export { CameraMosaicCell } from './CameraMosaicCell';
 export { CameraSelector } from './CameraSelector';
 export { HLSPlayer } from './HLSPlayer';
+export { JPEGPlayer } from './JPEGPlayer';
+export { MJPEGPlayer } from './MJPEGPlayer';
+export { VideoPlayer } from './VideoPlayer';
 export { MosaicToolbar, gridOptions } from './MosaicToolbar';
 export type { GridSize } from './MosaicToolbar';
