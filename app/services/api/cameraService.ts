@@ -1,14 +1,10 @@
 import { apiClient } from './client';
-import type {
-  Camera,
-  CameraListResponse,
-  CreateCameraDto,
-  UpdateCameraDto,
-} from '~/types';
+import type { Camera, CameraListResponse, CreateCameraDto, UpdateCameraDto } from '~/types';
 
 export interface CameraListParams {
   page?: number;
   limit?: number;
+  total?: number;
   search?: string;
 }
 
