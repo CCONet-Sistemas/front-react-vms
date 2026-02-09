@@ -149,7 +149,7 @@ export function DateRangePicker({
           max={value.endDate ? formatDateForInput(value.endDate) : undefined}
           placeholder={placeholder.start}
           className={cn(
-            'flex h-10 w-[140px] rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm',
+            'flex h-11 w-[180px] rounded-md border border-input bg-background pl-10 pr-3 py-2 text-base',
             'ring-offset-background placeholder:text-muted-foreground',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
@@ -169,7 +169,7 @@ export function DateRangePicker({
           min={value.startDate ? formatDateForInput(value.startDate) : undefined}
           placeholder={placeholder.end}
           className={cn(
-            'flex h-10 w-[140px] rounded-md border border-input bg-background px-3 py-2 text-sm',
+            'flex h-11 w-[180px] rounded-md border border-input bg-background px-3 py-2 text-base',
             'ring-offset-background placeholder:text-muted-foreground',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',

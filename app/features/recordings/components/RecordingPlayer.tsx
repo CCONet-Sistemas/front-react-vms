@@ -4,15 +4,18 @@ import { HLSPlayer } from '~/features/live-view/components/HLSPlayer';
 import type { HLSPlayerHandle } from '~/features/live-view/components/HLSPlayer';
 import { cn } from '~/lib/utils';
 import type { RecordingSessions } from '~/types/recordings.types';
+import type { DateRange } from '~/components/ui/date-picker';
 import { RecordingControlBar } from './RecordingControlBar';
 
 interface RecordingPlayerProps {
   sessions: RecordingSessions[];
   cameraId?: string;
   isLoading: boolean;
+  dateRange?: DateRange;
+  onDateRangeChange?: (range: DateRange) => void;
 }
 
-export function RecordingPlayer({ sessions, isLoading, cameraId }: RecordingPlayerProps) {
+export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDateRangeChange }: RecordingPlayerProps) {
   const [selectedSessionUuid, setSelectedSessionUuid] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -222,6 +225,8 @@ export function RecordingPlayer({ sessions, isLoading, cameraId }: RecordingPlay
         onVolumeChange={handleVolumeChange}
         onFullscreen={handleFullscreen}
         onTimeSelect={handleTimeSelect}
+        dateRange={dateRange}
+        onDateRangeChange={onDateRangeChange}
       />
     </div>
   );

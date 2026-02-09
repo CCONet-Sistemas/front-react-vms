@@ -2,7 +2,9 @@ import { Maximize, Minimize, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '~/components/ui/button';
 import { Slider } from '~/components/ui/slider';
 import type { RecordingSessions } from '~/types/recordings.types';
+import type { DateRange } from '~/components/ui/date-picker';
 import { RecordingTimeline } from './RecordingTimeline';
+import { RecordingDateFilterDialog } from './RecordingDateFilterDialog';
 
 interface RecordingControlBarProps {
   sessions: RecordingSessions[];
@@ -16,6 +18,8 @@ interface RecordingControlBarProps {
   onVolumeChange: (v: number) => void;
   onFullscreen: () => void;
   onTimeSelect: (time: Date, sessionUuid: string) => void;
+  dateRange?: DateRange;
+  onDateRangeChange?: (range: DateRange) => void;
 }
 
 function formatTime(date: Date | null): string {
@@ -35,6 +39,8 @@ export function RecordingControlBar({
   onVolumeChange,
   onFullscreen,
   onTimeSelect,
+  dateRange,
+  onDateRangeChange,
 }: RecordingControlBarProps) {
   return (
     <div className="w-full bg-background border rounded-b-lg">
@@ -62,6 +68,13 @@ export function RecordingControlBar({
         </span>
 
         <div className="flex-1" />
+
+        {dateRange && onDateRangeChange && (
+          <RecordingDateFilterDialog
+            value={dateRange}
+            onChange={onDateRangeChange}
+          />
+        )}
 
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onFullscreen}>
           {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}

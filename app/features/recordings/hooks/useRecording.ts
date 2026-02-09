@@ -1,9 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { recordingService } from '~/services/api/recordingsService';
+import { recordingService, type SessionSegmentsParams } from '~/services/api/recordingsService';
 
 export const recordingKeys = {
   getAvailableRange: (uuid: string) => ['recordings', 'available-range', uuid] as const,
-  getSessionSegments: (cameraId: string) => ['recordings', 'sessions', cameraId] as const,
+  getSessionSegments: (cameraId: string, params?: SessionSegmentsParams) =>
+    ['recordings', 'sessions', cameraId, params] as const,
 };
 
 export function useAvailableRange(uuid: string) {
@@ -14,10 +15,10 @@ export function useAvailableRange(uuid: string) {
   });
 }
 
-export function useSessionSegments(cameraId: string) {
+export function useSessionSegments(cameraId: string, params?: SessionSegmentsParams) {
   return useQuery({
-    queryKey: recordingKeys.getSessionSegments(cameraId),
-    queryFn: () => recordingService.getSessionSegments(cameraId),
+    queryKey: recordingKeys.getSessionSegments(cameraId, params),
+    queryFn: () => recordingService.getSessionSegments(cameraId, params),
     staleTime: 5 * 60 * 1000,
   });
 }
