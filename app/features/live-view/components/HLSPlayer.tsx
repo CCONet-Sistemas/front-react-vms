@@ -1,56 +1,54 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { useAuthStore } from '~/store/auth.store';
-import { apiClient } from '~/services/api';
 
-// Refresh token 1 minute before expiration (14 minutes)
-const TOKEN_REFRESH_INTERVAL = 14 * 60 * 1000;
+export interface HLSPlayerHandle {
+  play(): void;
+  pause(): void;
+  seek(seconds: number): void;
+  setVolume(v: number): void;
+  setMuted(m: boolean): void;
+}
+
 interface HLSPlayerProps {
   src: string;
   autoPlay?: boolean;
   muted?: boolean;
+  controls?: boolean;
   className?: string;
   onError?: (error: Error) => void;
   onPlaying?: () => void;
+  onPause?: () => void;
+  onEnded?: () => void;
 }
 
-export function HLSPlayer({
+export const HLSPlayer = forwardRef<HLSPlayerHandle, HLSPlayerProps>(function HLSPlayer({
   src,
   autoPlay = true,
   muted = true,
+  controls = false,
   className,
   onError,
   onPlaying,
-}: HLSPlayerProps) {
+  onPause,
+  onEnded,
+}, ref) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
   const [status, setStatus] = useState<'loading' | 'playing' | 'error'>('loading');
+
+  useImperativeHandle(ref, () => ({
+    play() { videoRef.current?.play(); },
+    pause() { videoRef.current?.pause(); },
+    seek(seconds: number) { if (videoRef.current) videoRef.current.currentTime = seconds; },
+    setVolume(v: number) { if (videoRef.current) videoRef.current.volume = v; },
+    setMuted(m: boolean) { if (videoRef.current) videoRef.current.muted = m; },
+  }));
   const [errorMessage, setErrorMessage] = useState<string>('');
   const accessToken = useAuthStore((state) => state.accessToken);
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
-
-  // Refresh token function
-  // const refreshToken = useCallback(async () => {
-  //   try {
-  //     const { data } = await apiClient.post<{ accessToken: string }>('/authentication/refresh');
-  //     console.log('HLS: Token refreshed:', data.accessToken);
-  //     setAccessToken(data.accessToken);
-  //     console.log('HLS: Token refreshed successfully');
-  //   } catch (error) {
-  //     console.error('HLS: Failed to refresh token', error);
-  //   }
-  // }, [setAccessToken]);
-
-  // Auto-refresh token every 14 minutes
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     refreshToken();
-  //   }, TOKEN_REFRESH_INTERVAL);
-
-  //   return () => clearInterval(intervalId);
-  // }, [refreshToken]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -159,9 +157,12 @@ export function HLSPlayer({
         ref={videoRef}
         className="w-full h-full object-contain"
         muted={muted}
+        controls={controls}
         playsInline
         onPlaying={handlePlaying}
         onWaiting={handleWaiting}
+        onPause={onPause}
+        onEnded={onEnded}
       />
 
       {/* Loading overlay */}
@@ -180,4 +181,4 @@ export function HLSPlayer({
       )}
     </div>
   );
-}
+});

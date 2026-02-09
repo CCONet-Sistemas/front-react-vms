@@ -19,6 +19,7 @@ const routeLabels: Record<string, string> = {
   settings: 'Configurações',
   users: 'Usuários',
   user: 'Usuário',
+  'saved-videos': 'Vídeos Salvos',
 };
 
 // Labels for dynamic segments based on context

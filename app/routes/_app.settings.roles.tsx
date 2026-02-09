@@ -11,7 +11,6 @@ export function meta(_args: Route.MetaArgs) {
 
 export default function RolesPage() {
   const { data: roles, isLoading, error } = useRoles();
-  console.log('RolesPage render', { roles, isLoading, error });
   return (
     <ProtectedRoute resource="role" action="read">
       <PageContent variant="list">

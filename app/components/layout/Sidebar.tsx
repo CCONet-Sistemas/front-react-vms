@@ -13,6 +13,9 @@ import {
   ChevronDown,
   ChevronRight,
   User,
+  SquareScissors,
+  Cctv,
+  Clapperboard,
 } from 'lucide-react';
 import { useUIStore } from '~/store';
 import { usePermissions } from '~/hooks/usePermissions';
@@ -48,10 +51,24 @@ const navItems: NavItem[] = [
     relatedPaths: ['/camera'],
     permission: 'camera:read',
   },
-  { label: 'Visualização ao Vivo', path: '/live-view', icon: Video, permission: 'stream:read' },
+  { label: 'Visualização ao Vivo', path: '/live-view', icon: Cctv, permission: 'stream:read' },
   {
     label: 'Gravações',
-    path: '/recordings',
+
+    subItems: [
+      {
+        label: 'Listar Gravações',
+        path: '/recordings',
+        icon: Video,
+        permission: 'recording:read',
+      },
+      {
+        label: 'Videos Salvos',
+        path: '/saved-videos',
+        icon: Clapperboard,
+        permission: 'recording:read',
+      },
+    ],
     icon: Film,
     relatedPaths: ['/recording'],
     permission: 'recording:read',

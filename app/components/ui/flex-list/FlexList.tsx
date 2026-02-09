@@ -44,7 +44,8 @@ const gridColumnsVariants = cva('', {
 });
 
 export interface FlexListProps<T>
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>,
+  extends
+    Omit<React.HTMLAttributes<HTMLDivElement>, 'children'>,
     VariantProps<typeof flexListVariants> {
   data: T[];
   isLoading?: boolean;
@@ -94,7 +95,6 @@ function FlexListInner<T>(
       </div>
     );
   }
-
   if (data.length === 0) {
     return emptyState ?? <FlexListEmpty />;
   }
