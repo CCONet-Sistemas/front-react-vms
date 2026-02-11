@@ -70,6 +70,12 @@ export function VideoCard({ video, variant = 'grid', onDownload, className }: Vi
         <div className={cn(thumbnailVariants({ variant }))}>
           <div className="absolute inset-0 flex items-center justify-center bg-muted">
             <Film className="h-10 w-10 text-muted-foreground/50" />
+            <img
+              src={video.thumbnailUrl}
+              alt={video.originalFileName}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
           </div>
 
           {/* Format badge */}
@@ -125,12 +131,7 @@ export function VideoCard({ video, variant = 'grid', onDownload, className }: Vi
 
       {/* Download button */}
       {onDownload && (
-        <div
-          className={cn(
-            'flex items-center',
-            variant === 'grid' ? 'px-3 pb-3' : 'pr-3 sm:pr-4'
-          )}
-        >
+        <div className={cn('flex items-center', variant === 'grid' ? 'px-3 pb-3' : 'pr-3 sm:pr-4')}>
           <Button
             variant="outline"
             size="icon-sm"

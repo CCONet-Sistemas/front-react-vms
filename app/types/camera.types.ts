@@ -99,8 +99,15 @@ export interface CameraMetadata {
   notes: string;
 }
 
-
-export type StreamState = 'created' | 'starting' | 'streaming' | 'degraded' | 'retrying' | 'paused' | 'offline' | 'stopped';
+export type StreamState =
+  | 'created'
+  | 'starting'
+  | 'streaming'
+  | 'degraded'
+  | 'retrying'
+  | 'paused'
+  | 'offline'
+  | 'stopped';
 
 export interface StreamStatus {
   state: StreamState;
@@ -118,6 +125,13 @@ export interface StreamStatus {
   stoppedAt: string | null; // ISO date
 }
 
+export interface CameraImages {
+  fileName: string;
+  fileSize: number;
+  createdAt: Date;
+  uuid: string;
+  thumbnailUrl: string;
+}
 
 // Main Camera interface
 export interface Camera {
@@ -133,6 +147,7 @@ export interface Camera {
   recording: CameraRecording;
   control: CameraControl;
   logs: CameraLogs;
+  images: CameraImages;
   metadata: CameraMetadata;
   streamStatus: StreamStatus;
   stream: CameraStream;

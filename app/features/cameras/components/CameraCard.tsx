@@ -90,7 +90,7 @@ export function CameraCard({ camera, variant = 'grid', className }: CameraCardPr
         {/* Thumbnail */}
         <div className={cn(thumbnailVariants({ variant }))}>
           <img
-            src={imageSrc}
+            src={camera.images[0]?.thumbnailUrl || imageSrc}
             alt={camera.name}
             className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
