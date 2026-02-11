@@ -448,6 +448,32 @@ select {
   border-top-right-radius: 8px;
 }
 
+.control-bar select {
+  height: 35px;
+  gap: 10px;
+  opacity: 1;
+  border-bottom-width: 1px;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.control-bar input {
+  height: 35px;
+  gap: 10px;
+  opacity: 1;
+  border-bottom-width: 1px;
+  padding-top: 8px;
+  padding-right: 16px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
 input[type='range'] {
   padding-left: 0px;
   padding-right: 0px;

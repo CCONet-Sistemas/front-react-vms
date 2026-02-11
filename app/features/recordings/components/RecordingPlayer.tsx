@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Video } from 'lucide-react';
 import { HLSPlayer } from '~/features/live-view/components/HLSPlayer';
 import type { HLSPlayerHandle } from '~/features/live-view/components/HLSPlayer';
 import { cn } from '~/lib/utils';
 import type { RecordingSessions } from '~/types/recordings.types';
 import type { DateRange } from '~/components/ui/date-picker';
 import { RecordingControlBar } from './RecordingControlBar';
+import { useExtractionManager } from '../hooks/useExtractionManager';
 
 interface RecordingPlayerProps {
   sessions: RecordingSessions[];
@@ -13,6 +13,12 @@ interface RecordingPlayerProps {
   isLoading: boolean;
   dateRange?: DateRange;
   onDateRangeChange?: (range: DateRange) => void;
+}
+
+function getStartOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
 }
 
 export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDateRangeChange }: RecordingPlayerProps) {
@@ -27,6 +33,17 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
   const playerRef = useRef<HLSPlayerHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const pendingSeekRef = useRef<number | null>(null);
+
+  const dayStart = useMemo(() => {
+    if (sessions.length === 0) return getStartOfDay(new Date());
+    const earliest = sessions.reduce((min, s) => {
+      const d = new Date(s.startedAt);
+      return d < min ? d : min;
+    }, new Date(sessions[0].startedAt));
+    return getStartOfDay(earliest);
+  }, [sessions]);
+
+  const extraction = useExtractionManager(cameraId, dayStart);
 
   const sortedSessions = useMemo(
     () =>
@@ -43,6 +60,14 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
     if (!selectedSessionUuid) return '';
     return `${import.meta.env.VITE_API_URL}/recording/${cameraId}/playlist.m3u8?sessionId=${selectedSessionUuid}`;
   }, [selectedSessionUuid, cameraId]);
+
+  const playheadPercent = useMemo(() => {
+    if (!currentTime) return null;
+    const SECONDS_IN_DAY = 86400;
+    const sec = (currentTime.getTime() - dayStart.getTime()) / 1000;
+    if (sec < 0 || sec > SECONDS_IN_DAY) return null;
+    return (sec / SECONDS_IN_DAY) * 100;
+  }, [currentTime, dayStart]);
 
   // Auto-select first active session
   useEffect(() => {
@@ -159,6 +184,13 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
     }
   }, []);
 
+  const handleToggleSelectionMode = useCallback(() => {
+    if (!extraction.isSelectionMode) {
+      extraction.initSelectionRange(playheadPercent);
+    }
+    extraction.toggleSelectionMode();
+  }, [extraction, playheadPercent]);
+
   // Listen for fullscreen changes
   useEffect(() => {
     const onFullscreenChange = () => {
@@ -227,6 +259,13 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
         onTimeSelect={handleTimeSelect}
         dateRange={dateRange}
         onDateRangeChange={onDateRangeChange}
+        isSelectionMode={extraction.isSelectionMode}
+        onToggleSelectionMode={handleToggleSelectionMode}
+        isExtracting={extraction.isExtracting}
+        extractionProgress={extraction.extractionProgress}
+        onSubmitExtraction={extraction.submitExtraction}
+        selectionRange={extraction.selectionRange}
+        onSelectionChange={extraction.setSelectionRange}
       />
     </div>
   );

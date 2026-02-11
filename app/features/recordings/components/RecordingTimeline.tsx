@@ -4,15 +4,24 @@ import { Button } from '~/components/ui/button';
 import { Slider } from '~/components/ui/slider';
 import type { RecordingSessions } from '~/types/recordings.types';
 
+interface SelectionRange {
+  startPercent: number;
+  endPercent: number;
+}
+
 interface RecordingTimelineProps {
   sessions: RecordingSessions[];
   currentTime: Date | null;
   onTimeSelect: (time: Date, sessionUuid: string) => void;
+  isSelectionMode?: boolean;
+  selectionRange?: SelectionRange;
+  onSelectionChange?: (range: SelectionRange) => void;
 }
 
 const SECONDS_IN_DAY = 86400;
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 12;
+const MIN_MARKER_DISTANCE = 0.5;
 
 interface Segment {
   startPercent: number;
@@ -53,12 +62,16 @@ export function RecordingTimeline({
   sessions,
   currentTime,
   onTimeSelect,
+  isSelectionMode = false,
+  selectionRange,
+  onSelectionChange,
 }: RecordingTimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; scrollLeft: number } | null>(null);
+  const markerDragRef = useRef<'start' | 'end' | null>(null);
 
   const dayStart = useMemo(() => {
     if (sessions.length === 0) return getStartOfDay(new Date());
@@ -151,8 +164,35 @@ export function RecordingTimeline({
     [zoom],
   );
 
+  // Marker drag handlers
+  const handleMarkerMouseDown = useCallback(
+    (marker: 'start' | 'end', e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      markerDragRef.current = marker;
+    },
+    [],
+  );
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      // Handle marker drag
+      if (markerDragRef.current && trackRef.current && selectionRange && onSelectionChange) {
+        const rect = trackRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+        if (markerDragRef.current === 'start') {
+          const clamped = Math.min(percent, selectionRange.endPercent - MIN_MARKER_DISTANCE);
+          onSelectionChange({ ...selectionRange, startPercent: Math.max(0, clamped) });
+        } else {
+          const clamped = Math.max(percent, selectionRange.startPercent + MIN_MARKER_DISTANCE);
+          onSelectionChange({ ...selectionRange, endPercent: Math.min(100, clamped) });
+        }
+        return;
+      }
+
+      // Handle pan drag
       if (!dragStartRef.current) return;
       const container = containerRef.current;
       if (!container) return;
@@ -163,6 +203,7 @@ export function RecordingTimeline({
     };
 
     const handleMouseUp = () => {
+      markerDragRef.current = null;
       dragStartRef.current = null;
       setTimeout(() => setIsDragging(false), 0);
     };
@@ -173,7 +214,7 @@ export function RecordingTimeline({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, []);
+  }, [selectionRange, onSelectionChange]);
 
   // Auto-scroll to playhead when it changes
   useEffect(() => {
@@ -235,6 +276,40 @@ export function RecordingTimeline({
             />
           ))}
 
+          {/* Selection overlay & markers */}
+          {isSelectionMode && selectionRange && (
+            <>
+              {/* Highlighted region */}
+              <div
+                className="absolute top-0 h-full bg-red-500/20 z-10 pointer-events-none"
+                style={{
+                  left: `${selectionRange.startPercent}%`,
+                  width: `${selectionRange.endPercent - selectionRange.startPercent}%`,
+                }}
+              />
+
+              {/* Start marker */}
+              <div
+                className="absolute top-0 h-full z-20 cursor-col-resize"
+                style={{ left: `${selectionRange.startPercent}%`, transform: 'translateX(-50%)' }}
+                onMouseDown={(e) => handleMarkerMouseDown('start', e)}
+              >
+                <div className="w-1 h-full bg-red-600 mx-auto" />
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-red-600 rounded-sm rotate-45" />
+              </div>
+
+              {/* End marker */}
+              <div
+                className="absolute top-0 h-full z-20 cursor-col-resize"
+                style={{ left: `${selectionRange.endPercent}%`, transform: 'translateX(-50%)' }}
+                onMouseDown={(e) => handleMarkerMouseDown('end', e)}
+              >
+                <div className="w-1 h-full bg-red-600 mx-auto" />
+                <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-red-600 rounded-sm rotate-45" />
+              </div>
+            </>
+          )}
+
           {/* Playhead */}
           {playheadPercent !== null && (
             <div
@@ -259,11 +334,11 @@ export function RecordingTimeline({
           <ZoomOut className="h-4 w-4" />
         </Button>
         <Slider
-          value={[zoom]}
+          value={zoom}
           min={MIN_ZOOM}
           max={MAX_ZOOM}
           step={0.5}
-          onValueChange={([v]) => handleZoomChange(v)}
+          onValueChange={(v) => handleZoomChange(v)}
           className="flex-1"
         />
         <Button

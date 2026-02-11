@@ -17,9 +17,12 @@ export function meta(_args: Route.MetaArgs) {
 export default function EditRecordingPage({ params }: Route.ComponentProps) {
   const { uuid } = params;
   const [searchParams, setSearchParams] = useSearchParams();
+  const now = new Date();
 
   const startDate = searchParams.get('startDate') || undefined;
+  // new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const endDate = searchParams.get('endDate') || undefined;
+  // new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const dateRange: DateRange = { startDate, endDate };
 
   const updateParams = useCallback(

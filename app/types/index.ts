@@ -5,3 +5,4 @@ export * from './event.types';
 export * from './group.types';
 export * from './permissions';
 export * from './notification.types';
+export * from './video.type';
