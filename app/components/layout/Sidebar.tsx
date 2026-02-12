@@ -109,6 +109,12 @@ const navItems: NavItem[] = [
         icon: Settings,
         permission: 'backup:read',
       },
+      {
+        label: 'Configurações avançadas',
+        path: '/settings/config',
+        icon: Settings,
+        permission: 'configuration:read',
+      },
     ],
     path: '/settings',
     icon: Settings,
