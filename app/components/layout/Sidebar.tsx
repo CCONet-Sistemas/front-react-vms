@@ -105,7 +105,7 @@ const navItems: NavItem[] = [
       },
       {
         label: 'Backup e Restauração',
-        path: '/settings/backup',
+        path: '/settings/backups',
         icon: Settings,
         permission: 'backup:read',
       },
@@ -118,7 +118,7 @@ const navItems: NavItem[] = [
     ],
     path: '/settings',
     icon: Settings,
-    relatedPaths: ['/setting'],
+    relatedPaths: ['/settings'],
     permission: 'configuration:read',
   },
 ];
