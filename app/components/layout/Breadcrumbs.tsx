@@ -20,6 +20,8 @@ const routeLabels: Record<string, string> = {
   users: 'Usuários',
   user: 'Usuário',
   'saved-videos': 'Vídeos Salvos',
+  recording: 'Gravação',
+  'saved-video': 'Vídeo Salvo',
 };
 
 // Labels for dynamic segments based on context
@@ -34,6 +36,15 @@ const dynamicLabels: Record<string, Record<string, string>> = {
   },
   event: {
     default: 'Detalhes do Evento',
+  },
+  recording: {
+    default: 'Detalhes da Gravação',
+  },
+  'saved-videos': {
+    default: 'Detalhes de Vídeos Salvos',
+  },
+  'saved-video': {
+    default: 'Detalhes do Vídeo Salvo',
   },
 };
 
@@ -71,9 +82,39 @@ export function Breadcrumbs() {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
+  // Mapeamento explícito de singular para plural
+  const singularToPlural: Record<string, string> = {
+    camera: 'cameras',
+    user: 'users',
+    event: 'events',
+    recording: 'recordings',
+    'saved-video': 'saved-videos',
+  };
+
   const breadcrumbs: BreadcrumbItem[] = pathSegments.map((segment, index) => {
-    const path = '/' + pathSegments.slice(0, index + 1).join('/');
-    const label = getSegmentLabel(segment, index, pathSegments);
+    let currentSegment = segment;
+    const nextSegment = pathSegments[index + 1];
+
+    // Se o próximo segmento for dinâmico (UUID ou 'new'), usar plural para o segmento atual
+    if (nextSegment && (isUUID(nextSegment) || nextSegment === 'new' || nextSegment === 'novo')) {
+      const plural = singularToPlural[segment];
+      if (plural) {
+        currentSegment = plural;
+      }
+    }
+
+    // Construir path usando os segmentos ajustados
+    const segmentsForPath = pathSegments.slice(0, index).map((seg, i) => {
+      const next = pathSegments[i + 1];
+      if (next && (isUUID(next) || next === 'new' || next === 'novo')) {
+        return singularToPlural[seg] || seg;
+      }
+      return seg;
+    });
+    segmentsForPath.push(currentSegment);
+
+    const path = '/' + segmentsForPath.join('/');
+    const label = routeLabels[currentSegment] || getSegmentLabel(segment, index, pathSegments);
     return { label, path };
   });
 
