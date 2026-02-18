@@ -36,16 +36,7 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   {
     label: 'Cameras',
-    subItems: [
-      { label: 'Listar Câmeras', path: '/cameras', icon: Camera, permission: 'camera:read' },
-      {
-        label: 'Adicionar Câmera',
-        path: '/camera',
-        icon: Camera,
-        relatedPaths: ['/camera'],
-        permission: 'camera:create',
-      },
-    ],
+
     path: '/cameras',
     icon: Camera,
     relatedPaths: ['/camera'],

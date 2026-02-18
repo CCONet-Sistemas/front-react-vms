@@ -24,8 +24,9 @@ function VideoStatusBadge({ status }: { status: EventVideo['status'] }) {
     processing: { label: 'Processando', variant: 'secondary' as const, icon: Loader2 },
     error: { label: 'Erro', variant: 'destructive' as const, icon: AlertCircle },
     pending: { label: 'Pendente', variant: 'warning' as const, icon: null },
+    failed: { label: 'Falhou', variant: 'destructive' as const, icon: AlertCircle },
   };
-
+  console.log('Video status:', status);
   const { label, variant, icon: Icon } = config[status];
 
   return (
