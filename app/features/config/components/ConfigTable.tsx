@@ -63,7 +63,6 @@ export function ConfigTable({ configs, onEdit, onDelete, isDeleting }: ConfigTab
           <TableHeader>
             <TableRow>
               <TableHead>Chave</TableHead>
-              <TableHead>Valor</TableHead>
               <TableHead>Tipo</TableHead>
               <TableHead>Descrição</TableHead>
               <TableHead className="text-right">Ações</TableHead>
@@ -82,11 +81,7 @@ export function ConfigTable({ configs, onEdit, onDelete, isDeleting }: ConfigTab
                   <TableCell className="font-medium font-mono text-sm">
                     {toStr(config.key.value)}
                   </TableCell>
-                  <TableCell className="max-w-[200px]">
-                    <span className="text-sm" title={toStr(config.value.rawValue)}>
-                      {truncate(config.value.rawValue, 50, config.value.type)}
-                    </span>
-                  </TableCell>
+
                   <TableCell>
                     <Badge
                       variant={typeBadgeVariant[config.value.type] ?? 'secondary'}

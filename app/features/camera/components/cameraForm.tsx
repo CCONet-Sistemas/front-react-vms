@@ -1,4 +1,3 @@
-import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { FormSection } from '~/components/ui/form-section';
@@ -68,7 +67,6 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
       } else {
         await createMutation.mutateAsync(data as any);
       }
-      // navigate('/cameras');
     } catch (error) {
       alert(isEditMode ? 'Erro ao atualizar câmera' : 'Erro ao criar câmera');
       console.error(error);
@@ -86,41 +84,31 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Informações do dispositivo</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-form-label">
-              Nome do dispositivo
-            </Label>
-            <Input id="name" placeholder="ReoLinkWireless" {...register('name')} />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="mode" className="text-form-label">
-              Modo
-            </Label>
-            <Input id="mode" placeholder="start" {...register('mode')} />
-            {errors.mode && <p className="text-sm text-destructive">{errors.mode.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="type" className="text-form-label">
-              Tipo
-            </Label>
-            <Input id="type" placeholder="h264" {...register('type')} />
-            {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="protocol" className="text-form-label">
-              Protocolo
-            </Label>
+          <Input
+            label="Nome do dispositivo"
+            error={!!errors.name}
+            helperText={errors.name?.message}
+            {...register('name')}
+          />
+          <Input
+            label="Modo"
+            error={!!errors.mode}
+            helperText={errors.mode?.message}
+            {...register('mode')}
+          />
+          <Input
+            label="Tipo"
+            error={!!errors.type}
+            helperText={errors.type?.message}
+            {...register('type')}
+          />
+          <div>
             <Select id="protocol" {...register('protocol')}>
               <option value="rtsp">RTSP</option>
               <option value="http">RTMP</option>
             </Select>
-
             {errors.protocol && (
-              <p className="text-sm text-destructive">{errors.protocol.message}</p>
+              <p className="text-sm text-destructive mt-1 pl-3.5">{errors.protocol.message}</p>
             )}
           </div>
         </div>
@@ -135,56 +123,35 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de rede</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="host" className="text-form-label">
-              Host
-            </Label>
-            <Input id="host" placeholder="192.168.1.40" {...register('connection.host')} />
-            {errors.connection?.host && (
-              <p className="text-sm text-destructive">{errors.connection.host.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="port" className="text-form-label">
-              Porta
-            </Label>
-            <Input id="port" type="number" placeholder="554" {...register('connection.port')} />
-            {errors.connection?.port && (
-              <p className="text-sm text-destructive">{errors.connection.port.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="username" className="text-form-label">
-              Usuário
-            </Label>
+          <Input
+            label="Host"
+            error={!!errors.connection?.host}
+            helperText={errors.connection?.host?.message}
+            {...register('connection.host')}
+          />
+          <Input
+            label="Porta"
+            type="number"
+            error={!!errors.connection?.port}
+            helperText={errors.connection?.port?.message}
+            {...register('connection.port')}
+          />
+          <Input
+            label="Usuário"
+            autoComplete="off"
+            {...register('connection.username')}
+          />
+          <Input
+            label="Senha"
+            type="password"
+            autoComplete="off"
+            {...register('connection.password')}
+          />
+          <div className="sm:col-span-2">
             <Input
-              id="username"
-              placeholder="admin"
-              autoComplete="off"
-              {...register('connection.username')}
+              label="Path"
+              {...register('connection.path')}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-form-label">
-              Senha
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="off"
-              {...register('connection.password')}
-            />
-          </div>
-
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="path" className="text-form-label">
-              Path
-            </Label>
-            <Input id="path" placeholder="/" {...register('connection.path')} />
           </div>
         </div>
       </FormSection>
@@ -198,33 +165,25 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de vídeo</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="space-y-2">
-            <Label htmlFor="fps" className="text-form-label">
-              FPS
-            </Label>
-            <Input id="fps" type="number" placeholder="30" {...register('video.fps')} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="width" className="text-form-label">
-              Largura
-            </Label>
-            <Input id="width" type="number" placeholder="1920" {...register('video.width')} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="height" className="text-form-label">
-              Altura
-            </Label>
-            <Input id="height" type="number" placeholder="1080" {...register('video.height')} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="codec" className="text-form-label">
-              Codec
-            </Label>
-            <Input id="codec" placeholder="h264_cuvid" {...register('video.codec')} />
-          </div>
+          <Input
+            label="FPS"
+            type="number"
+            {...register('video.fps')}
+          />
+          <Input
+            label="Largura"
+            type="number"
+            {...register('video.width')}
+          />
+          <Input
+            label="Altura"
+            type="number"
+            {...register('video.height')}
+          />
+          <Input
+            label="Codec"
+            {...register('video.codec')}
+          />
         </div>
       </FormSection>
 
@@ -237,26 +196,21 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de transmissão</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="streamFps" className="text-form-label">
-              FPS Stream
-            </Label>
-            <Input id="streamFps" type="number" placeholder="15" {...register('stream.fps')} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="scaleX" className="text-form-label">
-              Scale X
-            </Label>
-            <Input id="scaleX" type="number" placeholder="640" {...register('stream.scale.x')} />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="scaleY" className="text-form-label">
-              Scale Y
-            </Label>
-            <Input id="scaleY" type="number" placeholder="360" {...register('stream.scale.y')} />
-          </div>
+          <Input
+            label="FPS Stream"
+            type="number"
+            {...register('stream.fps')}
+          />
+          <Input
+            label="Scale X"
+            type="number"
+            {...register('stream.scale.x')}
+          />
+          <Input
+            label="Scale Y"
+            type="number"
+            {...register('stream.scale.y')}
+          />
         </div>
       </FormSection>
 

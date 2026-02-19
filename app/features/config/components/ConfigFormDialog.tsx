@@ -9,7 +9,7 @@ import {
 } from '~/components/ui/dialog';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
+import { Label } from '~/components/ui/label'; // mantido para o campo boolean
 import { Select, SelectOption } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
 import { Switch } from '~/components/ui/switch';
@@ -180,42 +180,29 @@ export function ConfigFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="key" required>
-              Chave
-            </Label>
-            <Input
-              id="key"
-              value={formData.key}
-              onChange={(e) => handleChange('key', e.target.value)}
-              placeholder="ex: site_name"
-              disabled={isEditing}
-              error={!!errors.key}
-            />
-            {errors.key && <p className="text-sm text-destructive">{errors.key}</p>}
-          </div>
+          <Input
+            label="Chave"
+            value={formData.key}
+            onChange={(e) => handleChange('key', e.target.value)}
+            disabled={isEditing}
+            error={!!errors.key}
+            helperText={errors.key}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="type" required>
-              Tipo
-            </Label>
-            <Select
-              id="type"
-              value={formData.type}
-              onChange={(e) => handleTypeChange(e.target.value as ConfigType)}
-            >
-              <SelectOption value="string">Texto</SelectOption>
-              <SelectOption value="number">Número</SelectOption>
-              <SelectOption value="boolean">Booleano</SelectOption>
-              <SelectOption value="json">JSON</SelectOption>
-            </Select>
-          </div>
+          <Select
+            label="Tipo"
+            value={formData.type}
+            onChange={(e) => handleTypeChange(e.target.value as ConfigType)}
+          >
+            <SelectOption value="string">Texto</SelectOption>
+            <SelectOption value="number">Número</SelectOption>
+            <SelectOption value="boolean">Booleano</SelectOption>
+            <SelectOption value="json">JSON</SelectOption>
+          </Select>
 
-          <div className="space-y-2">
-            <Label htmlFor="value" required={formData.type !== 'boolean'}>
-              Valor
-            </Label>
-            {formData.type === 'boolean' ? (
+          {formData.type === 'boolean' ? (
+            <div className="space-y-2">
+              <Label htmlFor="value">Valor</Label>
               <div className="flex items-center gap-3 pt-1">
                 <Switch
                   id="value"
@@ -226,63 +213,53 @@ export function ConfigFormDialog({
                   {formData.value === 'true' ? 'Verdadeiro' : 'Falso'}
                 </span>
               </div>
-            ) : formData.type === 'json' ? (
-              <>
-                <Textarea
-                  id="value"
-                  value={JSON.parse(JSON.parse(formData.value)) || ''}
-                  onChange={(e) => handleChange('value', e.target.value)}
-                  placeholder='{"key": "value"}'
-                  rows={4}
-                  className="font-mono text-sm"
-                  error={!!errors.value}
-                />
-              </>
-            ) : formData.type === 'number' ? (
-              <Input
-                id="value"
-                type="number"
-                value={formData.value}
-                onChange={(e) => handleChange('value', e.target.value)}
-                placeholder="0"
-                error={!!errors.value}
-              />
-            ) : (
-              <Input
-                id="value"
-                value={formData.value}
-                onChange={(e) => handleChange('value', e.target.value)}
-                placeholder="Valor da configuração"
-                error={!!errors.value}
-              />
-            )}
-            {errors.value && <p className="text-sm text-destructive">{errors.value}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Descrição</Label>
+              {errors.value && <p className="text-sm text-destructive">{errors.value}</p>}
+            </div>
+          ) : formData.type === 'json' ? (
             <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Descrição da configuração (opcional)"
-              rows={2}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="metadata">Metadata (JSON)</Label>
-            <Textarea
-              id="metadata"
-              value={formData.metadata}
-              onChange={(e) => handleChange('metadata', e.target.value)}
-              placeholder='{"environment": "production"}'
-              rows={2}
+              label="Valor"
+              value={JSON.parse(JSON.parse(formData.value)) || ''}
+              onChange={(e) => handleChange('value', e.target.value)}
+              rows={4}
               className="font-mono text-sm"
-              error={!!errors.metadata}
+              error={!!errors.value}
+              helperText={errors.value}
             />
-            {errors.metadata && <p className="text-sm text-destructive">{errors.metadata}</p>}
-          </div>
+          ) : formData.type === 'number' ? (
+            <Input
+              label="Valor"
+              type="number"
+              value={formData.value}
+              onChange={(e) => handleChange('value', e.target.value)}
+              error={!!errors.value}
+              helperText={errors.value}
+            />
+          ) : (
+            <Input
+              label="Valor"
+              value={formData.value}
+              onChange={(e) => handleChange('value', e.target.value)}
+              error={!!errors.value}
+              helperText={errors.value}
+            />
+          )}
+
+          <Textarea
+            label="Descrição"
+            value={formData.description}
+            onChange={(e) => handleChange('description', e.target.value)}
+            rows={2}
+          />
+
+          <Textarea
+            label="Metadata (JSON)"
+            value={formData.metadata}
+            onChange={(e) => handleChange('metadata', e.target.value)}
+            rows={2}
+            className="font-mono text-sm"
+            error={!!errors.metadata}
+            helperText={errors.metadata}
+          />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>

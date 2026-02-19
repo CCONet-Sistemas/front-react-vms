@@ -6,6 +6,7 @@ import type { RecordingSessions } from '~/types/recordings.types';
 import type { DateRange } from '~/components/ui/date-picker';
 import { RecordingControlBar } from './RecordingControlBar';
 import { useExtractionManager } from '../hooks/useExtractionManager';
+import { useEvents } from '~/features/events';
 
 interface RecordingPlayerProps {
   sessions: RecordingSessions[];
@@ -28,6 +29,8 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const playbackRateRef = useRef(1);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const playStartRef = useRef<{ wallTime: number; mediaTime: Date } | null>(null);
   const playerRef = useRef<HLSPlayerHandle>(null);
@@ -44,6 +47,15 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
   }, [sessions]);
 
   const extraction = useExtractionManager(cameraId, dayStart);
+
+  // Busca eventos da câmera para exibir como marcadores na timeline
+  const { data: eventsData } = useEvents({
+    cameraId,
+    startDate: dateRange?.startDate,
+    endDate: dateRange?.endDate,
+    limit: 200,
+  });
+  const events = eventsData?.data ?? [];
 
   const sortedSessions = useMemo(
     () =>
@@ -69,13 +81,17 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
     return (sec / SECONDS_IN_DAY) * 100;
   }, [currentTime, dayStart]);
 
-  // Auto-select first active session
+  // Auto-select first active session and position playhead at the end of the blue bar
   useEffect(() => {
     if (sessions.length === 0 || selectedSessionUuid) return;
     const active = sessions.find((s) => s.status === 'active') ?? sessions[0];
     if (active) {
       setSelectedSessionUuid(active.uuid);
-      setCurrentTime(new Date(active.startedAt));
+      const endTime =
+        active.status === 'active' && !active.stoppedAt
+          ? new Date()
+          : new Date(active.stoppedAt ?? active.lastSegmentAt);
+      setCurrentTime(endTime);
     }
   }, [sessions, selectedSessionUuid]);
 
@@ -133,9 +149,9 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
     intervalRef.current = setInterval(() => {
       if (!playStartRef.current) return;
       const elapsed = Date.now() - playStartRef.current.wallTime;
-      const newTime = new Date(playStartRef.current.mediaTime.getTime() + elapsed);
+      const newTime = new Date(playStartRef.current.mediaTime.getTime() + elapsed * playbackRateRef.current);
       setCurrentTime(newTime);
-    }, 1000);
+    }, 250);
   }, [selectedSession, currentTime]);
 
   const handlePause = useCallback(() => {
@@ -174,6 +190,16 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
     },
     [isMuted]
   );
+
+  const handlePlaybackRateChange = useCallback((rate: number) => {
+    playbackRateRef.current = rate;
+    setPlaybackRate(rate);
+    playerRef.current?.setPlaybackRate(rate);
+    // Reset playhead tracking so elapsed is recalculated from current position
+    if (playStartRef.current) {
+      playStartRef.current = { wallTime: Date.now(), mediaTime: currentTime ?? new Date() };
+    }
+  }, [currentTime]);
 
   const handleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
@@ -266,6 +292,9 @@ export function RecordingPlayer({ sessions, isLoading, cameraId, dateRange, onDa
         onSubmitExtraction={extraction.submitExtraction}
         selectionRange={extraction.selectionRange}
         onSelectionChange={extraction.setSelectionRange}
+        playbackRate={playbackRate}
+        onPlaybackRateChange={handlePlaybackRateChange}
+        events={events}
       />
     </div>
   );

@@ -6,7 +6,6 @@ import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
-import { Label } from '~/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
 import { loginSchema, type LoginFormData } from '../schemas/login.schema';
 import { useAuthStore } from '~/store';
@@ -37,7 +36,6 @@ export function LoginForm() {
       const response = await apiClient.post<LoginResponse>('/authentication', data);
       const tokens = response.data;
 
-      // Buscar dados do usuário após login com o token
       const userResponse = await apiClient.get('/users/me', {
         headers: { Authorization: `Bearer ${tokens.accessToken}` },
       });
@@ -45,7 +43,6 @@ export function LoginForm() {
 
       login(user, tokens.accessToken);
 
-      // Verificar se foi setado
       const state = useAuthStore.getState();
 
       navigate('/dashboard');
@@ -69,40 +66,32 @@ export function LoginForm() {
             <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md">{error}</div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="your@email.com"
-              autoComplete="email"
-              {...register('email')}
-            />
-            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            autoComplete="email"
+            error={!!errors.email}
+            helperText={errors.email?.message}
+            {...register('email')}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                autoComplete="current-password"
-                {...register('password')}
-              />
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            error={!!errors.password}
+            helperText={errors.password?.message}
+            rightIcon={
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
-          </div>
+            }
+            {...register('password')}
+          />
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? (

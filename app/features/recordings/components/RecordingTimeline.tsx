@@ -3,6 +3,7 @@ import { ZoomIn, ZoomOut } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Slider } from '~/components/ui/slider';
 import type { RecordingSessions } from '~/types/recordings.types';
+import type { Event } from '~/types';
 
 interface SelectionRange {
   startPercent: number;
@@ -16,7 +17,14 @@ interface RecordingTimelineProps {
   isSelectionMode?: boolean;
   selectionRange?: SelectionRange;
   onSelectionChange?: (range: SelectionRange) => void;
+  events?: Event[];
 }
+
+const EVENT_STATUS_COLORS: Record<Event['status'], string> = {
+  new: 'bg-orange-400',
+  viewed: 'bg-sky-400',
+  acknowledged: 'bg-green-500',
+};
 
 const SECONDS_IN_DAY = 86400;
 const MIN_ZOOM = 1;
@@ -65,13 +73,23 @@ export function RecordingTimeline({
   isSelectionMode = false,
   selectionRange,
   onSelectionChange,
+  events = [],
 }: RecordingTimelineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [now, setNow] = useState(() => new Date());
   const dragStartRef = useRef<{ x: number; scrollLeft: number } | null>(null);
   const markerDragRef = useRef<'start' | 'end' | null>(null);
+
+  // Keep `now` updated every second while there is an active session
+  useEffect(() => {
+    const hasActive = sessions.some((s) => s.status === 'active' && !s.stoppedAt);
+    if (!hasActive) return;
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, [sessions]);
 
   const dayStart = useMemo(() => {
     if (sessions.length === 0) return getStartOfDay(new Date());
@@ -85,7 +103,10 @@ export function RecordingTimeline({
   const segments: Segment[] = useMemo(() => {
     return sessions.map((session) => {
       const start = new Date(session.startedAt);
-      const end = new Date(session.stoppedAt || session.lastSegmentAt);
+      const end =
+        session.status === 'active' && !session.stoppedAt
+          ? now
+          : new Date(session.stoppedAt ?? session.lastSegmentAt);
       const startSec = (start.getTime() - dayStart.getTime()) / 1000;
       const endSec = (end.getTime() - dayStart.getTime()) / 1000;
       const startPercent = Math.max(0, (startSec / SECONDS_IN_DAY) * 100);
@@ -99,7 +120,7 @@ export function RecordingTimeline({
         endTime: end,
       };
     });
-  }, [sessions, dayStart]);
+  }, [sessions, dayStart, now]);
 
   const playheadPercent = useMemo(() => {
     if (!currentTime) return null;
@@ -109,6 +130,22 @@ export function RecordingTimeline({
   }, [currentTime, dayStart]);
 
   const hourLabels = useMemo(() => getHourLabels(zoom), [zoom]);
+
+  const eventMarkers = useMemo(() => {
+    return events
+      .map((event) => {
+        const time = new Date(event.timestamp);
+        const sec = (time.getTime() - dayStart.getTime()) / 1000;
+        if (sec < 0 || sec > SECONDS_IN_DAY) return null;
+        return {
+          uuid: event.uuid,
+          percent: (sec / SECONDS_IN_DAY) * 100,
+          status: event.status,
+          label: `${time.toLocaleTimeString('pt-BR', { hour12: false })} — ${event.reason ?? event.status}`,
+        };
+      })
+      .filter(Boolean) as { uuid: string; percent: number; status: Event['status']; label: string }[];
+  }, [events, dayStart]);
 
   const handleZoomChange = useCallback((newZoom: number) => {
     setZoom(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom)));
@@ -155,6 +192,11 @@ export function RecordingTimeline({
       if (zoom <= 1) return;
       const container = containerRef.current;
       if (!container) return;
+
+      // Ignore clicks on the native horizontal scrollbar area
+      const rect = container.getBoundingClientRect();
+      if (e.clientY > rect.top + container.clientHeight) return;
+
       setIsDragging(false);
       dragStartRef.current = {
         x: e.clientX,
@@ -274,6 +316,27 @@ export function RecordingTimeline({
               }}
               title={`${seg.startTime.toLocaleTimeString()} - ${seg.endTime.toLocaleTimeString()}`}
             />
+          ))}
+
+          {/* Event markers */}
+          {eventMarkers.map((marker) => (
+            <div
+              key={marker.uuid}
+              className="absolute top-0 h-full z-[5] cursor-default"
+              style={{ left: `${marker.percent}%`, transform: 'translateX(-50%)' }}
+              title={marker.label}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Diamond */}
+              <div
+                className={`w-2 h-2 ${EVENT_STATUS_COLORS[marker.status]} rotate-45 mx-auto mt-1`}
+              />
+              {/* Vertical line */}
+              <div
+                className={`w-px ${EVENT_STATUS_COLORS[marker.status]} opacity-60 mx-auto`}
+                style={{ height: 'calc(100% - 12px)' }}
+              />
+            </div>
           ))}
 
           {/* Selection overlay & markers */}

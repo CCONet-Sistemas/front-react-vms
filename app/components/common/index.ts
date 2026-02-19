@@ -4,3 +4,7 @@ export { PageHeader } from './PageHeader';
 export { Pagination } from './Pagination';
 export { ProtectedFeature } from './ProtectedFeature';
 export { ProtectedRoute } from './ProtectedRoute';
+export { FilterBar } from './FilterBar';
+export type { FilterFieldConfig, FilterSelectConfig, FilterDateRangeConfig, SortOption } from './FilterBar';
+export { ViewModeToggle } from './ViewModeToggle';
+export type { ViewMode } from './ViewModeToggle';

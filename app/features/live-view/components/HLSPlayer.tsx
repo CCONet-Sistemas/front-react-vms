@@ -10,6 +10,7 @@ export interface HLSPlayerHandle {
   seek(seconds: number): void;
   setVolume(v: number): void;
   setMuted(m: boolean): void;
+  setPlaybackRate(rate: number): void;
 }
 
 interface HLSPlayerProps {
@@ -45,6 +46,7 @@ export const HLSPlayer = forwardRef<HLSPlayerHandle, HLSPlayerProps>(function HL
     seek(seconds: number) { if (videoRef.current) videoRef.current.currentTime = seconds; },
     setVolume(v: number) { if (videoRef.current) videoRef.current.volume = v; },
     setMuted(m: boolean) { if (videoRef.current) videoRef.current.muted = m; },
+    setPlaybackRate(rate: number) { if (videoRef.current) videoRef.current.playbackRate = rate; },
   }));
   const [errorMessage, setErrorMessage] = useState<string>('');
   const accessToken = useAuthStore((state) => state.accessToken);

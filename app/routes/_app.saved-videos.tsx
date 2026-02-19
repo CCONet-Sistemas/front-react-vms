@@ -1,11 +1,11 @@
+import { useCallback } from 'react';
 import type { Route } from './+types/_app.saved-videos';
 
-import { PageContent, PageHeader, Pagination, ProtectedRoute } from '~/components/common';
+import { PageContent, PageHeader, Pagination, ProtectedRoute, FilterBar } from '~/components/common';
 import { VideosList } from '~/features/saved-videos';
 import { useVideos } from '~/features/saved-videos';
 import { videoService } from '~/services/api/videoService';
-import { useSearchParams } from 'react-router';
-import { useCallback } from 'react';
+import { useListParams } from '~/hooks/useListParams';
 import { toast } from 'sonner';
 import type { Video } from '~/types';
 
@@ -16,45 +16,19 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
-const DEFAULT_PER_PAGE = 12;
-
 export default function SavedVideosPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { params, setPage } = useListParams({ defaults: { per_page: 12 } });
 
-  const page = Number(searchParams.get('page')) || 1;
-  const perPage = Number(searchParams.get('per_page')) || DEFAULT_PER_PAGE;
-
-  const { data: videoData, isLoading } = useVideos({ page, per_page: perPage });
+  const { data: videoData, isLoading } = useVideos({
+    page: Number(params.page),
+    per_page: Number(params.per_page),
+    search: params.search,
+  });
 
   const videos = videoData?.data ?? [];
   const meta = videoData?.meta;
   const totalPages = meta?.last_page ?? 1;
   const total = meta?.total ?? 0;
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const newParams = new URLSearchParams(searchParams);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === undefined || value === '') {
-          newParams.delete(key);
-        } else {
-          newParams.set(key, value);
-        }
-      });
-
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const handlePageChange = (newPage: number) => {
-    updateParams({ page: String(newPage) });
-  };
-
-  const handleLimitChange = (newLimit: number) => {
-    updateParams({ per_page: String(newLimit), page: '1' });
-  };
 
   const handleDownload = useCallback(async (video: Video) => {
     try {
@@ -81,6 +55,15 @@ export default function SavedVideosPage() {
             description="Gerencie seus vídeos salvos, acesse gravações anteriores e organize seu conteúdo de vídeo."
           />
 
+          <FilterBar
+            placeholder="Buscar vídeos..."
+            sortOptions={[
+              { label: 'Data', value: 'createdAt' },
+              { label: 'Nome', value: 'name' },
+              { label: 'Tamanho', value: 'size' },
+            ]}
+          />
+
           <VideosList
             videos={videos}
             isLoading={isLoading}
@@ -90,12 +73,11 @@ export default function SavedVideosPage() {
 
           {totalPages > 0 && (
             <Pagination
-              page={page}
+              page={Number(params.page)}
               totalPages={totalPages}
               total={total}
-              limit={perPage}
-              onPageChange={handlePageChange}
-              onLimitChange={handleLimitChange}
+              limit={Number(params.per_page)}
+              onPageChange={setPage}
             />
           )}
         </div>

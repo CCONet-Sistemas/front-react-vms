@@ -3,10 +3,10 @@ import { Maximize, Minimize, Pause, Play, Scissors, Volume2, VolumeX } from 'luc
 import { Button } from '~/components/ui/button';
 import { Slider } from '~/components/ui/slider';
 import { Select, SelectOption } from '~/components/ui/select';
-import { Input } from '~/components/ui/input';
 import { Progress } from '~/components/ui/progress';
 import { cn } from '~/lib/utils';
 import type { RecordingSessions } from '~/types/recordings.types';
+import type { Event } from '~/types';
 import type { DateRange } from '~/components/ui/date-picker';
 import { RecordingTimeline } from './RecordingTimeline';
 import { RecordingDateFilterDialog } from './RecordingDateFilterDialog';
@@ -42,6 +42,9 @@ interface RecordingControlBarProps {
   }) => void;
   selectionRange?: SelectionRange;
   onSelectionChange?: (range: SelectionRange) => void;
+  playbackRate?: number;
+  onPlaybackRateChange?: (rate: number) => void;
+  events?: Event[];
 }
 
 function formatTime(date: Date | null): string {
@@ -70,11 +73,13 @@ export function RecordingControlBar({
   onSubmitExtraction,
   selectionRange,
   onSelectionChange,
+  playbackRate = 1,
+  onPlaybackRateChange,
+  events = [],
 }: RecordingControlBarProps) {
   const [quality, setQuality] = useState('original');
   const [resolution, setResolution] = useState('original');
   const [codec, setCodec] = useState('copy');
-  const [outputFileName, setOutputFileName] = useState('extraction');
 
   const handleSubmit = () => {
     onSubmitExtraction?.({
@@ -110,6 +115,19 @@ export function RecordingControlBar({
           {formatTime(currentTime)}
         </span>
 
+        <Select
+          selectSize="sm"
+          value={playbackRate}
+          onChange={(e) => onPlaybackRateChange?.(Number(e.target.value))}
+          className="w-20"
+        >
+          <SelectOption value={0.5}>0.5×</SelectOption>
+          <SelectOption value={1}>1×</SelectOption>
+          <SelectOption value={2}>2×</SelectOption>
+          <SelectOption value={4}>4×</SelectOption>
+          <SelectOption value={10}>10×</SelectOption>
+        </Select>
+
         <div className="flex-1" />
 
         {dateRange && onDateRangeChange && (
@@ -142,6 +160,7 @@ export function RecordingControlBar({
           isSelectionMode={isSelectionMode}
           selectionRange={selectionRange}
           onSelectionChange={onSelectionChange}
+          events={events}
         />
       </div>
 

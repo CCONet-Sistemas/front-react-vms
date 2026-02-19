@@ -4,18 +4,18 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 const selectVariants = cva(
-  'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors appearance-none cursor-pointer',
+  'flex w-full items-center justify-between rounded-t-[6px] border-b bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed transition-colors appearance-none cursor-pointer',
   {
     variants: {
       variant: {
-        default: 'border-input',
-        error: 'border-destructive focus:ring-destructive',
-        success: 'border-success focus:ring-success',
+        default: 'input-state-default',
+        error: 'input-state-error',
+        success: 'input-state-success',
       },
       selectSize: {
-        default: 'h-10 px-3 py-2',
+        default: 'select-default',
         sm: 'h-9 px-3 py-1 text-xs',
-        lg: 'h-12 px-4 py-3',
+        lg: 'h-12 pt-4 pr-3 pb-3.5 pl-3.5',
       },
     },
     defaultVariants: {
@@ -30,15 +30,41 @@ export interface SelectProps
     Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'>,
     VariantProps<typeof selectVariants> {
   error?: boolean;
+  label?: string;
+  helperText?: string;
 }
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, variant, selectSize, error, children, ...props }, ref) => {
+  ({ className, variant, selectSize, error, label, helperText, id, children, ...props }, ref) => {
+    const generatedId = React.useId();
+    const selectId = id ?? generatedId;
     const selectVariant = error ? 'error' : variant;
+    const isError = selectVariant === 'error';
+
+    if (label) {
+      return (
+        <div className={cn('floating-select-wrapper', isError && 'floating-select-error')}>
+          <select
+            id={selectId}
+            className={cn(selectVariants({ variant: selectVariant, selectSize }), 'pr-10', className)}
+            ref={ref}
+            {...props}
+          >
+            {children}
+          </select>
+          <ChevronDown className="absolute right-3 bottom-3 h-4 w-4 opacity-50 pointer-events-none" />
+          <label htmlFor={selectId} className="floating-label">
+            {label}
+          </label>
+          {helperText && <p className="floating-helper-text">{helperText}</p>}
+        </div>
+      );
+    }
 
     return (
       <div className="relative">
         <select
+          id={id}
           className={cn(selectVariants({ variant: selectVariant, selectSize }), 'pr-10', className)}
           ref={ref}
           {...props}

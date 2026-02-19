@@ -106,6 +106,9 @@
 
 /* ===== LIGHT THEME (Default) ===== */
 :root {
+  /* border */
+  --color-border: #ced2d9;
+
   /* Primary */
   --color-primary: #1755b5;
   --color-primary-foreground: #ffffff;
@@ -229,6 +232,9 @@
 
 /* ===== DARK THEME ===== */
 .dark {
+  /* border */
+  --color-border: #767a80;
+
   /* Primary */
   --color-primary: #a7c4f1;
   --color-primary-foreground: #132c53;
@@ -354,6 +360,11 @@
   border-color: var(--color-border);
 }
 
+.form-section {
+  background-color: var(--color-primary-foreground);
+  color: var(--color-foreground);
+}
+
 aside {
   background-color: var(--color-surface);
   color: var(--color-sidebar-foreground);
@@ -436,42 +447,245 @@ header {
 
 input,
 select {
-  height: 62px;
   gap: 10px;
   opacity: 1;
+  background-color: transparent;
+  font-weight: 500;
   border-bottom-width: 1px;
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-color: var(--color-border);
+  padding-top: 16px;
+  padding-right: 12px;
+  padding-bottom: 14px;
+  padding-left: 14px;
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
-.control-bar select {
-  height: 35px;
-  gap: 10px;
-  opacity: 1;
-  border-bottom-width: 1px;
-  padding-top: 8px;
-  padding-right: 16px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+.input-default {
+  height: 54px;
+  padding-top: 16px;
+  padding-right: 12px;
+  padding-bottom: 14px;
+  padding-left: 14px;
 }
 
+.select-default {
+  height: 54px;
+  padding-top: 16px;
+  padding-right: 12px;
+  padding-bottom: 14px;
+  padding-left: 14px;
+}
+
+/* ===== INPUT STATE VARIANTS ===== */
+.input-state-default {
+  border-bottom-color: var(--color-border);
+}
+
+.input-state-default:hover:not(:disabled) {
+  border-bottom-color: var(--color-on-surface-variant);
+}
+
+.input-state-default:focus-visible {
+  border-bottom-color: var(--color-primary);
+}
+
+.input-state-error {
+  border-bottom-color: var(--color-destructive);
+}
+
+.input-state-success {
+  border-bottom-color: var(--color-success);
+}
+
+/* Disabled: border quase invisível */
+input:disabled,
+select:disabled {
+  border-bottom-color: var(--color-primary-99);
+}
+
+/* Icon wrapper border states */
+.input-icon-wrapper:has(.input-state-default:focus-visible) .left-icon,
+.input-icon-wrapper:has(.input-state-default:focus-visible) .right-icon {
+  border-bottom-color: var(--color-primary);
+}
+
+.input-icon-wrapper:has(.input-state-error) .left-icon,
+.input-icon-wrapper:has(.input-state-error) .right-icon {
+  border-bottom-color: var(--color-destructive);
+}
+
+/* ===== FLOATING LABEL ===== */
+.floating-input-wrapper {
+  position: relative;
+}
+
+/* Mais espaço no topo para a label flutuar dentro do campo */
+.floating-input-wrapper input {
+  padding-top: 22px;
+  padding-bottom: 8px;
+}
+
+.floating-label {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem; /* 14px — mesmo tamanho do valor */
+  line-height: 1.25rem;
+  color: var(--color-muted-foreground);
+  pointer-events: none;
+  transition:
+    top 0.15s ease,
+    transform 0.15s ease,
+    font-size 0.15s ease,
+    color 0.15s ease;
+  white-space: nowrap;
+}
+
+/* Sobe quando focado OU quando já tem valor */
+.floating-input-wrapper:focus-within .floating-label,
+.floating-input-wrapper input:not(:placeholder-shown) ~ .floating-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.6875rem; /* 11px */
+  line-height: 1rem;
+}
+
+/* Cor da label: ativo (azul) */
+.floating-input-wrapper:focus-within .floating-label {
+  color: var(--color-primary);
+}
+
+/* Cor da label: erro (vermelho) */
+.floating-input-error .floating-label,
+.floating-input-error:focus-within .floating-label {
+  color: var(--color-destructive);
+}
+
+/* Cor da label: desabilitado */
+.floating-input-wrapper:has(input:disabled) .floating-label {
+  color: var(--color-muted-foreground);
+  opacity: 0.5;
+}
+
+/* ===== FLOATING LABEL - SELECT ===== */
+.floating-select-wrapper {
+  position: relative;
+}
+
+/* Select com label: padding extra no topo para a label */
+.floating-select-wrapper select {
+  padding-top: 22px;
+  padding-bottom: 8px;
+}
+
+/* Chevron reposicionado para não colidir com a label */
+.floating-select-wrapper .floating-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.floating-select-wrapper:focus-within .floating-label {
+  color: var(--color-primary);
+}
+
+.floating-select-error .floating-label,
+.floating-select-error:focus-within .floating-label {
+  color: var(--color-destructive);
+}
+
+/* ===== FLOATING LABEL - TEXTAREA ===== */
+.floating-textarea-wrapper {
+  position: relative;
+}
+
+.floating-textarea-wrapper textarea {
+  padding-top: 22px;
+  padding-bottom: 8px;
+}
+
+.floating-textarea-wrapper .floating-label {
+  top: 17px;
+}
+
+.floating-textarea-wrapper:focus-within .floating-label,
+.floating-textarea-wrapper textarea:not(:placeholder-shown) ~ .floating-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.floating-textarea-wrapper:focus-within .floating-label {
+  color: var(--color-primary);
+}
+
+.floating-textarea-error .floating-label,
+.floating-textarea-error:focus-within .floating-label {
+  color: var(--color-destructive);
+}
+
+/* ===== FLOATING LABEL - COMBOBOX ===== */
+.floating-combobox-wrapper {
+  position: relative;
+}
+
+.floating-combobox-wrapper .floating-label {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+}
+
+/* Sobe quando tem valor selecionado ou está aberto */
+.floating-combobox-wrapper.combobox-has-value .floating-label,
+.floating-combobox-wrapper:focus-within .floating-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+}
+
+.floating-combobox-wrapper:focus-within .floating-label {
+  color: var(--color-primary);
+}
+
+.floating-combobox-error .floating-label {
+  color: var(--color-destructive);
+}
+
+/* Texto auxiliar abaixo do campo */
+.floating-helper-text {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  padding-left: 14px;
+  color: var(--color-muted-foreground);
+}
+
+.floating-input-error .floating-helper-text {
+  color: var(--color-destructive);
+}
+
+input:in-range {
+  height: 54px;
+}
+
+.control-bar select,
 .control-bar input {
   height: 35px;
-  gap: 10px;
-  opacity: 1;
-  border-bottom-width: 1px;
   padding-top: 8px;
-  padding-right: 16px;
+  padding-right: 12px;
   padding-bottom: 8px;
-  padding-left: 16px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  padding-left: 14px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 input[type='range'] {
@@ -479,31 +693,43 @@ input[type='range'] {
   padding-right: 0px;
 }
 
+/* Remove spinner nativo do input number */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
 .input-icon-wrapper > .left-icon,
 .input-icon-wrapper > .right-icon {
-  height: 62px;
+  height: 54px;
   gap: 10px;
   opacity: 1;
   border-bottom-width: 1px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+  border-bottom-color: var(--color-border);
+  padding-top: 16px;
+  padding-bottom: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .input-icon-wrapper > .left-icon {
-  padding-left: 16px;
+  padding-left: 14px;
   padding-right: 12px;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 0;
 }
 
 .input-icon-wrapper > .right-icon {
-  padding-right: 16px;
+  padding-right: 14px;
   padding-left: 12px;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 0;
 }
 
 /* Input with left icon only */

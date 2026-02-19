@@ -24,6 +24,16 @@ export interface PaginationParams {
   limit?: number;
 }
 
+export interface SearchParams {
+  search?: string;
+  page?: number | string;
+  per_page?: number | string;
+  sort?: string;
+  order?: 'asc' | 'desc';
+  select?: string;
+  [key: string]: any;
+}
+
 export interface LoginDto {
   email: string;
   password: string;

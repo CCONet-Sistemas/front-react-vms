@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { User, Shield, Lock } from 'lucide-react';
-import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { FormSection } from '~/components/ui/form-section';
@@ -107,75 +106,55 @@ export function RoleForm({ role }: RoleFormProps) {
           <span className="text-xs font-medium">Dados básicos</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField className="space-y-2">
-            <Label htmlFor="name" className="text-form-label">
-              Nome
-            </Label>
+          <FormField>
             <Input
-              id="name"
-              placeholder="Nome do perfil"
-              {...register('name')}
+              label="Nome"
+              error={!!errors.name}
+              helperText={errors.name?.message}
               disabled={isSystemRole || isEditMode}
+              {...register('name')}
             />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
           </FormField>
 
-          <FormField className="space-y-2">
-            <Label htmlFor="hierarchy" className="text-form-label">
-              Hierarquia
-            </Label>
+          <FormField>
             <Input
-              id="hierarchy"
+              label="Hierarquia"
               type="number"
-              placeholder="0"
-              {...register('hierarchy')}
+              error={!!errors.hierarchy}
+              helperText={errors.hierarchy?.message ?? 'Quanto maior o valor, mais privilégios.'}
               disabled={isSystemRole}
+              {...register('hierarchy')}
             />
-            {errors.hierarchy && (
-              <p className="text-sm text-destructive">{errors.hierarchy.message}</p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Quanto maior o valor, mais privilégios o perfil possui.
-            </p>
           </FormField>
 
-          <FormField className="space-y-2 sm:col-span-2">
-            <Label htmlFor="description" className="text-form-label">
-              Descrição
-            </Label>
+          <FormField className="sm:col-span-2">
             <Textarea
-              id="description"
-              placeholder="Descrição do perfil"
+              label="Descrição"
               {...register('description')}
               rows={2}
+              error={!!errors.description}
+              helperText={errors.description?.message}
             />
-            {errors.description && (
-              <p className="text-sm text-destructive">{errors.description.message}</p>
-            )}
           </FormField>
 
-          <FormField className="space-y-2">
-            <Label htmlFor="isActive" className="text-form-label">
-              Status
-            </Label>
+          <FormField>
             <Controller
               name="isActive"
               control={control}
               render={({ field }) => (
                 <Select
-                  id="isActive"
+                  label="Status"
                   value={field.value ? 'true' : 'false'}
                   onChange={(e) => field.onChange(e.target.value === 'true')}
                   disabled={isSystemRole}
+                  error={!!errors.isActive}
+                  helperText={errors.isActive?.message}
                 >
                   <option value="true">Ativo</option>
                   <option value="false">Inativo</option>
                 </Select>
               )}
             />
-            {errors.isActive && (
-              <p className="text-sm text-destructive">{errors.isActive.message}</p>
-            )}
           </FormField>
         </div>
       </FormSection>

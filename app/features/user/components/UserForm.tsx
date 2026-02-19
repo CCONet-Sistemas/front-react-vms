@@ -1,4 +1,3 @@
-import { Label } from '~/components/ui/label';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { FormSection } from '~/components/ui/form-section';
@@ -58,7 +57,6 @@ export default function UserForm({ user }: { user?: UserType }) {
   const onSubmit = async (data: UserFormData | UpdateUserFormData) => {
     try {
       if (isEditMode) {
-        // Remove senha vazia para não enviar ao backend
         const updateData = {
           name: data.name,
           email: data.email,
@@ -96,87 +94,71 @@ export default function UserForm({ user }: { user?: UserType }) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
-      {/* ===================== */}
-      {/* DEVICE INFO */}
-      {/* ===================== */}
       <FormSection title="Usuário">
         <div className="mb-3 flex items-center gap-2 text-primary">
           <User className="h-4 w-4" />
           <span className="text-xs font-medium">Dados do usuário</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField className="space-y-2">
-            <Label htmlFor="name" className="text-form-label">
-              Nome
-            </Label>
-            <Input id="name" placeholder="Nome completo" {...register('name')} />
-            {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
-          </FormField>
-
-          <FormField className="space-y-2">
-            <Label htmlFor="email" className="text-form-label">
-              Email
-            </Label>
-            <Input id="email" placeholder="email@exemplo.com" {...register('email')} />
-            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-          </FormField>
-
-          <FormField className="space-y-2">
-            <Label htmlFor="type" className="text-form-label">
-              Senha
-            </Label>
+          <FormField>
             <Input
-              id="password"
-              placeholder="Mínimo 6 caracteres"
-              {...register('password')}
+              label="Nome"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name')}
+            />
+          </FormField>
+
+          <FormField>
+            <Input
+              label="Email"
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register('email')}
+            />
+          </FormField>
+
+          <FormField>
+            <Input
+              label="Senha"
               type="password"
               autoComplete="off"
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              {...register('password')}
             />
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
           </FormField>
 
-          <FormField className="space-y-2">
-            <Label htmlFor="repeat_password" className="text-form-label">
-              Repetir senha
-            </Label>
+          <FormField>
             <Input
-              id="repeat_password"
-              placeholder="Confirme a senha"
-              {...register('repeat_password')}
+              label="Repetir senha"
               type="password"
+              error={!!errors.repeat_password}
+              helperText={errors.repeat_password?.message}
+              {...register('repeat_password')}
             />
-
-            {errors.repeat_password && (
-              <p className="text-sm text-destructive">{errors.repeat_password.message}</p>
-            )}
           </FormField>
         </div>
       </FormSection>
 
-      {/* ===================== */}
-      {/* CONFIGURAÇÕES DE PERFIL */}
-      {/* ===================== */}
       <FormSection title="Configurações de perfil">
         <div className="mb-3 flex items-center gap-2 text-primary">
           <Shield className="h-4 w-4" />
           <span className="text-xs font-medium">Perfil e permissões</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField className="space-y-2">
-            <Label htmlFor="roleId" className="text-form-label">
-              Perfil de acesso
-            </Label>
+          <FormField>
             <Controller
               name="roleId"
               control={control}
               render={({ field }) => (
                 <Select
-                  id="roleId"
+                  label="Perfil de acesso"
                   disabled={isLoadingRoles}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
+                  error={!!errors.roleId}
+                  helperText={errors.roleId?.message}
                 >
                   <option value="">Selecione um perfil</option>
                   {roles?.map((role) => (
@@ -187,20 +169,15 @@ export default function UserForm({ user }: { user?: UserType }) {
                 </Select>
               )}
             />
-            {errors.roleId && (
-              <p className="text-sm text-destructive">{errors.roleId.message}</p>
-            )}
           </FormField>
 
-          <FormField className="space-y-2">
-            <Label htmlFor="groupId" className="text-form-label">
-              Grupo/Entidade
-            </Label>
+          <FormField>
             <Controller
               name="groupId"
               control={control}
               render={({ field }) => (
                 <Combobox
+                  label="Grupo/Entidade"
                   options={
                     groupsData?.data?.map((group) => ({
                       value: String(group.id),
@@ -209,46 +186,37 @@ export default function UserForm({ user }: { user?: UserType }) {
                   }
                   value={field.value ? String(field.value) : ''}
                   onChange={(value) => field.onChange(value ? Number(value) : undefined)}
-                  placeholder="Selecione um grupo"
                   searchPlaceholder="Buscar grupo..."
                   emptyMessage="Nenhum grupo encontrado."
                   disabled={isLoadingGroups}
+                  error={!!errors.groupId}
+                  helperText={errors.groupId?.message}
                 />
               )}
             />
-            {errors.groupId && (
-              <p className="text-sm text-destructive">{errors.groupId.message}</p>
-            )}
           </FormField>
 
-          <FormField className="space-y-2">
-            <Label htmlFor="isActive" className="text-form-label">
-              Status
-            </Label>
+          <FormField>
             <Controller
               name="isActive"
               control={control}
               render={({ field }) => (
                 <Select
-                  id="isActive"
+                  label="Status"
                   value={field.value ? 'true' : 'false'}
                   onChange={(e) => field.onChange(e.target.value === 'true')}
+                  error={!!errors.isActive}
+                  helperText={errors.isActive?.message}
                 >
                   <option value="true">Ativo</option>
                   <option value="false">Inativo</option>
                 </Select>
               )}
             />
-            {errors.isActive && (
-              <p className="text-sm text-destructive">{errors.isActive.message}</p>
-            )}
           </FormField>
         </div>
       </FormSection>
 
-      {/* ===================== */}
-      {/* ACTIONS */}
-      {/* ===================== */}
       <FormSection className="flex justify-end gap-3 pt-2">
         <Button
           type="button"

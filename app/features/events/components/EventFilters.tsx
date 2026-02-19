@@ -1,123 +1,133 @@
-import { Search, X, Grid, List } from 'lucide-react';
-import { Input } from '~/components/ui/input';
+import { useCallback } from 'react';
+import { useSearchParams } from 'react-router';
+import { X, Grid, List } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Select, SelectOption } from '~/components/ui/select';
-import { DateRangePicker, type DateRange } from '~/components/ui/date-picker';
+import { DateRangePicker } from '~/components/ui/date-picker';
 import { statusOptions } from '../constants/eventTypes';
 import { useCameras } from '~/features/cameras';
+import { cn } from '~/lib/utils';
 import type { EventFilters as EventFiltersType } from '~/types';
 
 export type ViewMode = 'grid' | 'list';
 
 interface EventFiltersProps {
-  filters: EventFiltersType;
-  onFilterChange: (filters: EventFiltersType) => void;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
+  showStatus?: boolean;
+  showCamera?: boolean;
+  showDateRange?: boolean;
+  showViewMode?: boolean;
+  className?: string;
 }
 
 export function EventFilters({
-  filters,
-  onFilterChange,
-  viewMode,
-  onViewModeChange,
+  showStatus = true,
+  showCamera = true,
+  showDateRange = true,
+  showViewMode = true,
+  className,
 }: EventFiltersProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const status = searchParams.get('status') || '';
+  const cameraId = searchParams.get('cameraId') || '';
+  const startDate = searchParams.get('startDate') || undefined;
+  const endDate = searchParams.get('endDate') || undefined;
+  const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
+
   const { data: camerasData } = useCameras({ limit: 100 });
   const cameras = camerasData?.data ?? [];
 
-  const handleSearchChange = (value: string) => {
-    onFilterChange({ ...filters, search: value || undefined });
-  };
+  const updateParams = useCallback(
+    (updates: Record<string, string | undefined>) => {
+      const newParams = new URLSearchParams(searchParams);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === undefined || value === '') newParams.delete(key);
+        else newParams.set(key, value);
+      });
+      newParams.set('page', '1');
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
-  const handleStatusChange = (value: string) => {
-    onFilterChange({
-      ...filters,
-      status: value ? (value as EventFiltersType['status']) : undefined,
+  const handleViewModeChange = useCallback(
+    (mode: ViewMode) => {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set('view', mode);
+      setSearchParams(newParams);
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const handleClearFilters = useCallback(() => {
+    updateParams({
+      status: undefined,
+      cameraId: undefined,
+      startDate: undefined,
+      endDate: undefined,
     });
-  };
+  }, [updateParams]);
 
-  const handleCameraChange = (value: string) => {
-    onFilterChange({
-      ...filters,
-      cameraId: value || undefined,
-    });
-  };
+  const hasActiveFilters = !!(status || cameraId || startDate || endDate);
 
-  const handleDateRangeChange = (range: DateRange) => {
-    onFilterChange({
-      ...filters,
-      startDate: range.startDate,
-      endDate: range.endDate,
-    });
-  };
+  const anyFilterVisible = showStatus || showCamera || showDateRange;
 
-  const handleClearFilters = () => {
-    onFilterChange({});
-  };
-
-  const hasActiveFilters =
-    filters.search || filters.status || filters.cameraId || filters.startDate || filters.endDate;
+  if (!anyFilterVisible && !showViewMode) return null;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-end gap-4">
-        {/* Search */}
-        <div className="flex-1 min-w-[200px] max-w-sm">
-          <Input
-            placeholder="Buscar eventos..."
-            value={filters.search || ''}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            leftIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
+    <div className={cn('flex flex-wrap items-center gap-3', className)}>
+      {showStatus && (
+        <Select
+          value={status}
+          onChange={(e) => updateParams({ status: e.target.value || undefined })}
+          className="w-[150px]"
+        >
+          <SelectOption value="">Todos os status</SelectOption>
+          {statusOptions.map((opt) => (
+            <SelectOption key={opt.value} value={opt.value}>
+              {opt.label}
+            </SelectOption>
+          ))}
+        </Select>
+      )}
 
-        {/* Status filter */}
-        <div className="w-[150px]">
-          <Select value={filters.status || ''} onChange={(e) => handleStatusChange(e.target.value)}>
-            <SelectOption value="">Todos os status</SelectOption>
-            {statusOptions.map((option) => (
-              <SelectOption key={option.value} value={option.value}>
-                {option.label}
-              </SelectOption>
-            ))}
-          </Select>
-        </div>
+      {showCamera && (
+        <Select
+          value={cameraId}
+          onChange={(e) => updateParams({ cameraId: e.target.value || undefined })}
+          className="w-[180px]"
+        >
+          <SelectOption value="">Todas as câmeras</SelectOption>
+          {cameras.map((camera) => (
+            <SelectOption key={camera.uuid} value={camera.uuid}>
+              {camera.name}
+            </SelectOption>
+          ))}
+        </Select>
+      )}
 
-        {/* Camera filter */}
-        <div className="w-[180px]">
-          <Select
-            value={filters.cameraId || ''}
-            onChange={(e) => handleCameraChange(e.target.value)}
-          >
-            <SelectOption value="">Todas as câmeras</SelectOption>
-            {cameras.map((camera) => (
-              <SelectOption key={camera.uuid} value={camera.uuid}>
-                {camera.name}
-              </SelectOption>
-            ))}
-          </Select>
-        </div>
-
-        {/* Date Range filter */}
+      {showDateRange && (
         <DateRangePicker
-          value={{ startDate: filters.startDate, endDate: filters.endDate }}
-          onChange={handleDateRangeChange}
+          value={{ startDate, endDate }}
+          onChange={(range) =>
+            updateParams({ startDate: range.startDate, endDate: range.endDate })
+          }
         />
+      )}
 
-        {/* Clear filters */}
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={handleClearFilters} className="gap-1">
-            <X className="h-4 w-4" />
-            Limpar
-          </Button>
-        )}
+      {hasActiveFilters && anyFilterVisible && (
+        <Button variant="ghost" size="sm" onClick={handleClearFilters} className="gap-1">
+          <X className="h-4 w-4" />
+          Limpar
+        </Button>
+      )}
 
-        {/* View mode toggle */}
+      {showViewMode && (
         <div className="flex items-center gap-1 ml-auto border rounded-lg p-1">
           <Button
             variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
             size="icon-sm"
-            onClick={() => onViewModeChange('grid')}
+            onClick={() => handleViewModeChange('grid')}
             aria-label="Visualização em grade"
           >
             <Grid className="h-4 w-4" />
@@ -125,13 +135,13 @@ export function EventFilters({
           <Button
             variant={viewMode === 'list' ? 'secondary' : 'ghost'}
             size="icon-sm"
-            onClick={() => onViewModeChange('list')}
+            onClick={() => handleViewModeChange('list')}
             aria-label="Visualização em lista"
           >
             <List className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      )}
     </div>
   );
 }

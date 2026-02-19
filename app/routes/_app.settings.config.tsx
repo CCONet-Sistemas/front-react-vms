@@ -1,19 +1,24 @@
-import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import type { Route } from './+types/_app.settings.config';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
-import { PageContent, PageHeader, Pagination, ProtectedRoute } from '~/components/common';
+import {
+  PageContent,
+  PageHeader,
+  Pagination,
+  ProtectedRoute,
+  FilterBar,
+} from '~/components/common';
 import { Button } from '~/components/ui/button';
 import {
   ConfigTable,
   ConfigFormDialog,
-  ConfigFilters,
   useConfigs,
   useCreateConfig,
   useUpdateConfig,
   useDeleteConfig,
 } from '~/features/config';
+import { useListParams } from '~/hooks/useListParams';
 import type { Configuration, CreateConfigDto, UpdateConfigDto } from '~/types';
 
 export function meta(_args: Route.MetaArgs) {
@@ -23,59 +28,22 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
-const DEFAULT_ITEMS_PER_PAGE = 50;
-
 export default function SettingsConfigPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { params, setPage } = useListParams({ defaults: { per_page: 50 } });
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingConfig, setEditingConfig] = useState<Configuration | null>(null);
 
-  // Get params from URL
-  const page = Number(searchParams.get('page')) || 1;
-  const itemsPerPage = Number(searchParams.get('itemsPerPage')) || DEFAULT_ITEMS_PER_PAGE;
-  const search = searchParams.get('search') || undefined;
-
-  // Queries and mutations
-  const { data, isLoading, error } = useConfigs({ page, itemsPerPage, search });
+  const { data, isLoading, error } = useConfigs({
+    page: Number(params.page),
+    itemsPerPage: Number(params.per_page),
+    search: params.search,
+  });
   const createConfig = useCreateConfig();
   const updateConfig = useUpdateConfig();
   const deleteConfig = useDeleteConfig();
 
   const configs = data?.data ?? [];
   const meta = data?.meta;
-
-  // Update URL params
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const newParams = new URLSearchParams(searchParams);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === undefined || value === '') {
-          newParams.delete(key);
-        } else {
-          newParams.set(key, value);
-        }
-      });
-
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams]
-  );
-
-  const handlePageChange = (newPage: number) => {
-    updateParams({ page: String(newPage) });
-  };
-
-  const handleLimitChange = (newLimit: number) => {
-    updateParams({ itemsPerPage: String(newLimit), page: '1' });
-  };
-
-  const handleSearchChange = (newSearch: string) => {
-    updateParams({
-      search: newSearch || undefined,
-      page: '1',
-    });
-  };
 
   const handleOpenCreate = () => {
     setEditingConfig(null);
@@ -95,7 +63,10 @@ export default function SettingsConfigPage() {
   const handleSubmit = async (formData: CreateConfigDto | UpdateConfigDto) => {
     try {
       if (editingConfig) {
-        await updateConfig.mutateAsync({ key: editingConfig.key.value, data: formData as UpdateConfigDto });
+        await updateConfig.mutateAsync({
+          key: editingConfig.key.value,
+          data: formData as UpdateConfigDto,
+        });
         toast.success('Configuração atualizada com sucesso!');
       } else {
         await createConfig.mutateAsync(formData as CreateConfigDto);
@@ -122,7 +93,6 @@ export default function SettingsConfigPage() {
 
   const isSubmitting = createConfig.isPending || updateConfig.isPending;
 
-  // Normalize meta to Pagination component format
   const paginationMeta = meta
     ? {
         page: meta.currentPage,
@@ -143,7 +113,13 @@ export default function SettingsConfigPage() {
             </Button>
           </PageHeader>
 
-          <ConfigFilters search={search || ''} onSearchChange={handleSearchChange} />
+          <FilterBar
+            placeholder="Buscar por chave ou descrição..."
+            sortOptions={[
+              { label: 'Chave', value: 'key' },
+              { label: 'Data', value: 'createdAt' },
+            ]}
+          />
 
           {error && (
             <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
@@ -172,8 +148,7 @@ export default function SettingsConfigPage() {
                   totalPages={paginationMeta.totalPages}
                   total={paginationMeta.total}
                   limit={paginationMeta.limit}
-                  onPageChange={handlePageChange}
-                  onLimitChange={handleLimitChange}
+                  onPageChange={setPage}
                 />
               )}
             </>

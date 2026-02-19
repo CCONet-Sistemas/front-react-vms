@@ -151,89 +151,63 @@ export function UserFormDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name" required>
-              Nome
-            </Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              placeholder="Nome completo"
-              error={!!errors.name}
-            />
-            {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
-          </div>
+          <Input
+            label="Nome"
+            value={formData.name}
+            onChange={(e) => handleChange('name', e.target.value)}
+            error={!!errors.name}
+            helperText={errors.name}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="email" required>
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="email@exemplo.com"
-              error={!!errors.email}
-            />
-            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            error={!!errors.email}
+            helperText={errors.email}
+          />
 
-          <div className="space-y-2">
-            <Label htmlFor="password" required={!isEditing}>
-              {isEditing ? 'Nova Senha (opcional)' : 'Senha'}
-            </Label>
+          <Input
+            label={isEditing ? 'Nova Senha (opcional)' : 'Senha'}
+            type={showPassword ? 'text' : 'password'}
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            error={!!errors.password}
+            helperText={errors.password}
+            rightIcon={
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            }
+          />
+
+          {(formData.password || !isEditing) && (
             <Input
-              id="password"
-              type={showPassword ? 'text' : 'password'}
-              value={formData.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              placeholder={isEditing ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
-              error={!!errors.password}
+              label="Confirmar Senha"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={formData.confirmPassword}
+              onChange={(e) => handleChange('confirmPassword', e.target.value)}
+              error={!!errors.confirmPassword}
+              helperText={errors.confirmPassword}
               rightIcon={
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               }
             />
-            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-          </div>
-
-          {(formData.password || !isEditing) && (
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" required={!isEditing}>
-                Confirmar Senha
-              </Label>
-              <Input
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                placeholder="Repita a senha"
-                error={!!errors.confirmPassword}
-                rightIcon={
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                }
-              />
-              {errors.confirmPassword && (
-                <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
           )}
 
           <div className="space-y-2">

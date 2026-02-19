@@ -1,5 +1,4 @@
-import { Search, X } from 'lucide-react';
-import { Input } from '~/components/ui/input';
+import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { Label } from '~/components/ui/label';
 import type { UserFilters as UserFiltersType } from '~/types';
@@ -10,10 +9,6 @@ interface UserFiltersProps {
 }
 
 export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
-  const handleSearchChange = (value: string) => {
-    onFilterChange({ ...filters, search: value || undefined });
-  };
-
   const handleActiveOnlyChange = (checked: boolean) => {
     onFilterChange({ ...filters, activeOnly: checked || undefined });
   };
@@ -22,19 +17,8 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
     onFilterChange({});
   };
 
-  const hasActiveFilters = filters.search || filters.activeOnly;
-
   return (
-    <div className="flex flex-wrap items-end gap-4">
-      <div className="flex-1 min-w-[200px] max-w-sm">
-        <Input
-          placeholder="Buscar por nome ou email..."
-          value={filters.search || ''}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          leftIcon={<Search className="h-4 w-4" />}
-        />
-      </div>
-
+    <div className="flex flex-wrap items-center gap-4">
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -48,10 +32,10 @@ export function UserFilters({ filters, onFilterChange }: UserFiltersProps) {
         </Label>
       </div>
 
-      {hasActiveFilters && (
+      {filters.activeOnly && (
         <Button variant="ghost" size="sm" onClick={handleClearFilters} className="gap-1">
           <X className="h-4 w-4" />
-          Limpar filtros
+          Limpar
         </Button>
       )}
     </div>

@@ -1,17 +1,21 @@
-import { useState, useCallback } from 'react';
-import { redirect, useNavigate, useSearchParams } from 'react-router';
+import { useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import type { Route } from './+types/_app.events';
 import { toast } from 'sonner';
-import { Bell, CheckCheck } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, Button } from '~/components/ui';
-import { PageContent, PageHeader, Pagination, ProtectedRoute } from '~/components/common';
+import { Bell } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui';
 import {
-  EventFilters,
-  EventList,
-  useEvents,
-  useAcknowledgeEvent,
-  type ViewMode,
-} from '~/features/events';
+  FilterBar,
+  PageContent,
+  PageHeader,
+  Pagination,
+  ProtectedRoute,
+  ViewModeToggle,
+} from '~/components/common';
+import { EventList, useEvents, useAcknowledgeEvent } from '~/features/events';
+import { statusOptions } from '~/features/events/constants/eventTypes';
+import { useCameras } from '~/features/cameras';
+import { useListParams } from '~/hooks/useListParams';
 import type { Event, EventFilters as EventFiltersType } from '~/types';
 
 export function meta(_args: Route.MetaArgs) {
@@ -21,101 +25,68 @@ export function meta(_args: Route.MetaArgs) {
   ];
 }
 
-const DEFAULT_LIMIT = 12;
+type ViewMode = 'grid' | 'list';
 
 export default function EventsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [viewMode, setViewMode] = useState<ViewMode>(
-    (searchParams.get('view') as ViewMode) || 'grid'
-  );
+  const { params, setPage } = useListParams({ defaults: { per_page: 12 } });
+  const [searchParams] = useSearchParams();
 
-  // Get params from URL
-  const page = Number(searchParams.get('page')) || 1;
-  const limit = Number(searchParams.get('limit')) || DEFAULT_LIMIT;
-  const search = searchParams.get('search') || undefined;
+  // Filtros específicos lidos da URL (gerenciados pelo FilterBar)
   const status = (searchParams.get('status') as EventFiltersType['status']) || undefined;
   const cameraId = searchParams.get('cameraId') || undefined;
   const startDate = searchParams.get('startDate') || undefined;
   const endDate = searchParams.get('endDate') || undefined;
+  const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
 
-  // Filters state derived from URL
-  const filters: EventFiltersType = { search, status, cameraId, startDate, endDate };
+  // Carrega opções de câmeras para o FilterBar
+  const { data: camerasData } = useCameras({ limit: 100 });
+  const cameraOptions = (camerasData?.data ?? []).map((c) => ({
+    label: c.name,
+    value: c.uuid,
+  }));
 
-  // Queries and mutations
-  const { data, isLoading, error } = useEvents({ page, limit, ...filters });
+  const { data, isLoading, error } = useEvents({
+    page: Number(params.page),
+    limit: Number(params.per_page),
+    search: params.search,
+    status,
+    cameraId,
+    startDate,
+    endDate,
+  });
+
   const acknowledgeEvent = useAcknowledgeEvent();
   const navigate = useNavigate();
   const events = data?.data ?? [];
   const total = data?.total ?? 0;
   const totalPages = data?.totalPages ?? 0;
-
-  // Calculate stats
   const newCount = events.filter((e) => e.status === 'new').length;
 
-  // Update URL params
-  const updateParams = useCallback(
-    (updates: Record<string, string | undefined>) => {
-      const newParams = new URLSearchParams(searchParams);
-
-      Object.entries(updates).forEach(([key, value]) => {
-        if (value === undefined || value === '') {
-          newParams.delete(key);
-        } else {
-          newParams.set(key, value);
-        }
-      });
-
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams]
+  const handleViewEvent = useCallback(
+    (event: Event) => navigate(`/event/${event.uuid}`),
+    [navigate]
   );
 
-  const handlePageChange = (newPage: number) => {
-    updateParams({ page: String(newPage) });
-  };
-
-  const handleLimitChange = (newLimit: number) => {
-    updateParams({ limit: String(newLimit), page: '1' });
-  };
-
-  const handleFilterChange = (newFilters: EventFiltersType) => {
-    updateParams({
-      search: newFilters.search,
-      status: newFilters.status,
-      cameraId: newFilters.cameraId,
-      startDate: newFilters.startDate,
-      endDate: newFilters.endDate,
-      page: '1', // Reset to first page when filters change
-    });
-  };
-
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
-    updateParams({ view: mode });
-  };
-
-  const handleViewEvent = (event: Event) => {
-    navigate(`/event/${event.uuid}`);
-  };
-
-  const handleAcknowledgeEvent = async (event: Event) => {
-    try {
-      await acknowledgeEvent.mutateAsync(event.uuid);
-      toast.success('Evento confirmado com sucesso!');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Ocorreu um erro';
-      toast.error('Erro ao confirmar evento', { description: message });
-    }
-  };
+  const handleAcknowledgeEvent = useCallback(
+    async (event: Event) => {
+      try {
+        await acknowledgeEvent.mutateAsync(event.uuid);
+        toast.success('Evento confirmado com sucesso!');
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Ocorreu um erro';
+        toast.error('Erro ao confirmar evento', { description: message });
+      }
+    },
+    [acknowledgeEvent]
+  );
 
   return (
     <ProtectedRoute resource="event" action="read">
       <PageContent>
         <div className="space-y-6">
-          {/* Header */}
           <PageHeader title="Eventos" description="Eventos capturados pelas câmeras." />
 
-          {/* Stats Cards */}
+          {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -145,22 +116,43 @@ export default function EventsPage() {
             </Card>
           </div>
 
-          {/* Filters */}
-          <EventFilters
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            viewMode={viewMode}
-            onViewModeChange={handleViewModeChange}
-          />
+          {/* Filtros */}
+          <div className="space-y-2">
+            <FilterBar
+              placeholder="Buscar eventos..."
+              sortOptions={[
+                { label: 'Data', value: 'createdAt' },
+                { label: 'Status', value: 'status' },
+              ]}
+              fields={[
+                {
+                  type: 'select',
+                  key: 'status',
+                  placeholder: 'Todos os status',
+                  options: statusOptions,
+                  className: 'w-[150px]',
+                },
+                {
+                  type: 'select',
+                  key: 'cameraId',
+                  placeholder: 'Todas as câmeras',
+                  options: cameraOptions,
+                  className: 'w-[180px]',
+                },
+                { type: 'daterange' },
+              ]}
+            />
+            <div className="flex justify-end">
+              <ViewModeToggle defaultMode="grid" />
+            </div>
+          </div>
 
-          {/* Error state */}
           {error && (
             <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
               <p className="text-sm text-destructive">Erro ao carregar eventos. Tente novamente.</p>
             </div>
           )}
 
-          {/* Events List */}
           <EventList
             events={events}
             isLoading={isLoading}
@@ -169,15 +161,13 @@ export default function EventsPage() {
             onAcknowledgeEvent={handleAcknowledgeEvent}
           />
 
-          {/* Pagination */}
           {totalPages > 0 && (
             <Pagination
-              page={page}
+              page={Number(params.page)}
               totalPages={totalPages}
               total={total}
-              limit={limit}
-              onPageChange={handlePageChange}
-              onLimitChange={handleLimitChange}
+              limit={Number(params.per_page)}
+              onPageChange={setPage}
             />
           )}
         </div>
