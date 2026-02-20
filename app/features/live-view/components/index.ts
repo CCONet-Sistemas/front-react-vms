@@ -1,4 +1,5 @@
 export { CameraFullscreenModal } from './CameraFullscreenModal';
+export { PTZControls } from './PTZControls';
 export { CameraMosaic } from './CameraMosaic';
 export { CameraMosaicCell } from './CameraMosaicCell';
 export { CameraSelector } from './CameraSelector';

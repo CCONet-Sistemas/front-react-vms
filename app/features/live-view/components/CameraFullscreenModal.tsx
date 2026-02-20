@@ -1,7 +1,10 @@
 import { useEffect, useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { Button } from '~/components/ui/button';
 import { VideoPlayer } from './VideoPlayer';
+import { PTZControls } from './PTZControls';
+import { cameraService, type PtzCommand } from '~/services/api/cameraService';
 import type { Camera } from '~/types';
 
 interface CameraFullscreenModalProps {
@@ -16,6 +19,17 @@ interface CameraFullscreenModalProps {
   showNavigation?: boolean;
 }
 
+const PTZ_KEYS: Record<string, PtzCommand> = {
+  w: 'up',
+  W: 'up',
+  s: 'down',
+  S: 'down',
+  a: 'left',
+  A: 'left',
+  d: 'right',
+  D: 'right',
+};
+
 export function CameraFullscreenModal({
   camera,
   isOpen,
@@ -24,10 +38,36 @@ export function CameraFullscreenModal({
   onNext,
   showNavigation = false,
 }: CameraFullscreenModalProps) {
-  // Handle keyboard navigation
+  const ptzMutation = useMutation({
+    mutationFn: (command: PtzCommand) =>
+      cameraService.ptz(camera?.uuid ?? '', command),
+  });
+
+  const ptzEnabled = camera?.control?.enabled;
+
+  // Handle keyboard navigation + PTZ
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isOpen) return;
+
+      // PTZ via WASD + zoom via +/-
+      if (ptzEnabled) {
+        if (PTZ_KEYS[e.key]) {
+          e.preventDefault();
+          ptzMutation.mutate(PTZ_KEYS[e.key]);
+          return;
+        }
+        if (e.key === '+' || e.key === '=') {
+          e.preventDefault();
+          ptzMutation.mutate('zoom_in');
+          return;
+        }
+        if (e.key === '-') {
+          e.preventDefault();
+          ptzMutation.mutate('zoom_out');
+          return;
+        }
+      }
 
       switch (e.key) {
         case 'Escape':
@@ -41,13 +81,28 @@ export function CameraFullscreenModal({
           break;
       }
     },
-    [isOpen, onClose, onPrevious, onNext]
+    [isOpen, onClose, onPrevious, onNext, ptzEnabled, ptzMutation]
+  );
+
+  // Handle scroll zoom
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (!isOpen || !ptzEnabled) return;
+      e.preventDefault();
+      ptzMutation.mutate(e.deltaY < 0 ? 'zoom_in' : 'zoom_out');
+    },
+    [isOpen, ptzEnabled, ptzMutation]
   );
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  useEffect(() => {
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    return () => document.removeEventListener('wheel', handleWheel);
+  }, [handleWheel]);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -110,12 +165,7 @@ export function CameraFullscreenModal({
               className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
               aria-label="Câmera anterior"
             >
-              <svg
-                className="h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -131,12 +181,7 @@ export function CameraFullscreenModal({
               className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
               aria-label="Próxima câmera"
             >
-              <svg
-                className="h-8 w-8"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -151,9 +196,11 @@ export function CameraFullscreenModal({
 
       {/* Bottom info bar */}
       <div className="absolute bottom-0 left-0 right-0 z-10 flex items-center justify-between p-4 bg-gradient-to-t from-black/80 to-transparent">
+        <div>{camera.control?.enabled && <PTZControls cameraUuid={camera.uuid} />}</div>
         <div className="flex items-center gap-2 text-white/60 text-sm">
-          <span>Pressione ESC para sair</span>
-          {showNavigation && <span>• Use ← → para navegar</span>}
+          <span>ESC para sair</span>
+          {showNavigation && <span>• ← → para navegar</span>}
+          {camera.control?.enabled && <span>• WASD para PTZ • scroll ou +/− para zoom</span>}
         </div>
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { apiClient } from './client';
 import type { Camera, CameraListResponse, CreateCameraDto, UpdateCameraDto } from '~/types';
 
+export type PtzCommand = 'up' | 'down' | 'left' | 'right' | 'zoom_in' | 'zoom_out';
+
 export interface CameraListParams {
   page?: number;
   limit?: number;
@@ -46,5 +48,9 @@ export const cameraService = {
 
   stop: async (uuid: string): Promise<void> => {
     await apiClient.post(`/camera/${uuid}/stop`);
+  },
+
+  ptz: async (uuid: string, command: PtzCommand): Promise<void> => {
+    await apiClient.post(`/camera/${uuid}/ptz`, { command });
   },
 };
