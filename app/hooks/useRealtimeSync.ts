@@ -17,10 +17,13 @@ import type {
   VideoEventPayload,
   SystemEventPayload,
   SyncEventPayload,
+  RecordingStatusPayload,
 } from '~/services/websocket/types';
 import type { Event } from '~/types/event.types';
 import type { Notification, NotificationType } from '~/types/notification.types';
 import type { Camera, StreamStatus } from '~/types/camera.types';
+import type { RecordingControlStatus } from '~/types/recordings.types';
+import { recordingControlKeys } from '~/features/recordings/hooks/useRecordingControls';
 
 // Map detection reasons to detection types
 const DETECTION_TYPE_MAP: Record<string, EventDetectionType> = {
@@ -313,6 +316,19 @@ export function useRealtimeSync() {
     [addNotification]
   );
 
+  // Handle recording status events
+  const handleRecordingEvent = useCallback((payload: RecordingStatusPayload) => {
+    const { cameraId, controlState } = payload;
+
+    queryClient.setQueryData<RecordingControlStatus>(
+      recordingControlKeys.status(cameraId),
+      (prev) =>
+        prev
+          ? { ...prev, state: controlState, isRecording: controlState === 'recording', isPaused: false }
+          : undefined
+    );
+  }, []);
+
   // Handle notifications from server
   const handleNotification = useCallback(
     (payload: NotificationPayload) => {
@@ -338,4 +354,5 @@ export function useRealtimeSync() {
   useWebSocketEvent<SyncEventPayload>('sync:event', handleSyncEvent);
   useWebSocketEvent<SystemEventPayload>('system:event', handleSystemEvent);
   useWebSocketEvent<NotificationPayload>('notification:new', handleNotification);
+  useWebSocketEvent<RecordingStatusPayload>('recording:status', handleRecordingEvent);
 }

@@ -65,10 +65,7 @@ class WebSocketManager {
     return this.socket?.connected ?? false;
   }
 
-  subscribe<T = unknown>(
-    event: string,
-    handler: WebSocketEventHandler<T>
-  ): () => void {
+  subscribe<T = unknown>(event: string, handler: WebSocketEventHandler<T>): () => void {
     if (!this.subscribers.has(event)) {
       this.subscribers.set(event, new Set());
     }
@@ -83,10 +80,7 @@ class WebSocketManager {
     return () => this.unsubscribe(event, handler);
   }
 
-  unsubscribe<T = unknown>(
-    event: string,
-    handler: WebSocketEventHandler<T>
-  ): void {
+  unsubscribe<T = unknown>(event: string, handler: WebSocketEventHandler<T>): void {
     const handlers = this.subscribers.get(event);
     if (handlers) {
       handlers.delete(handler as WebSocketEventHandler);
@@ -202,11 +196,7 @@ class WebSocketManager {
     useWebSocketStore.getState().setError(error);
   }
 
-  private log(
-    level: 'info' | 'warn' | 'error',
-    message: string,
-    data?: unknown
-  ): void {
+  private log(level: 'info' | 'warn' | 'error', message: string, data?: unknown): void {
     if (!this.debug) return;
 
     const prefix = `[Socket.IO ${new Date().toISOString()}]`;

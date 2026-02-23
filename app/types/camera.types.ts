@@ -68,6 +68,7 @@ export interface CameraRecording {
   acodec: string;
   crf: number;
   cutoff: string;
+  storageDays: number;
   watermark: CameraWatermark;
 }
 
@@ -173,6 +174,7 @@ export interface UpdateCameraDto {
   name?: string;
   externalId?: string;
   connection?: Partial<CameraConnection>;
+  recording?: Partial<CameraRecording>;
 }
 
 // Stream info

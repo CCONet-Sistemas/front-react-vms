@@ -1,3 +1,15 @@
+export type RecordingControlState = 'recording' | 'paused' | 'stopped' | 'error' | 'idle';
+
+export interface RecordingControlStatus {
+  cameraId: string;
+  controlState: RecordingControlState;
+  isRecording: boolean;
+  isPaused: boolean;
+  sessionId?: string;
+  startedAt?: string;
+  errorMessage?: string;
+}
+
 export interface RecordingAvailableRange {
   cameraId: string;
   startTime: string;

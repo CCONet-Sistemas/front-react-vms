@@ -174,6 +174,18 @@ export interface NotificationPayload {
   data?: Record<string, unknown>;
 }
 
+// Recording event types
+export type RecordingEventType = 'recording:status';
+
+// recording:status payload
+export interface RecordingStatusPayload {
+  cameraId: string;
+  controlState: 'recording' | 'stopped' | 'error';
+  status: 'active' | 'stopped' | 'failed';
+  recordingEnabled: boolean;
+  timestamp: string;
+}
+
 // Connected event payload
 export interface ConnectedPayload {
   socketId: string;

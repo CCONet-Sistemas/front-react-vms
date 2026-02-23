@@ -1,4 +1,4 @@
-import type { RecordingAvailableRange, RecordingSessions, ExtractionRequest, ExtractionJob } from '~/types/recordings.types';
+import type { RecordingAvailableRange, RecordingSessions, ExtractionRequest, ExtractionJob, RecordingControlStatus } from '~/types/recordings.types';
 import { apiClient } from './client';
 
 export interface SessionSegmentsParams {
@@ -33,6 +33,27 @@ export const recordingService = {
     const { data } = await apiClient.get<Blob>(`/recording/${cameraId}/extract/${jobId}/download`, {
       responseType: 'blob',
     });
+    return data;
+  },
+
+  startRecording: async (cameraId: string): Promise<void> => {
+    await apiClient.post(`/recording/${cameraId}/start`);
+  },
+
+  stopRecording: async (cameraId: string): Promise<void> => {
+    await apiClient.post(`/recording/${cameraId}/stop`);
+  },
+
+  pauseRecording: async (cameraId: string): Promise<void> => {
+    await apiClient.post(`/recording/${cameraId}/pause`);
+  },
+
+  resumeRecording: async (cameraId: string): Promise<void> => {
+    await apiClient.post(`/recording/${cameraId}/resume`);
+  },
+
+  getStatus: async (cameraId: string): Promise<RecordingControlStatus> => {
+    const { data } = await apiClient.get<RecordingControlStatus>(`/recording/${cameraId}/status`);
     return data;
   },
 };

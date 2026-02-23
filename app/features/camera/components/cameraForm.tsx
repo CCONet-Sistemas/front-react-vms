@@ -9,7 +9,7 @@ import { cameraSchema, type CameraFormData } from '../schemas/camera.schema';
 import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCameras';
 import { useNavigate } from 'react-router';
 import { Select } from '~/components/ui/select';
-import { Toaster } from '~/components/ui/sonner';
+import { toast } from 'sonner';
 import { ProtectedFeature } from '~/components/common';
 
 export default function CameraForm({ camera }: { camera?: CameraType }) {
@@ -52,6 +52,13 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
               y: camera.stream?.scale?.y,
             },
           },
+          recording: {
+            vcodec: camera.recording?.vcodec,
+            acodec: camera.recording?.acodec,
+            crf: camera.recording?.crf,
+            cutoff: camera.recording?.cutoff,
+            storageDays: camera.recording?.storageDays,
+          },
         }
       : undefined,
   });
@@ -59,16 +66,18 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
   const onSubmit = async (data: CameraFormData) => {
     try {
       if (isEditMode) {
-        await updateMutation.mutateAsync({
-          uuid: camera.uuid,
-          data: data as any,
-        });
-        <Toaster />;
+        await updateMutation.mutateAsync({ uuid: camera.uuid, data: data as any });
+        toast.success('Câmera atualizada com sucesso!');
       } else {
-        await createMutation.mutateAsync(data as any);
+        const created = await createMutation.mutateAsync(data as any);
+        toast.success('Câmera criada com sucesso!');
+        navigate(`/camera/${created.uuid}`);
       }
     } catch (error) {
-      alert(isEditMode ? 'Erro ao atualizar câmera' : 'Erro ao criar câmera');
+      const message = error instanceof Error ? error.message : 'Ocorreu um erro';
+      toast.error(isEditMode ? 'Erro ao atualizar câmera' : 'Erro ao criar câmera', {
+        description: message,
+      });
       console.error(error);
     }
   };
@@ -136,11 +145,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             helperText={errors.connection?.port?.message}
             {...register('connection.port')}
           />
-          <Input
-            label="Usuário"
-            autoComplete="off"
-            {...register('connection.username')}
-          />
+          <Input label="Usuário" autoComplete="off" {...register('connection.username')} />
           <Input
             label="Senha"
             type="password"
@@ -148,10 +153,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             {...register('connection.password')}
           />
           <div className="sm:col-span-2">
-            <Input
-              label="Path"
-              {...register('connection.path')}
-            />
+            <Input label="Path" {...register('connection.path')} />
           </div>
         </div>
       </FormSection>
@@ -165,25 +167,10 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de vídeo</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Input
-            label="FPS"
-            type="number"
-            {...register('video.fps')}
-          />
-          <Input
-            label="Largura"
-            type="number"
-            {...register('video.width')}
-          />
-          <Input
-            label="Altura"
-            type="number"
-            {...register('video.height')}
-          />
-          <Input
-            label="Codec"
-            {...register('video.codec')}
-          />
+          <Input label="FPS" type="number" {...register('video.fps')} />
+          <Input label="Largura" type="number" {...register('video.width')} />
+          <Input label="Altura" type="number" {...register('video.height')} />
+          <Input label="Codec" {...register('video.codec')} />
         </div>
       </FormSection>
 
@@ -196,21 +183,9 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de transmissão</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Input
-            label="FPS Stream"
-            type="number"
-            {...register('stream.fps')}
-          />
-          <Input
-            label="Scale X"
-            type="number"
-            {...register('stream.scale.x')}
-          />
-          <Input
-            label="Scale Y"
-            type="number"
-            {...register('stream.scale.y')}
-          />
+          <Input label="FPS Stream" type="number" {...register('stream.fps')} />
+          <Input label="Scale X" type="number" {...register('stream.scale.x')} />
+          <Input label="Scale Y" type="number" {...register('stream.scale.y')} />
         </div>
       </FormSection>
 

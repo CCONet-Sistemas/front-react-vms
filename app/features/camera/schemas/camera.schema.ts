@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { record, z } from 'zod';
 
 export const cameraSchema = z.object({
   // Device Info
@@ -44,6 +44,13 @@ export const cameraSchema = z.object({
         .optional(),
     })
     .optional(),
+  recording: z.object({
+    vcodec: z.string().default('copy'),
+    acodec: z.string().default('no'),
+    crf: z.coerce.number().min(0).max(51).default(1),
+    cutoff: z.string().default('15'),
+    storageDays: z.coerce.number().min(1).max(30).default(7),
+  }),
 });
 
 export type CameraFormData = z.infer<typeof cameraSchema>;
