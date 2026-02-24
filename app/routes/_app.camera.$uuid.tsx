@@ -5,8 +5,9 @@ import type { StreamState } from '~/types';
 import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
 import { streamStatusConfig } from '~/features/cameras/constants';
 import { RecordingControlPanel } from '~/features/recordings';
+import { DetectionForm } from '~/features/detections';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs';
-import { Settings, Video } from 'lucide-react';
+import { Settings, Video, ScanSearch } from 'lucide-react';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -53,6 +54,10 @@ export default function EditCameraPage({ params }: Route.ComponentProps) {
                 <Video className="h-3.5 w-3.5" />
                 Gravação
               </TabsTrigger>
+              <TabsTrigger value="detection" className="gap-1.5">
+                <ScanSearch className="h-3.5 w-3.5" />
+                Detecções
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="config">
@@ -61,6 +66,10 @@ export default function EditCameraPage({ params }: Route.ComponentProps) {
 
             <TabsContent value="recording">
               <RecordingControlPanel cameraId={uuid} camera={camera} />
+            </TabsContent>
+
+            <TabsContent value="detection">
+              <DetectionForm cameraId={uuid} camera={camera} />
             </TabsContent>
           </Tabs>
         ) : (

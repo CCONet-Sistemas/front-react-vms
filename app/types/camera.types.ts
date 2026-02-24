@@ -148,7 +148,7 @@ export interface Camera {
   recording: CameraRecording;
   control: CameraControl;
   logs: CameraLogs;
-  images: CameraImages;
+  images: CameraImages[];
   metadata: CameraMetadata;
   streamStatus: StreamStatus;
   stream: CameraStream;
