@@ -69,19 +69,16 @@ export function ConfigFormDialog({
 }: ConfigFormDialogProps) {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
-
+  console.log(config);
   const isEditing = !!config;
 
   useEffect(() => {
     if (isOpen) {
       if (config) {
         setFormData({
-          key: config.key.value,
-          type: config.value.type,
-          value:
-            typeof config.value.rawValue === 'string'
-              ? config.value.rawValue
-              : JSON.stringify(config.value.rawValue, null, 2),
+          key: config.key,
+          type: config.type,
+          value: config.value,
           description: config.description || '',
           metadata:
             config.metadata && Object.keys(config.metadata).length > 0

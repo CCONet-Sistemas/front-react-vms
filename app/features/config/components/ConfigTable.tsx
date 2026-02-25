@@ -77,17 +77,17 @@ export function ConfigTable({ configs, onEdit, onDelete, isDeleting }: ConfigTab
               </TableRow>
             ) : (
               configs.map((config) => (
-                <TableRow key={toStr(config.key.value)}>
+                <TableRow key={toStr(config.key)}>
                   <TableCell className="font-medium font-mono text-sm">
-                    {toStr(config.key.value)}
+                    {toStr(config.key)}
                   </TableCell>
 
                   <TableCell>
                     <Badge
-                      variant={typeBadgeVariant[config.value.type] ?? 'secondary'}
+                      variant={typeBadgeVariant[config.type] ?? 'secondary'}
                       className="text-xs"
                     >
-                      {toStr(config.value.type)}
+                      {toStr(config.type)}
                     </Badge>
                   </TableCell>
                   <TableCell className="max-w-[250px]">
@@ -138,7 +138,7 @@ export function ConfigTable({ configs, onEdit, onDelete, isDeleting }: ConfigTab
         description={
           <>
             Tem certeza que deseja excluir a configuração{' '}
-            <strong>{toStr(configToDelete?.key?.value)}</strong>? Esta ação não pode ser desfeita.
+            <strong>{toStr(configToDelete?.key)}</strong>? Esta ação não pode ser desfeita.
           </>
         }
       />

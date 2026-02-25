@@ -1,39 +1,43 @@
-import { useState, useCallback } from 'react';
-import { useSearchParams } from 'react-router';
-import type { Route } from './+types/_app.settings.config';
-import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
-import { PageContent, PageHeader, Pagination, ProtectedRoute } from '~/components/common';
-import { Button } from '~/components/ui/button';
-import {
-  ConfigTable,
-  ConfigFormDialog,
-  ConfigFilters,
-  useConfigs,
-  useCreateConfig,
-  useUpdateConfig,
-  useDeleteConfig,
-} from '~/features/config';
-import type { Configuration, CreateConfigDto, UpdateConfigDto } from '~/types';
+import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs';
+import { BackupSection, RestoreSection } from '~/features/backups';
 
-export function meta(_args: Route.MetaArgs) {
+export function meta() {
   return [
-    { title: 'Configurações | VMS' },
-    { name: 'description', content: 'Gerenciar configurações - Video Management System' },
+    { title: 'Backup e Restauração | VMS' },
+    { name: 'description', content: 'Backup e restauração - Video Management System' },
   ];
 }
 
-const DEFAULT_ITEMS_PER_PAGE = 50;
-
 export default function SettingsBackupPage() {
   return (
-    <ProtectedRoute permission="configuration:read">
-      <PageContent variant="list">
+    <ProtectedRoute permission="backup:read">
+      <PageContent variant="form">
         <div className="space-y-6">
           <PageHeader
-            title="Backups e Restauração"
-            description="Gerencie os backups e restaurações do sistema"
-          ></PageHeader>
+            title="Backup e Restauração"
+            description="Gerencie backups e restaurações do sistema"
+          />
+
+          <Tabs defaultValue="configurations">
+            <TabsList>
+              <TabsTrigger value="configurations">Configurações</TabsTrigger>
+              <TabsTrigger value="system">Sistema</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="configurations">
+              <div className="space-y-6">
+                <BackupSection />
+                <RestoreSection />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="system">
+              <div className="space-y-6">
+                {/* TODO: backup de sistema */}
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </PageContent>
     </ProtectedRoute>

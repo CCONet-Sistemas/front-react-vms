@@ -35,7 +35,7 @@ export default function SettingsConfigPage() {
 
   const { data, isLoading, error } = useConfigs({
     page: Number(params.page),
-    itemsPerPage: Number(params.per_page),
+    per_page: Number(params.per_page),
     search: params.search,
   });
   const createConfig = useCreateConfig();
@@ -44,7 +44,6 @@ export default function SettingsConfigPage() {
 
   const configs = data?.data ?? [];
   const meta = data?.meta;
-
   const handleOpenCreate = () => {
     setEditingConfig(null);
     setIsFormOpen(true);
@@ -64,7 +63,7 @@ export default function SettingsConfigPage() {
     try {
       if (editingConfig) {
         await updateConfig.mutateAsync({
-          key: editingConfig.key.value,
+          key: editingConfig.key,
           data: formData as UpdateConfigDto,
         });
         toast.success('Configuração atualizada com sucesso!');
@@ -83,7 +82,7 @@ export default function SettingsConfigPage() {
 
   const handleDelete = async (config: Configuration) => {
     try {
-      await deleteConfig.mutateAsync(config.key.value);
+      await deleteConfig.mutateAsync(config.key);
       toast.success('Configuração excluída com sucesso!');
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Ocorreu um erro';
@@ -95,10 +94,12 @@ export default function SettingsConfigPage() {
 
   const paginationMeta = meta
     ? {
-        page: meta.currentPage,
-        totalPages: meta.totalPages,
-        total: meta.totalItems,
-        limit: meta.itemsPerPage,
+        page: meta.current_page,
+        totalPages: Math.ceil(meta.total / meta.per_page),
+        total: meta.total,
+        limit: meta.per_page,
+        from: meta.from,
+        to: meta.to,
       }
     : null;
 
@@ -106,7 +107,10 @@ export default function SettingsConfigPage() {
     <ProtectedRoute permission="configuration:read">
       <PageContent variant="list">
         <div className="space-y-6">
-          <PageHeader title="Configurações avançadas" description="Gerencie as configurações do sistema">
+          <PageHeader
+            title="Configurações avançadas"
+            description="Gerencie as configurações do sistema"
+          >
             <Button variant="secondary" onClick={handleOpenCreate}>
               <Plus className="h-4 w-4 mr-2" />
               Nova configuração
