@@ -20,9 +20,9 @@ export default function EditRecordingPage({ params }: Route.ComponentProps) {
   const now = new Date();
 
   const startDate = searchParams.get('startDate') || undefined;
-  // new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
   const endDate = searchParams.get('endDate') || undefined;
-  // new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const sort = searchParams.get('sort') || undefined;
+  const order = (searchParams.get('order') as 'asc' | 'desc') || undefined;
   const dateRange: DateRange = { startDate, endDate };
 
   const updateParams = useCallback(
@@ -59,7 +59,7 @@ export default function EditRecordingPage({ params }: Route.ComponentProps) {
       </ProtectedRoute>
     );
   }
-  const { data: sessions, isLoading } = useSessionSegments(uuid, { startDate, endDate });
+  const { data: sessions, isLoading } = useSessionSegments(uuid, { startDate, endDate, sort, order });
 
   return (
     <ProtectedRoute resource="recording" action="read">

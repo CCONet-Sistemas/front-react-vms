@@ -4,8 +4,10 @@ import type { Permission } from "~/types";
 
 export const permissionsService = {
   listRoles: async (): Promise<RolePermissions[]> => {
-    const { data } = await apiClient.get<RolePermissions[]>('/authorization/roles');
-    return data;
+    const { data } = await apiClient.get<{ data: RolePermissions[]; meta: unknown }>(
+      '/authorization/roles'
+    );
+    return data.data;
   },
   createRole: async (payload: CreateRoleDto): Promise<RolePermissions> => {
     const { data } = await apiClient.post<RolePermissions>('/authorization/roles', payload);

@@ -33,14 +33,16 @@ export default function UsersPage() {
 
   const { data, isLoading, error } = useUsers({
     page: Number(params.page),
-    limit: Number(params.per_page),
+    per_page: Number(params.per_page),
     search: params.search,
+    sort: params.sort,
+    order: params.order,
     activeOnly,
   });
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
-  const users = data ?? ([] as User[]);
+  const users = data?.data ?? ([] as User[]);
   const meta = data?.meta;
 
   const handleFilterChange = useCallback(
@@ -148,12 +150,12 @@ export default function UsersPage() {
                 isDeleting={deleteUser.isPending}
               />
 
-              {meta && meta.totalPages > 0 && (
+              {meta && meta.last_page > 0 && (
                 <Pagination
-                  page={meta.page}
-                  totalPages={meta.totalPages}
+                  page={meta.current_page}
+                  totalPages={meta.last_page}
                   total={meta.total}
-                  limit={meta.limit}
+                  limit={meta.per_page}
                   onPageChange={setPage}
                 />
               )}

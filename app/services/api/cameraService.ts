@@ -1,14 +1,9 @@
 import { apiClient } from './client';
-import type { Camera, CameraListResponse, CreateCameraDto, UpdateCameraDto } from '~/types';
+import type { Camera, CameraListResponse, CreateCameraDto, UpdateCameraDto, SearchParams } from '~/types';
 
 export type PtzCommand = 'up' | 'down' | 'left' | 'right' | 'zoom_in' | 'zoom_out';
 
-export interface CameraListParams {
-  page?: number;
-  limit?: number;
-  total?: number;
-  search?: string;
-}
+export type CameraListParams = SearchParams;
 
 export const cameraService = {
   list: async (params?: CameraListParams): Promise<CameraListResponse> => {

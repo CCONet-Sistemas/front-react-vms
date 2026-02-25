@@ -23,6 +23,8 @@ export default function SavedVideosPage() {
     page: Number(params.page),
     per_page: Number(params.per_page),
     search: params.search,
+    sort: params.sort,
+    order: params.order,
   });
 
   const videos = videoData?.data ?? [];

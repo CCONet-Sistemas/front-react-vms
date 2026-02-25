@@ -1,11 +1,7 @@
 import { apiClient } from './client';
-import type { VideoDetail, VideoListResponse } from '~/types';
+import type { VideoDetail, VideoListResponse, SearchParams } from '~/types';
 
-export interface VideoListParams {
-  page?: number;
-  per_page?: number;
-  search?: string;
-}
+export type VideoListParams = SearchParams;
 
 export const videoService = {
   list: async (params?: VideoListParams): Promise<VideoListResponse> => {

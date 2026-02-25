@@ -1,10 +1,8 @@
+import type { SearchParams } from './api.types';
+
 export interface Group {
   id: number;
   name: string;
 }
 
-export interface GroupListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
-}
+export type GroupListParams = SearchParams;

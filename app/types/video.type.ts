@@ -20,14 +20,6 @@ export interface VideoDetail {
   createdAt: string;
 }
 
-export interface VideoListResponse {
-  data: Video[];
-  meta: {
-    current_page: number;
-    per_page: number;
-    total: number;
-    last_page: number;
-    from: number;
-    to: number;
-  };
-}
+import type { PaginatedResponse } from './api.types';
+
+export type VideoListResponse = PaginatedResponse<Video>;

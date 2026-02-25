@@ -15,8 +15,11 @@ export const recordingService = {
   },
 
   getSessionSegments: async (cameraId: string, params?: SessionSegmentsParams): Promise<RecordingSessions[]> => {
-    const { data } = await apiClient.get<RecordingSessions[]>(`/recording/${cameraId}/sessions`, { params });
-    return data;
+    const { data } = await apiClient.get<{ data: RecordingSessions[]; meta: unknown }>(
+      `/recording/${cameraId}/sessions`,
+      { params }
+    );
+    return data.data;
   },
 
   extractRecording: async (cameraId: string, request: ExtractionRequest): Promise<ExtractionJob> => {

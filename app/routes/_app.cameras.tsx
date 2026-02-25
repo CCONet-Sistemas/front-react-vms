@@ -1,6 +1,13 @@
 import { useSearchParams } from 'react-router';
 import type { Route } from './+types/_app.cameras';
-import { ProtectedRoute, PageHeader, PageContent, Pagination, FilterBar, ViewModeToggle } from '~/components/common';
+import {
+  ProtectedRoute,
+  PageHeader,
+  PageContent,
+  Pagination,
+  FilterBar,
+  ViewModeToggle,
+} from '~/components/common';
 import { CameraList, useCameras, type ViewMode } from '~/features/cameras';
 import { useListParams } from '~/hooks/useListParams';
 
@@ -19,13 +26,15 @@ export default function CamerasPage() {
 
   const { data, isLoading, error } = useCameras({
     page: Number(params.page),
-    limit: Number(params.per_page),
+    per_page: Number(params.per_page),
     search: params.search,
+    sort: params.sort,
+    order: params.order,
   });
-
+  console.log('Cameras data:', data); // Log para depuração
   const cameras = data?.data ?? [];
-  const total = data?.total ?? 0;
-  const totalPages = Math.ceil(total / Number(params.per_page));
+  const total = data?.meta?.total ?? 0;
+  const totalPages = data?.meta?.last_page ?? 0;
 
   return (
     <ProtectedRoute resource="camera" action="read">
@@ -63,10 +72,10 @@ export default function CamerasPage() {
 
           {totalPages > 0 && (
             <Pagination
-              page={Number(params.page)}
+              page={data?.meta?.current_page ?? Number(params.page)}
               totalPages={totalPages}
               total={total}
-              limit={Number(params.per_page)}
+              limit={data?.meta?.per_page ?? Number(params.per_page)}
               onPageChange={setPage}
             />
           )}

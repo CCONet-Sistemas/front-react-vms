@@ -18,20 +18,8 @@ export interface CreateConfigDto {
 
 export type UpdateConfigDto = Partial<CreateConfigDto>;
 
-export interface ConfigListResponse {
-  data: Configuration[];
-  meta: {
-    current_page: number;
-    from: number;
-    last_page: number;
-    to: number;
-    total: number;
-    per_page: number;
-  };
-}
+import type { PaginatedResponse, SearchParams } from './api.types';
 
-export interface ConfigListParams {
-  page?: number;
-  per_page?: number;
-  search?: string;
-}
+export type ConfigListResponse = PaginatedResponse<Configuration>;
+
+export type ConfigListParams = SearchParams;

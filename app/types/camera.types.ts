@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from './api.types';
+
 // Camera Status
 export type CameraMode = 'start' | 'stop' | 'idle';
 export type CameraStatus = 'running' | 'stopped' | 'error' | 'idle';
@@ -155,11 +157,7 @@ export interface Camera {
 }
 
 // API Response
-export interface CameraListResponse {
-  data: Camera[];
-  page: number;
-  total: number;
-}
+export type CameraListResponse = PaginatedResponse<Camera>;
 
 // DTOs
 export interface CreateCameraDto {

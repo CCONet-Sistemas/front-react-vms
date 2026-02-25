@@ -48,7 +48,7 @@ function saveConfig(config: LiveViewConfig) {
 }
 
 export default function LiveViewPage() {
-  const { data, isLoading } = useCameras({ limit: 100 });
+  const { data, isLoading } = useCameras({ per_page: 100 });
   const [isInitialized, setIsInitialized] = useState(false);
   const [gridSize, setGridSize] = useState<GridSize>('2x2');
   const [selectedCameras, setSelectedCameras] = useState<(Camera | null)[]>([]);

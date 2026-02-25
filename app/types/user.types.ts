@@ -1,3 +1,5 @@
+import type { SearchParams } from './api.types';
+
 export interface UserRoles {
   name: string[];
   permissions: Permission[];
@@ -57,9 +59,6 @@ export interface UserFilters {
   activeOnly?: boolean;
 }
 
-export interface UserListParams {
-  page?: number;
-  limit?: number;
-  search?: string;
+export interface UserListParams extends SearchParams {
   activeOnly?: boolean;
 }

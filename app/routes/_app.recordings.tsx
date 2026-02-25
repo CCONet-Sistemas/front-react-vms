@@ -16,13 +16,15 @@ export default function RecordingsPage() {
 
   const { data: cameraData, isLoading: cameraLoading, error: cameraError } = useCameras({
     page: Number(params.page),
-    limit: Number(params.per_page),
+    per_page: Number(params.per_page),
     search: params.search,
+    sort: params.sort,
+    order: params.order,
   });
 
   const data = cameraData?.data ?? [];
-  const total = cameraData?.total ?? 0;
-  const totalPages = Math.ceil(total / Number(params.per_page));
+  const total = cameraData?.meta?.total ?? 0;
+  const totalPages = cameraData?.meta?.last_page ?? 0;
 
   return (
     <ProtectedRoute resource="recording" action="read">
@@ -39,7 +41,6 @@ export default function RecordingsPage() {
               { label: 'Data', value: 'createdAt' },
               { label: 'Câmera', value: 'camera' },
             ]}
-            fields={[{ type: 'viewmode', defaultMode: 'list' }]}
           />
 
           {cameraError && (
@@ -54,10 +55,10 @@ export default function RecordingsPage() {
 
           {totalPages > 0 && (
             <Pagination
-              page={Number(params.page)}
+              page={cameraData?.meta?.current_page ?? Number(params.page)}
               totalPages={totalPages}
               total={total}
-              limit={Number(params.per_page)}
+              limit={cameraData?.meta?.per_page ?? Number(params.per_page)}
               onPageChange={setPage}
             />
           )}

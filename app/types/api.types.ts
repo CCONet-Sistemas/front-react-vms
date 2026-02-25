@@ -12,16 +12,13 @@ export interface ApiError {
 export interface PaginatedResponse<T> {
   data: T[];
   meta: {
+    current_page: number;
+    per_page: number;
     total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    last_page: number;
+    from: number;
+    to: number;
   };
-}
-
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
 }
 
 export interface SearchParams {

@@ -1,4 +1,4 @@
-import type { PaginationParams } from './api.types';
+import type { PaginatedResponse, SearchParams } from './api.types';
 
 export type EventStatus = 'new' | 'viewed' | 'acknowledged';
 
@@ -40,14 +40,14 @@ export interface EventFilters {
   endDate?: string;
 }
 
-export interface EventListParams extends PaginationParams, EventFilters {}
-
-export interface EventListResponse {
-  data: Event[];
-  page: number;
-  total: number;
-  totalPages: number;
+export interface EventListParams extends SearchParams {
+  status?: EventStatus;
+  cameraId?: string;
+  startDate?: string;
+  endDate?: string;
 }
+
+export type EventListResponse = PaginatedResponse<Event>;
 
 export interface UpdateEventStatusDto {
   status: EventStatus;

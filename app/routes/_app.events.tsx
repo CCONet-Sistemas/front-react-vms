@@ -39,7 +39,7 @@ export default function EventsPage() {
   const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
 
   // Carrega opções de câmeras para o FilterBar
-  const { data: camerasData } = useCameras({ limit: 100 });
+  const { data: camerasData } = useCameras({ per_page: 100 });
   const cameraOptions = (camerasData?.data ?? []).map((c) => ({
     label: c.name,
     value: c.uuid,
@@ -47,8 +47,10 @@ export default function EventsPage() {
 
   const { data, isLoading, error } = useEvents({
     page: Number(params.page),
-    limit: Number(params.per_page),
+    per_page: Number(params.per_page),
     search: params.search,
+    sort: params.sort,
+    order: params.order,
     status,
     cameraId,
     startDate,
@@ -58,8 +60,8 @@ export default function EventsPage() {
   const acknowledgeEvent = useAcknowledgeEvent();
   const navigate = useNavigate();
   const events = data?.data ?? [];
-  const total = data?.total ?? 0;
-  const totalPages = data?.totalPages ?? 0;
+  const total = data?.meta?.total ?? 0;
+  const totalPages = data?.meta?.last_page ?? 0;
   const newCount = events.filter((e) => e.status === 'new').length;
 
   const handleViewEvent = useCallback(
@@ -163,10 +165,10 @@ export default function EventsPage() {
 
           {totalPages > 0 && (
             <Pagination
-              page={Number(params.page)}
+              page={data?.meta?.current_page ?? Number(params.page)}
               totalPages={totalPages}
               total={total}
-              limit={Number(params.per_page)}
+              limit={data?.meta?.per_page ?? Number(params.per_page)}
               onPageChange={setPage}
             />
           )}
