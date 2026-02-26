@@ -81,18 +81,6 @@ export default function DashboardPage() {
       />
 
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          {/* <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </Button> */}
-        </div>
-
         {/* Metric cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {cameraStats.map((stat) => (

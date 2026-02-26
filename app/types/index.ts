@@ -7,3 +7,4 @@ export * from './permissions';
 export * from './notification.types';
 export * from './video.type';
 export * from './config.type';
+export * from './trigger.types';

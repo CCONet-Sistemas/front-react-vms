@@ -55,7 +55,7 @@ export function useCameraStats(enabled = true) {
   return useQuery({
     queryKey: ['camera-stats'],
     queryFn: async () => {
-      const response = await cameraService.list({ total: 1000 });
+      const response = await cameraService.list({ per_page: 1000 });
       const cameras = response.data || [];
       const online = cameras.filter((c) => c.streamStatus?.state === 'streaming').length;
       const offline = cameras.filter((c) => c.streamStatus?.state === 'offline').length;
