@@ -16,6 +16,7 @@ import {
   SquareScissors,
   Cctv,
   Clapperboard,
+  RefreshCw,
 } from 'lucide-react';
 import { useUIStore } from '~/store';
 import { usePermissions } from '~/hooks/usePermissions';
@@ -108,6 +109,12 @@ const navItems: NavItem[] = [
         path: '/settings/config',
         icon: Settings,
         permission: 'configuration:read',
+      },
+      {
+        label: 'Sincronização',
+        path: '/settings/sync',
+        icon: RefreshCw,
+        permission: 'event:read',
       },
     ],
     path: '/settings',

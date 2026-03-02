@@ -17,6 +17,7 @@ const routeLabels: Record<string, string> = {
   events: 'Eventos',
   event: 'Eventos',
   settings: 'Configurações',
+  sync: 'Sincronização',
   users: 'Usuários',
   user: 'Usuário',
   'saved-videos': 'Vídeos Salvos',
