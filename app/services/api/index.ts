@@ -6,3 +6,4 @@ export { setupInterceptors } from './interceptors';
 export { userService } from './userService';
 export { videoService } from './videoService';
 export { configService } from './configService';
+export { backupService } from './backupService';
