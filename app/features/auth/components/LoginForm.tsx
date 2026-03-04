@@ -57,7 +57,7 @@ export function LoginForm() {
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">VMS Login</CardTitle>
         <CardDescription className="text-center">
-          Enter your credentials to access the system
+          Utilize suas credenciais para acessar o sistema de gerenciamento de vídeo.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -76,7 +76,7 @@ export function LoginForm() {
           />
 
           <Input
-            label="Password"
+            label="Senha"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             error={!!errors.password}
@@ -97,10 +97,10 @@ export function LoginForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                Entrando...
               </>
             ) : (
-              'Sign in'
+              'Entrar'
             )}
           </Button>
         </form>

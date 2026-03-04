@@ -8,8 +8,12 @@ import { useTheme } from '~/hooks/useTheme';
 import { useRealtimeSync } from '~/hooks/useRealtimeSync';
 import { useNotificationToasts } from '~/hooks/useNotificationToasts';
 import { wsManager } from '~/services/websocket';
+import { useUIStore } from '~/store';
+import { cn } from '~/lib/utils';
 
 export function MainLayout() {
+  const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+
   // Initialize theme and fetch user data on mount
   useTheme();
   useMe();
@@ -33,7 +37,11 @@ export function MainLayout() {
       <Header />
 
       {/* Main content area */}
-      <main className="lg:pl-64 pt-16">
+      <main className={cn(
+        'pt-16 transition-[padding] duration-300 ease-in-out',
+        'lg:pl-[78px]',
+        !sidebarCollapsed && 'lg:pl-80'
+      )}>
         <Outlet />
       </main>
 

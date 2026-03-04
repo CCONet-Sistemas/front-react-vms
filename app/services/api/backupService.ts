@@ -6,6 +6,13 @@ import type {
   BackupListResponse,
   BackupStatistics,
   BackupValidationResult,
+  BackupSchedule,
+  BackupScheduleListParams,
+  BackupScheduleListResponse,
+  BackupScheduleStatistics,
+  BackupScheduleNextExecutions,
+  CreateBackupScheduleDto,
+  UpdateBackupScheduleDto,
   CreateBackupDto,
   RestoreParams,
   RestoreResult,
@@ -67,6 +74,60 @@ export const backupService = {
 
   downloadBackup: async ({ uuid }: { uuid: string }): Promise<BackupDownloadInfo> => {
     const { data } = await apiClient.get<BackupDownloadInfo>(`/backups/${uuid}/download`);
+    return data;
+  },
+
+  // Schedule methods
+  listSchedules: async (params?: BackupScheduleListParams): Promise<BackupScheduleListResponse> => {
+    const { data } = await apiClient.get<BackupScheduleListResponse>('/backups/schedules/list', { params });
+    return data;
+  },
+
+  getSchedule: async (id: string): Promise<BackupSchedule> => {
+    const { data } = await apiClient.get<BackupSchedule>(`/backups/schedules/${id}`);
+    return data;
+  },
+
+  getScheduleStatistics: async (): Promise<BackupScheduleStatistics> => {
+    const { data } = await apiClient.get<BackupScheduleStatistics>('/backups/schedules/statistics');
+    return data;
+  },
+
+  createSchedule: async (dto: CreateBackupScheduleDto): Promise<BackupSchedule> => {
+    const { data } = await apiClient.post<BackupSchedule>('/backups/schedules', dto);
+    return data;
+  },
+
+  updateSchedule: async (id: string, dto: UpdateBackupScheduleDto): Promise<BackupSchedule> => {
+    const { data } = await apiClient.put<BackupSchedule>(`/backups/schedules/${id}`, dto);
+    return data;
+  },
+
+  deleteSchedule: async (id: string): Promise<void> => {
+    await apiClient.delete(`/backups/schedules/${id}`);
+  },
+
+  enableSchedule: async (id: string): Promise<BackupSchedule> => {
+    const { data } = await apiClient.post<BackupSchedule>(`/backups/schedules/${id}/enable`);
+    return data;
+  },
+
+  disableSchedule: async (id: string): Promise<BackupSchedule> => {
+    const { data } = await apiClient.post<BackupSchedule>(`/backups/schedules/${id}/disable`);
+    return data;
+  },
+
+  toggleSchedule: async (id: string): Promise<BackupSchedule> => {
+    const { data } = await apiClient.post<BackupSchedule>(`/backups/schedules/${id}/toggle`);
+    return data;
+  },
+
+  executeSchedule: async (id: string): Promise<void> => {
+    await apiClient.post(`/backups/schedules/${id}/execute`);
+  },
+
+  getNextExecutions: async (id: string): Promise<BackupScheduleNextExecutions> => {
+    const { data } = await apiClient.get<BackupScheduleNextExecutions>(`/backups/schedules/${id}/next-executions`);
     return data;
   },
 };

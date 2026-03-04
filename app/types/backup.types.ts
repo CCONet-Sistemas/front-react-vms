@@ -1,3 +1,5 @@
+import type { PaginatedResponse } from './api.types';
+
 export type RestoreStrategy = 'merge' | 'replace' | 'selective';
 
 export interface BackupData {
@@ -21,7 +23,13 @@ export interface RestoreResult {
   skipped?: number;
 }
 
-export type BackupStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'VALIDATING' | 'VALIDATED';
+export type BackupStatus =
+  | 'PENDING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'FAILED'
+  | 'VALIDATING'
+  | 'VALIDATED';
 export type BackupType = 'FULL' | 'INCREMENTAL' | 'DIFFERENTIAL' | 'MANUAL' | 'SCHEDULED';
 
 export interface Backup {
@@ -77,4 +85,62 @@ export interface BackupDownloadInfo {
   checksum: string;
 }
 
-export type BackupListResponse = import('./api.types').PaginatedResponse<Backup>;
+export type BackupListResponse = PaginatedResponse<Backup>;
+
+export interface BackupSchedule {
+  id: string;
+  uuid: string;
+  name: string;
+  description?: string;
+  cronExpression: string;
+  type: BackupType;
+  status: BackupStatus | null;
+  lastRunStatus: BackupStatus | null;
+  enabled: boolean;
+  retentionCount?: number;
+  lastRunAt?: string;
+  nextRunAt?: string;
+  lastBackupId?: string;
+  successfulRuns: number;
+  failedRuns: number;
+  totalRuns: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBackupScheduleDto {
+  name: string;
+  description?: string;
+  cronExpression: string;
+  type: BackupType;
+  enabled?: boolean;
+  retentionCount?: number;
+}
+
+export type UpdateBackupScheduleDto = Partial<CreateBackupScheduleDto>;
+
+export interface BackupScheduleListParams {
+  page?: number;
+  limit?: number;
+  status?: BackupStatus;
+  enabled?: boolean;
+  search?: string;
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
+export interface BackupScheduleStatistics {
+  total: number;
+  active: number;
+  inactive: number;
+  totalRuns: number;
+  successfulRuns: number;
+  failedRuns: number;
+  averageSuccessRate: number;
+}
+
+export interface BackupScheduleNextExecutions {
+  nextExecutions: string[];
+}
+
+export type BackupScheduleListResponse = PaginatedResponse<BackupSchedule>;

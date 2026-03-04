@@ -87,4 +87,13 @@ const SelectOption = React.forwardRef<HTMLOptionElement, SelectOptionProps>(
 );
 SelectOption.displayName = 'SelectOption';
 
-export { Select, SelectOption, selectVariants };
+export interface SelectOptGroupProps extends React.OptgroupHTMLAttributes<HTMLOptGroupElement> {}
+
+const SelectOptGroup = React.forwardRef<HTMLOptGroupElement, SelectOptGroupProps>(
+  ({ className, ...props }, ref) => (
+    <optgroup ref={ref} className={cn('bg-background', className)} {...props} />
+  )
+);
+SelectOptGroup.displayName = 'SelectOptGroup';
+
+export { Select, SelectOption, SelectOptGroup, selectVariants };

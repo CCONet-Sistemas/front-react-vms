@@ -13,16 +13,24 @@ import {
   ChevronDown,
   ChevronRight,
   User,
-  SquareScissors,
   Cctv,
   Clapperboard,
   RefreshCw,
+  CalendarClock,
+  Database,
+  HardDrive,
+  LogOut,
 } from 'lucide-react';
 import { useUIStore } from '~/store';
 import { usePermissions } from '~/hooks/usePermissions';
 import { Button } from '~/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from '~/components/ui/popover';
+import { Divider } from '~/components/ui/divider';
 import { cn } from '~/lib/utils';
+import { useAuth } from '~/hooks/useAuth';
 import type { Permission } from '~/types';
+import logoUrl from '~/assets/images/logo.svg';
+import completeLogoUrl from '~/assets/images/complete-logo.svg';
 
 interface NavItem {
   label: string;
@@ -37,7 +45,6 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   {
     label: 'Cameras',
-
     path: '/cameras',
     icon: Camera,
     relatedPaths: ['/camera'],
@@ -46,7 +53,6 @@ const navItems: NavItem[] = [
   { label: 'Visualização ao Vivo', path: '/live-view', icon: Cctv, permission: 'stream:read' },
   {
     label: 'Gravações',
-
     subItems: [
       {
         label: 'Listar Gravações',
@@ -99,10 +105,29 @@ const navItems: NavItem[] = [
         permission: 'role:read',
       },
       {
-        label: 'Backup e Restauração',
-        path: '/settings/backups',
-        icon: Settings,
+        label: 'Backup',
+        icon: Database,
         permission: 'backup:read',
+        subItems: [
+          {
+            label: 'Gerenciar Backups',
+            path: '/settings/backups/manager',
+            icon: HardDrive,
+            permission: 'backup:read',
+          },
+          {
+            label: 'Agendamentos',
+            path: '/settings/backups/schedules',
+            icon: CalendarClock,
+            permission: 'backup:read',
+          },
+          {
+            label: 'Configurações',
+            path: '/settings/backups/config',
+            icon: Settings,
+            permission: 'backup:read',
+          },
+        ],
       },
       {
         label: 'Configurações avançadas',
@@ -124,79 +149,161 @@ const navItems: NavItem[] = [
   },
 ];
 
+// ─── Flyout Menu (collapsed mode) ─────────────────────────────────────────────
+
+function FlyoutItems({ items }: { items: NavItem[] }) {
+  const location = useLocation();
+  const [expanded, setExpanded] = useState<string[]>([]);
+
+  const isActive = (item: NavItem) => {
+    if (!item.path) return false;
+    return (
+      location.pathname === item.path ||
+      location.pathname.startsWith(item.path + '/') ||
+      item.relatedPaths?.some(
+        (p) => location.pathname === p || location.pathname.startsWith(p + '/')
+      ) ||
+      false
+    );
+  };
+
+  const toggle = (label: string) =>
+    setExpanded((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+
+  return (
+    <ul className="space-y-[2px]">
+      {items.map((item) => {
+        const active = isActive(item);
+        const hasChildren = !!item.subItems?.length;
+        const isExpanded = expanded.includes(item.label);
+
+        return (
+          <li key={item.label}>
+            {hasChildren ? (
+              <>
+                <button
+                  onClick={() => toggle(item.label)}
+                  className={cn(
+                    'w-full flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                    'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronDown className="h-3 w-3" />
+                  ) : (
+                    <ChevronRight className="h-3 w-3" />
+                  )}
+                </button>
+                {isExpanded && (
+                  <ul className="mt-0.5 ml-4 border-l pl-3 space-y-[2px]">
+                    <FlyoutItems items={item.subItems!} />
+                  </ul>
+                )}
+              </>
+            ) : (
+              <PopoverClose asChild>
+                <NavLink
+                  to={item.path!}
+                  className={cn(
+                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                    active
+                      ? 'bg-[#7BB0FF40] text-[#17181A] font-medium'
+                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  )}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span>{item.label}</span>
+                </NavLink>
+              </PopoverClose>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function filterNavItems(
+  items: NavItem[],
+  hasPermission: (p: Permission) => boolean,
+  isAdmin: boolean
+): NavItem[] {
+  return items
+    .filter((item) => !item.permission || isAdmin || hasPermission(item.permission))
+    .map((item) => {
+      if (item.subItems) {
+        return { ...item, subItems: filterNavItems(item.subItems, hasPermission, isAdmin) };
+      }
+      return item;
+    })
+    .filter((item) => !item.subItems || item.subItems.length > 0);
+}
+
 export function Sidebar() {
   const sidebarOpen = useUIStore((state) => state.sidebarOpen);
   const setSidebarOpen = useUIStore((state) => state.setSidebarOpen);
+  const collapsed = useUIStore((state) => state.sidebarCollapsed);
+  const { logout } = useAuth();
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const { hasPermission, isAdmin } = usePermissions();
 
-  // Filter nav items based on permissions
-  const filteredNavItems = useMemo(() => {
-    return (
-      navItems
-        .filter((item) => {
-          // If no permission required, show the item
-          if (!item.permission) return true;
-          // Admin has access to everything
-          if (isAdmin) return true;
-          // Check if user has the required permission
-          return hasPermission(item.permission);
-        })
-        .map((item) => {
-          // Filter subitems based on permissions
-          if (item.subItems) {
-            const filteredSubItems = item.subItems.filter((subItem) => {
-              if (!subItem.permission) return true;
-              if (isAdmin) return true;
-              return hasPermission(subItem.permission);
-            });
-            return { ...item, subItems: filteredSubItems };
-          }
-          return item;
-        })
-        // Remove parent items that have no visible subitems
-        .filter((item) => {
-          if (item.subItems && item.subItems.length === 0) return false;
-          return true;
-        })
-    );
-  }, [hasPermission, isAdmin]);
+  const filteredNavItems = useMemo(
+    () => filterNavItems(navItems, hasPermission, isAdmin),
+    [hasPermission, isAdmin]
+  );
 
-  // Toggle submenu expansion
   const toggleMenu = (label: string) => {
     setExpandedMenus((prev) =>
       prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
     );
   };
 
-  // Check if menu item is active
   const isItemActive = (item: NavItem): boolean => {
     if (!item.path) return false;
-
     return (
       location.pathname === item.path ||
       location.pathname.startsWith(item.path + '/') ||
       item.relatedPaths?.some(
-        (relatedPath) =>
-          location.pathname === relatedPath || location.pathname.startsWith(relatedPath + '/')
+        (p) => location.pathname === p || location.pathname.startsWith(p + '/')
       ) ||
       false
     );
   };
 
-  // Check if any subitem is active
-  const hasActiveSubItem = (item: NavItem): boolean => {
-    return item.subItems?.some((subItem) => isItemActive(subItem)) || false;
+  const hasActiveDescendant = (item: NavItem): boolean => {
+    return item.subItems?.some((sub) => isItemActive(sub) || hasActiveDescendant(sub)) || false;
   };
 
-  // Auto-expand menu if a subitem is active
+  // Auto-expand menus when a descendant is active
   useEffect(() => {
-    filteredNavItems.forEach((item) => {
-      if (item.subItems && hasActiveSubItem(item) && !expandedMenus.includes(item.label)) {
-        setExpandedMenus((prev) => [...prev, item.label]);
+    const toExpand: string[] = [];
+
+    function collect(items: NavItem[]) {
+      for (const item of items) {
+        if (item.subItems) {
+          if (hasActiveDescendant(item) && !expandedMenus.includes(item.label)) {
+            toExpand.push(item.label);
+          }
+          collect(item.subItems);
+        }
       }
-    });
+    }
+
+    collect(filteredNavItems);
+
+    if (toExpand.length > 0) {
+      setExpandedMenus((prev) => [...new Set([...prev, ...toExpand])]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, filteredNavItems]);
 
   // Close sidebar on mobile when route changes
@@ -213,10 +320,176 @@ export function Sidebar() {
         setSidebarOpen(false);
       }
     }
-
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [sidebarOpen, setSidebarOpen]);
+
+  // ─── Recursive render ────────────────────────────────────────────────────────
+
+  function renderItems(items: NavItem[], depth = 0) {
+    return items.map((item) => {
+      const isActive = isItemActive(item);
+      const hasChildren = !!item.subItems?.length;
+      const isExpanded = expandedMenus.includes(item.label);
+      const hasActiveChild = hasActiveDescendant(item);
+
+      if (depth === 0) {
+        // ── Level 1 (top-level) ──────────────────────────────────────────────
+
+        // Collapsed + has children → flyout
+        if (collapsed && hasChildren) {
+          return (
+            <li key={item.label}>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    title={item.label}
+                    className={cn(
+                      'w-full flex items-center justify-center rounded-lg px-3 py-2 transition-colors',
+                      hasActiveChild
+                        ? 'bg-[#7BB0FF40] text-[#17181A]'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 shrink-0" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="right"
+                  align="start"
+                  sideOffset={8}
+                  className="w-52 p-2"
+                >
+                  <p className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                    {item.label}
+                  </p>
+                  <FlyoutItems items={item.subItems!} />
+                </PopoverContent>
+              </Popover>
+            </li>
+          );
+        }
+
+        return (
+          <li key={item.label}>
+            {hasChildren ? (
+              <button
+                onClick={() => toggleMenu(item.label)}
+                title={collapsed ? item.label : undefined}
+                className={cn(
+                  'w-full flex items-center rounded-lg px-3 py-2 transition-colors',
+                  collapsed ? 'justify-center' : 'justify-between gap-3',
+                  hasActiveChild
+                    ? 'bg-[#7BB0FF40] text-[#17181A]'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                )}
+              >
+                <div className={cn('flex items-center', !collapsed && 'gap-3')}>
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  {!collapsed && item.label}
+                </div>
+                {!collapsed && (isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                ))}
+              </button>
+            ) : (
+              <NavLink
+                to={item.path!}
+                title={collapsed ? item.label : undefined}
+                className={cn(
+                  'flex items-center rounded-lg px-3 py-2 transition-colors',
+                  collapsed ? 'justify-center' : 'gap-3',
+                  isActive
+                    ? 'bg-[#7BB0FF40] text-[#17181A]'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                )}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                {!collapsed && item.label}
+              </NavLink>
+            )}
+
+            {!collapsed && hasChildren && isExpanded && (
+              <ul className="mt-1 ml-4 space-y-1 border-l pl-4">
+                {renderItems(item.subItems!, 1)}
+              </ul>
+            )}
+          </li>
+        );
+      }
+
+      if (depth === 1) {
+        // ── Level 2 ──────────────────────────────────────────────────────────
+        return (
+          <li key={item.label}>
+            {hasChildren ? (
+              <button
+                onClick={() => toggleMenu(item.label)}
+                className={cn(
+                  'w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm',
+                  'transition-colors',
+                  hasActiveChild
+                    ? 'bg-[#7BB0FF40] text-[#17181A] font-medium'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </div>
+                {isExpanded ? (
+                  <ChevronDown className="h-3 w-3" />
+                ) : (
+                  <ChevronRight className="h-3 w-3" />
+                )}
+              </button>
+            ) : (
+              <NavLink
+                to={item.path!}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm',
+                  'transition-colors',
+                  isActive
+                    ? 'bg-[#7BB0FF40] text-[#17181A] font-medium'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </NavLink>
+            )}
+
+            {hasChildren && isExpanded && (
+              <ul className="mt-1 ml-3 space-y-1 border-l pl-3">
+                {renderItems(item.subItems!, 2)}
+              </ul>
+            )}
+          </li>
+        );
+      }
+
+      // ── Level 3+ ────────────────────────────────────────────────────────────
+      return (
+        <li key={item.label}>
+          <NavLink
+            to={item.path!}
+            className={cn(
+              'flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs',
+              'transition-colors',
+              isActive
+                ? 'bg-[#7BB0FF40] text-[#17181A] font-medium'
+                : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+            )}
+          >
+            <item.icon className="h-3.5 w-3.5" />
+            {item.label}
+          </NavLink>
+        </li>
+      );
+    });
+  }
 
   return (
     <>
@@ -232,124 +505,63 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-64 border-r',
+          'fixed top-0 left-0 z-50 h-full border-r',
           'flex flex-col',
-          'transition-transform duration-300 ease-in-out',
+          'transition-[width,transform] duration-300 ease-in-out',
           'lg:translate-x-0 lg:z-30',
+          collapsed ? 'w-[78px]' : 'w-80',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center justify-between border-b px-4 bg-header-aside">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <Video className="h-5 w-5 text-primary-foreground" />
+        <div className="flex h-16 items-center justify-between border-b px-4 bg-header-aside shrink-0">
+          {collapsed ? (
+            <div className="flex w-full items-center justify-start">
+              <img src={logoUrl} alt="Logo" className="h-8 w-auto" />
             </div>
-            <div>
-              <h1 className="text-lg font-semibold leading-none">VMS</h1>
-              <p className="text-xs text-muted-foreground">Video Management</p>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-2">
+                <img src={logoUrl} alt="Logo" className="h-8 w-auto shrink-0" />
+                <img src={completeLogoUrl} alt="Logo completo" className="h-8 w-auto" />
+              </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(false)}
-            className="lg:hidden"
-            aria-label="Close sidebar"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+              {/* Close — mobile only */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarOpen(false)}
+                className="lg:hidden"
+                aria-label="Fechar menu"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
-          <ul className="space-y-1">
-            {filteredNavItems.map((item) => {
-              const isActive = isItemActive(item);
-              const hasSubItems = item.subItems && item.subItems.length > 0;
-              const isExpanded = expandedMenus.includes(item.label);
-              const hasActiveChild = hasActiveSubItem(item);
-
-              return (
-                <li key={item.label}>
-                  {/* Menu principal */}
-                  {hasSubItems ? (
-                    // Item com submenus - apenas expande/colapsa
-                    <button
-                      onClick={() => toggleMenu(item.label)}
-                      className={cn(
-                        'w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm font-medium',
-                        'transition-colors',
-                        hasActiveChild
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <item.icon className="h-5 w-5" />
-                        {item.label}
-                      </div>
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </button>
-                  ) : (
-                    // Item sem submenus - navega normalmente
-                    <NavLink
-                      to={item.path!}
-                      className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
-                        'transition-colors',
-                        isActive
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
-                    </NavLink>
-                  )}
-
-                  {/* Submenus */}
-                  {hasSubItems && isExpanded && (
-                    <ul className="mt-1 ml-4 space-y-1 border-l pl-4">
-                      {item.subItems!.map((subItem) => {
-                        const isSubActive = isItemActive(subItem);
-
-                        return (
-                          <li key={subItem.label}>
-                            <NavLink
-                              to={subItem.path!}
-                              className={cn(
-                                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm',
-                                'transition-colors',
-                                isSubActive
-                                  ? 'bg-primary/10 text-primary font-medium'
-                                  : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                              )}
-                            >
-                              <subItem.icon className="h-4 w-4" />
-                              {subItem.label}
-                            </NavLink>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          <ul className="space-y-[3px]">{renderItems(filteredNavItems, 0)}</ul>
         </nav>
 
         {/* Footer */}
-        <div className="border-t p-4">
-          <p className="text-xs text-muted-foreground text-center">
-            VMS v{import.meta.env.VITE_APP_VERSION || '1.0.0'}
-          </p>
+        <div className="shrink-0">
+          <Divider />
+          <div className="p-3">
+            <button
+              onClick={logout}
+              title={collapsed ? 'Sair' : undefined}
+              className={cn(
+                'w-full flex items-center rounded-lg px-3 py-2 transition-colors',
+                'text-muted-foreground hover:bg-accent hover:text-destructive',
+                collapsed ? 'justify-center' : 'gap-3'
+              )}
+            >
+              <LogOut className="h-5 w-5 shrink-0" />
+              {!collapsed && <span>Sair</span>}
+            </button>
+          </div>
         </div>
       </aside>
     </>
