@@ -9,3 +9,4 @@ export * from './video.type';
 export * from './config.type';
 export * from './trigger.types';
 export * from './backup.types';
+export * from './notification-log.types';

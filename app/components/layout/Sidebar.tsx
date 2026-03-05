@@ -130,6 +130,12 @@ const navItems: NavItem[] = [
         ],
       },
       {
+        label: 'Notificações',
+        path: '/settings/notifications',
+        icon: Bell,
+        permission: 'notification:read',
+      },
+      {
         label: 'Configurações avançadas',
         path: '/settings/config',
         icon: Settings,
