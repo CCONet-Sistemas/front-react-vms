@@ -8,6 +8,7 @@ import {
   ProtectedRoute,
   FilterBar,
   Pagination,
+  ProtectedFeature,
 } from '~/components/common';
 import { Button } from '~/components/ui/button';
 import {
@@ -144,10 +145,12 @@ export default function SettingsBackupsIndexPage() {
             title="Gerenciar Backups"
             description="Visualize e gerencie os backups do sistema"
           >
-            <Button variant="secondary" onClick={() => setIsCreateOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Criar Backup
-            </Button>
+            <ProtectedFeature permission="backup:create">
+              <Button variant="default" onClick={() => setIsCreateOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Criar Backup
+              </Button>
+            </ProtectedFeature>
           </PageHeader>
 
           <BackupStatsRow statistics={statistics} isLoading={isLoadingStats} />

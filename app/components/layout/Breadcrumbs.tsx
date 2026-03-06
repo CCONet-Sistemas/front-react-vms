@@ -23,6 +23,16 @@ const routeLabels: Record<string, string> = {
   'saved-videos': 'Vídeos Salvos',
   recording: 'Gravação',
   'saved-video': 'Vídeo Salvo',
+  notifications: 'Notificações',
+  templates: 'Templates',
+  backups: 'Backups',
+  manager: 'Gerenciar Backups',
+  schedules: 'Agendamentos',
+  roles: 'Perfis de Acesso',
+  role: 'Perfil de Acesso',
+  profile: 'Perfil',
+  config: 'Configurações Avançadas',
+  send: 'Enviar Notificação',
 };
 
 // Labels for dynamic segments based on context
@@ -46,6 +56,18 @@ const dynamicLabels: Record<string, Record<string, string>> = {
   },
   'saved-video': {
     default: 'Detalhes do Vídeo Salvo',
+  },
+  templates: {
+    new: 'Novo Template',
+    default: 'Editar Template',
+  },
+  manager: {
+    new: 'Novo Backup',
+    default: 'Editar Backup',
+  },
+  roles: {
+    new: 'Novo Perfil',
+    default: 'Editar Perfil',
   },
 };
 

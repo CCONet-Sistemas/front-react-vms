@@ -8,3 +8,4 @@ export { videoService } from './videoService';
 export { configService } from './configService';
 export { backupService } from './backupService';
 export { notificationLogService } from './notificationLogService';
+export { notificationTemplateService } from './notificationTemplateService';

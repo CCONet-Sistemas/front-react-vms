@@ -13,7 +13,10 @@ export const triggerService = {
   },
 
   update: async (cameraId: string, dto: UpdateTriggerDto): Promise<CameraTrigger> => {
-    const { data } = await apiClient.put<CameraTrigger>(`/camera/triggers/${cameraId}`, { ...dto, cameraId });
+    const { data } = await apiClient.put<CameraTrigger>(`/camera/triggers/${cameraId}`, {
+      ...dto,
+      cameraId,
+    });
     return data;
   },
 

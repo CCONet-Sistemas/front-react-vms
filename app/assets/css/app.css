@@ -597,8 +597,17 @@ select:disabled {
   padding-bottom: 8px;
 }
 
-/* Chevron reposicionado para não colidir com a label */
+/* Label começa centralizada (igual ao Input) */
 .floating-select-wrapper .floating-label {
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
+}
+
+/* Sobe quando focado, tem valor ou está aberto */
+.floating-select-wrapper:focus-within .floating-label,
+.floating-select-wrapper.select-has-value .floating-label,
+.floating-select-wrapper.floating-select-open .floating-label {
   top: 8px;
   transform: translateY(0);
   font-size: 0.6875rem;
@@ -614,6 +623,11 @@ select:disabled {
   color: var(--color-destructive);
 }
 
+.floating-select-wrapper:has(select:disabled) .floating-label {
+  color: var(--color-muted-foreground);
+  opacity: 0.5;
+}
+
 /* ===== FLOATING LABEL - TEXTAREA ===== */
 .floating-textarea-wrapper {
   position: relative;
@@ -625,7 +639,9 @@ select:disabled {
 }
 
 .floating-textarea-wrapper .floating-label {
-  top: 17px;
+  top: 22px;
+  transform: translateY(-50%);
+  font-size: 0.875rem;
 }
 
 .floating-textarea-wrapper:focus-within .floating-label,
@@ -643,6 +659,11 @@ select:disabled {
 .floating-textarea-error .floating-label,
 .floating-textarea-error:focus-within .floating-label {
   color: var(--color-destructive);
+}
+
+.floating-textarea-wrapper:has(textarea:disabled) .floating-label {
+  color: var(--color-muted-foreground);
+  opacity: 0.5;
 }
 
 /* ===== FLOATING LABEL - COMBOBOX ===== */

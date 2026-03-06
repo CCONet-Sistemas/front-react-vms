@@ -20,6 +20,8 @@ import {
   Database,
   HardDrive,
   LogOut,
+  List,
+  FileText,
 } from 'lucide-react';
 import { useUIStore } from '~/store';
 import { usePermissions } from '~/hooks/usePermissions';
@@ -39,6 +41,7 @@ interface NavItem {
   relatedPaths?: string[];
   subItems?: NavItem[];
   permission?: Permission;
+  exact?: boolean;
 }
 
 const navItems: NavItem[] = [
@@ -131,9 +134,23 @@ const navItems: NavItem[] = [
       },
       {
         label: 'Notificações',
-        path: '/settings/notifications',
         icon: Bell,
         permission: 'notification:read',
+        subItems: [
+          {
+            label: 'Logs',
+            path: '/settings/notifications',
+            icon: List,
+            permission: 'notification:read',
+            exact: true,
+          },
+          {
+            label: 'Templates',
+            path: '/settings/notifications/templates',
+            icon: FileText,
+            permission: 'notification:read',
+          },
+        ],
       },
       {
         label: 'Configurações avançadas',
@@ -163,6 +180,13 @@ function FlyoutItems({ items }: { items: NavItem[] }) {
 
   const isActive = (item: NavItem) => {
     if (!item.path) return false;
+    if (item.exact) {
+      return (
+        location.pathname === item.path ||
+        item.relatedPaths?.some((p) => location.pathname === p) ||
+        false
+      );
+    }
     return (
       location.pathname === item.path ||
       location.pathname.startsWith(item.path + '/') ||
@@ -275,6 +299,13 @@ export function Sidebar() {
 
   const isItemActive = (item: NavItem): boolean => {
     if (!item.path) return false;
+    if (item.exact) {
+      return (
+        location.pathname === item.path ||
+        item.relatedPaths?.some((p) => location.pathname === p) ||
+        false
+      );
+    }
     return (
       location.pathname === item.path ||
       location.pathname.startsWith(item.path + '/') ||
@@ -360,12 +391,7 @@ export function Sidebar() {
                     <item.icon className="h-5 w-5 shrink-0" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent
-                  side="right"
-                  align="start"
-                  sideOffset={8}
-                  className="w-52 p-2"
-                >
+                <PopoverContent side="right" align="start" sideOffset={8} className="w-52 p-2">
                   <p className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
                     {item.label}
                   </p>
@@ -394,11 +420,12 @@ export function Sidebar() {
                   <item.icon className="h-5 w-5 shrink-0" />
                   {!collapsed && item.label}
                 </div>
-                {!collapsed && (isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                ))}
+                {!collapsed &&
+                  (isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  ))}
               </button>
             ) : (
               <NavLink
