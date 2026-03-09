@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MoreHorizontal, Pencil, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Pencil, Trash2, UserCheck, UserX, UserPlus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,16 +10,7 @@ import {
 } from '~/components/ui/table';
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '~/components/ui/alert-dialog';
+import { ConfirmDeleteDialog } from '~/components/common/ConfirmDeleteDialog';
 import type { User } from '~/types';
 import { Link } from 'react-router';
 
@@ -65,8 +56,16 @@ export function UsersTable({ users, onEdit, onDelete, isDeleting }: UsersTablePr
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                  Nenhum usuário encontrado.
+                <TableCell colSpan={6} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="text-muted-foreground">Nenhum usuário encontrado.</p>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/user/new">
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Criar primeiro usuário
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
@@ -132,28 +131,18 @@ export function UsersTable({ users, onEdit, onDelete, isDeleting }: UsersTablePr
         </Table>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!userToDelete} onOpenChange={() => setUserToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o usuário <strong>{userToDelete?.name}</strong>? Esta
-              ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={!!userToDelete}
+        onOpenChange={() => setUserToDelete(null)}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={isDeleting}
+        description={
+          <>
+            Tem certeza que deseja excluir o usuário <strong>{userToDelete?.name}</strong>? Esta
+            ação não pode ser desfeita.
+          </>
+        }
+      />
     </>
   );
 }

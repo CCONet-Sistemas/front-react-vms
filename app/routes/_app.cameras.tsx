@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router';
+import { useSearchParams, useRouteError, isRouteErrorResponse } from 'react-router';
 import type { Route } from './+types/_app.cameras';
 import {
   ProtectedRoute,
@@ -8,8 +8,23 @@ import {
   FilterBar,
   ViewModeToggle,
 } from '~/components/common';
+
 import { CameraList, useCameras, type ViewMode } from '~/features/cameras';
 import { useListParams } from '~/hooks/useListParams';
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  return (
+    <PageContent>
+      <div className="rounded-lg border border-destructive bg-destructive/10 p-6 text-center">
+        <p className="text-destructive font-medium">Ocorreu um erro inesperado.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {isRouteErrorResponse(error) ? error.statusText : 'Tente novamente mais tarde.'}
+        </p>
+      </div>
+    </PageContent>
+  );
+}
 
 export function meta(_args: Route.MetaArgs) {
   return [

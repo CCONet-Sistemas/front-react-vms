@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRouteError, isRouteErrorResponse } from 'react-router';
 import type { Route } from './+types/_app.settings.config';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
@@ -9,6 +10,7 @@ import {
   ProtectedRoute,
   FilterBar,
 } from '~/components/common';
+import { TableSkeleton } from '~/components/ui/table-skeleton';
 import { Button } from '~/components/ui/button';
 import {
   ConfigTable,
@@ -20,6 +22,20 @@ import {
 } from '~/features/config';
 import { useListParams } from '~/hooks/useListParams';
 import type { Configuration, CreateConfigDto, UpdateConfigDto } from '~/types';
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  return (
+    <PageContent>
+      <div className="rounded-lg border border-destructive bg-destructive/10 p-6 text-center">
+        <p className="text-destructive font-medium">Ocorreu um erro inesperado.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {isRouteErrorResponse(error) ? error.statusText : 'Tente novamente mais tarde.'}
+        </p>
+      </div>
+    </PageContent>
+  );
+}
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -134,9 +150,7 @@ export default function SettingsConfigPage() {
           )}
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-pulse text-muted-foreground">Carregando configurações...</div>
-            </div>
+            <TableSkeleton rows={8} columns={4} />
           ) : (
             <>
               <ConfigTable

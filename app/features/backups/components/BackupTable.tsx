@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog';
 import { ConfirmDeleteDialog } from '~/components/common/ConfirmDeleteDialog';
+import { TableSkeleton } from '~/components/ui/table-skeleton';
 import { BackupStatusBadge } from './BackupStatusBadge';
 import type { Backup, BackupType } from '~/types/backup.types';
 
@@ -57,6 +58,7 @@ interface BackupTableProps {
   onValidate: (backup: Backup) => void;
   onRestore: (backup: Backup) => void;
   onDownload: (backup: Backup) => void;
+  isLoading?: boolean;
   isDeleting?: boolean;
   isValidating?: boolean;
   isRestoring?: boolean;
@@ -69,6 +71,7 @@ export function BackupTable({
   onValidate,
   onRestore,
   onDownload,
+  isLoading,
   isDeleting,
   isValidating,
   isRestoring,
@@ -90,6 +93,10 @@ export function BackupTable({
       setBackupToRestore(null);
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={8} columns={6} />;
+  }
 
   return (
     <>

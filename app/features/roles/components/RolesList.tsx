@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Pencil, Shield, ShieldCheck, ShieldX, Lock } from 'lucide-react';
+import { Pencil, Shield, ShieldCheck, ShieldX, Lock, Plus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -10,8 +10,8 @@ import {
 } from '~/components/ui/table';
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
+import { TableSkeleton } from '~/components/ui/table-skeleton';
 import type { RolePermissions } from '~/types/permissions';
-import path from 'path';
 
 interface RolesListProps {
   roles: RolePermissions[];
@@ -40,11 +40,7 @@ export function RolesList({ roles, isLoading }: RolesListProps) {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-pulse text-muted-foreground">Carregando perfis...</div>
-      </div>
-    );
+    return <TableSkeleton rows={7} columns={7} />;
   }
 
   return (
@@ -64,8 +60,16 @@ export function RolesList({ roles, isLoading }: RolesListProps) {
         <TableBody>
           {roles.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                Nenhum perfil encontrado.
+              <TableCell colSpan={7} className="py-12 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <p className="text-muted-foreground">Nenhum perfil encontrado.</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/settings/role">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar perfil
+                    </Link>
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ) : (

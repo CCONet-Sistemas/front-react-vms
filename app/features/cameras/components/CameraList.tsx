@@ -1,5 +1,7 @@
-import { Camera as CameraIcon } from 'lucide-react';
+import { Camera as CameraIcon, Plus } from 'lucide-react';
+import { Link } from 'react-router';
 import { FlexList, FlexListEmpty } from '~/components/ui';
+import { Button } from '~/components/ui/button';
 import { CameraCard } from './CameraCard';
 import type { Camera } from '~/types';
 
@@ -23,6 +25,14 @@ export function CameraList({ cameras, isLoading = false, variant = 'grid' }: Cam
           icon={<CameraIcon className="h-6 w-6 text-muted-foreground" />}
           title="Nenhuma câmera encontrada"
           description="Adicione sua primeira câmera para começar."
+          action={
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/camera">
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar câmera
+              </Link>
+            </Button>
+          }
         />
       }
       renderItem={(camera) => <CameraCard camera={camera} variant={variant} />}

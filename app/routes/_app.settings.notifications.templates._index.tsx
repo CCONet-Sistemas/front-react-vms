@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams, useRouteError, isRouteErrorResponse } from 'react-router';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -27,6 +27,20 @@ import type {
   DefaultNotificationTemplate,
 } from '~/types/notification-template.types';
 
+export function ErrorBoundary() {
+  const error = useRouteError();
+  return (
+    <PageContent>
+      <div className="rounded-lg border border-destructive bg-destructive/10 p-6 text-center">
+        <p className="text-destructive font-medium">Ocorreu um erro inesperado.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {isRouteErrorResponse(error) ? error.statusText : 'Tente novamente mais tarde.'}
+        </p>
+      </div>
+    </PageContent>
+  );
+}
+
 export function meta() {
   return [
     { title: 'Templates de Notificação | VMS' },
@@ -41,7 +55,7 @@ export default function SettingsNotificationsTemplatesPage() {
 
   const channelFilter = (searchParams.get('channel') as NotificationTemplateType) || undefined;
 
-  const { data: customData } = useNotificationTemplateList({
+  const { data: customData, isLoading: isLoadingTemplates } = useNotificationTemplateList({
     page: Number(params.page),
     limit: Number(params.per_page),
     search: params.search,
@@ -118,6 +132,7 @@ export default function SettingsNotificationsTemplatesPage() {
                   onEdit={(t) => navigate(`/settings/notifications/templates/${t.uuid}`)}
                   onTest={setTestTemplate}
                   onDelete={handleDelete}
+                  isLoading={isLoadingTemplates}
                   isDeleting={deleteTemplate.isPending}
                 />
 

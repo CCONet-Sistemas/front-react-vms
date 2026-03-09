@@ -708,7 +708,7 @@ select:disabled {
 }
 
 input:in-range {
-  height: 54px;
+  /* height: 54px; */
 }
 
 .control-bar select,

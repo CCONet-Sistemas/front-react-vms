@@ -37,7 +37,7 @@ export default function SettingsNotificationsPage() {
   const startDate = searchParams.get('startDate') || undefined;
   const endDate = searchParams.get('endDate') || undefined;
 
-  const { data } = useNotificationLogList({
+  const { data, isLoading } = useNotificationLogList({
     page: Number(params.page),
     limit: Number(params.per_page),
     search: params.search,
@@ -113,6 +113,7 @@ export default function SettingsNotificationsPage() {
             logs={logs}
             onRetry={handleRetry}
             onViewDetail={setSelectedLog}
+            isLoading={isLoading}
             isRetrying={retryNotification.isPending}
           />
 

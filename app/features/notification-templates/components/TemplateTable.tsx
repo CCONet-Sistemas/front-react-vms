@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Pencil, FlaskConical, Trash2 } from 'lucide-react';
+import { Pencil, FlaskConical, Trash2, Plus } from 'lucide-react';
+import { Link } from 'react-router';
 import {
   Table,
   TableBody,
@@ -11,6 +12,7 @@ import {
 import { Button } from '~/components/ui/button';
 import { Badge } from '~/components/ui/badge';
 import { ConfirmDeleteDialog } from '~/components/common/ConfirmDeleteDialog';
+import { TableSkeleton } from '~/components/ui/table-skeleton';
 import { TemplateChannelBadge } from './TemplateChannelBadge';
 import type { NotificationTemplate } from '~/types/notification-template.types';
 
@@ -29,6 +31,7 @@ interface TemplateTableProps {
   onEdit: (template: NotificationTemplate) => void;
   onTest: (template: NotificationTemplate) => void;
   onDelete: (template: NotificationTemplate) => void;
+  isLoading?: boolean;
   isDeleting?: boolean;
 }
 
@@ -37,6 +40,7 @@ export function TemplateTable({
   onEdit,
   onTest,
   onDelete,
+  isLoading,
   isDeleting,
 }: TemplateTableProps) {
   const [templateToDelete, setTemplateToDelete] = useState<NotificationTemplate | null>(null);
@@ -47,6 +51,10 @@ export function TemplateTable({
       setTemplateToDelete(null);
     }
   };
+
+  if (isLoading) {
+    return <TableSkeleton rows={8} columns={6} />;
+  }
 
   return (
     <>
@@ -65,8 +73,16 @@ export function TemplateTable({
           <TableBody>
             {templates.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                  Nenhum template encontrado.
+                <TableCell colSpan={6} className="py-12 text-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <p className="text-muted-foreground">Nenhum template encontrado.</p>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to="/settings/notifications/templates/new">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Criar template
+                      </Link>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (

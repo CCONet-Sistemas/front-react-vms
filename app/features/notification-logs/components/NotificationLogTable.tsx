@@ -1,4 +1,5 @@
 import { Eye, RotateCcw } from 'lucide-react';
+import { TableSkeleton } from '~/components/ui/table-skeleton';
 import {
   Table,
   TableBody,
@@ -44,6 +45,7 @@ interface NotificationLogTableProps {
   logs: NotificationLog[];
   onRetry: (log: NotificationLog) => void;
   onViewDetail: (log: NotificationLog) => void;
+  isLoading?: boolean;
   isRetrying?: boolean;
 }
 
@@ -51,8 +53,13 @@ export function NotificationLogTable({
   logs,
   onRetry,
   onViewDetail,
+  isLoading,
   isRetrying,
 }: NotificationLogTableProps) {
+  if (isLoading) {
+    return <TableSkeleton rows={8} columns={6} />;
+  }
+
   return (
     <div className="rounded-lg border">
       <Table>
