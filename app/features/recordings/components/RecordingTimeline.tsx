@@ -101,7 +101,7 @@ export function RecordingTimeline({
   }, [sessions]);
 
   const segments: Segment[] = useMemo(() => {
-    return sessions.map((session) => {
+    return sessions.flatMap((session) => {
       const start = new Date(session.startedAt);
       const end =
         session.status === 'active' && !session.stoppedAt
@@ -109,16 +109,21 @@ export function RecordingTimeline({
           : new Date(session.stoppedAt ?? session.lastSegmentAt);
       const startSec = (start.getTime() - dayStart.getTime()) / 1000;
       const endSec = (end.getTime() - dayStart.getTime()) / 1000;
-      const startPercent = Math.max(0, (startSec / SECONDS_IN_DAY) * 100);
-      const widthPercent = Math.max(0.1, ((endSec - startSec) / SECONDS_IN_DAY) * 100);
 
-      return {
-        startPercent,
-        widthPercent,
-        sessionUuid: session.uuid,
-        startTime: start,
-        endTime: end,
-      };
+      // Clamp to the 24-hour window; skip segments fully outside
+      const clampedStart = Math.max(0, startSec);
+      const clampedEnd = Math.min(SECONDS_IN_DAY, endSec);
+      if (clampedEnd <= clampedStart) return [];
+
+      return [
+        {
+          startPercent: (clampedStart / SECONDS_IN_DAY) * 100,
+          widthPercent: Math.max(0.1, ((clampedEnd - clampedStart) / SECONDS_IN_DAY) * 100),
+          sessionUuid: session.uuid,
+          startTime: start,
+          endTime: end,
+        },
+      ];
     });
   }, [sessions, dayStart, now]);
 

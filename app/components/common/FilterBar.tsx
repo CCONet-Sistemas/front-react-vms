@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import { Search, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '~/components/ui/button';
+import { Badge } from '~/components/ui/badge';
 import { Input } from '~/components/ui/input';
 import { Select, SelectOption } from '~/components/ui/select';
 import { DateRangePicker } from '~/components/ui/date-picker';
@@ -211,9 +212,16 @@ export function FilterBar({
 
       {/* Clear all */}
       {hasActiveFilters && (
-        <Button variant="ghost" size="sm" onClick={handleClearAll} className="gap-1">
-          <X className="h-4 w-4" />
+        <Button variant="outline" size="sm" onClick={handleClearAll} className="gap-1.5">
+          <X className="h-3.5 w-3.5" />
           Limpar
+          <Badge variant="secondary" className="ml-0.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none">
+            {[
+              params.search ? 1 : 0,
+              params.sort ? 1 : 0,
+              ...clearableFieldKeys.map((key) => (searchParams.get(key) ? 1 : 0)),
+            ].reduce((a, b) => a + b, 0)}
+          </Badge>
         </Button>
       )}
     </div>

@@ -1,4 +1,4 @@
-import { Menu, Moon, Sun } from 'lucide-react';
+import { Menu, Moon, Sun, Search } from 'lucide-react';
 import { useUIStore } from '~/store';
 import { useTheme } from '~/hooks/useTheme';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -11,6 +11,7 @@ export function Header() {
   const toggleSidebar = useUIStore((state) => state.toggleSidebar);
   const toggleSidebarCollapsed = useUIStore((state) => state.toggleSidebarCollapsed);
   const sidebarCollapsed = useUIStore((state) => state.sidebarCollapsed);
+  const openCommandPalette = useUIStore((state) => state.openCommandPalette);
   const { isDark, toggleTheme } = useTheme();
 
   return (
@@ -51,6 +52,15 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={openCommandPalette}
+          aria-label="Busca global (Ctrl+K)"
+        >
+          <Search className="h-5 w-5" />
+        </Button>
+
         <NotificationsDropdown />
 
         <Button

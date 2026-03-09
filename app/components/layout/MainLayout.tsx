@@ -3,6 +3,7 @@ import { Outlet } from 'react-router';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { Toaster } from '~/components/ui/sonner';
+import { CommandPalette } from '~/components/common';
 import { useMe } from '~/hooks/useMe';
 import { useTheme } from '~/hooks/useTheme';
 import { useRealtimeSync } from '~/hooks/useRealtimeSync';
@@ -47,6 +48,9 @@ export function MainLayout() {
 
       {/* Toast notifications */}
       <Toaster />
+
+      {/* Command Palette */}
+      <CommandPalette />
     </div>
   );
 }

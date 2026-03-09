@@ -17,10 +17,10 @@ export function meta(_args: Route.MetaArgs) {
 export default function EditRecordingPage({ params }: Route.ComponentProps) {
   const { uuid } = params;
   const [searchParams, setSearchParams] = useSearchParams();
-  const now = new Date();
 
-  const startDate = searchParams.get('startDate') || undefined;
-  const endDate = searchParams.get('endDate') || undefined;
+  const todayDate = new Date().toISOString().split('T')[0];
+  const startDate = searchParams.get('start_date') || `${todayDate}T00:00:00Z`;
+  const endDate = searchParams.get('end_date') || `${todayDate}T23:59:59Z`;
   const sort = searchParams.get('sort') || undefined;
   const order = (searchParams.get('order') as 'asc' | 'desc') || undefined;
   const dateRange: DateRange = { startDate, endDate };
@@ -42,8 +42,8 @@ export default function EditRecordingPage({ params }: Route.ComponentProps) {
 
   const handleDateRangeChange = (range: DateRange) => {
     updateParams({
-      startDate: range.startDate,
-      endDate: range.endDate,
+      start_date: range.startDate ? `${range.startDate}T00:00:00Z` : undefined,
+      end_date: range.endDate ? `${range.endDate}T23:59:59Z` : undefined,
     });
   };
 
@@ -59,7 +59,14 @@ export default function EditRecordingPage({ params }: Route.ComponentProps) {
       </ProtectedRoute>
     );
   }
-  const { data: sessions, isLoading } = useSessionSegments(uuid, { startDate, endDate, sort, order });
+  const { data: rawSessions, isLoading } = useSessionSegments(uuid, {
+    start_date: startDate,
+    end_date: endDate,
+    sort,
+    order,
+    per_page: 500,
+  });
+  const sessions = rawSessions?.filter((s) => s.status !== 'error');
 
   return (
     <ProtectedRoute resource="recording" action="read">

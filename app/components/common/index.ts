@@ -8,3 +8,4 @@ export { FilterBar } from './FilterBar';
 export type { FilterFieldConfig, FilterSelectConfig, FilterDateRangeConfig, SortOption } from './FilterBar';
 export { ViewModeToggle } from './ViewModeToggle';
 export type { ViewMode } from './ViewModeToggle';
+export { CommandPalette } from './CommandPalette';

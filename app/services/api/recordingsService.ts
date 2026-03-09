@@ -1,9 +1,30 @@
 import type { RecordingAvailableRange, RecordingSessions, ExtractionRequest, ExtractionJob, RecordingControlStatus } from '~/types/recordings.types';
 import { apiClient } from './client';
 
+export interface SessionSegmentsMeta {
+  current_page: number;
+  per_page: number;
+  total: number;
+  last_page: number;
+  from: number;
+  to: number;
+}
+
 export interface SessionSegmentsParams {
-  startDate?: string;
-  endDate?: string;
+  start_date?: string;
+  end_date?: string;
+  status?: string;
+  search?: string;
+  sort?: string;
+  order?: 'asc' | 'desc';
+  per_page?: number;
+  page?: number;
+  select?: string;
+}
+
+export interface SessionSegmentsResult {
+  data: RecordingSessions[];
+  meta: SessionSegmentsMeta;
 }
 
 export const recordingService = {
@@ -14,12 +35,12 @@ export const recordingService = {
     return data;
   },
 
-  getSessionSegments: async (cameraId: string, params?: SessionSegmentsParams): Promise<RecordingSessions[]> => {
-    const { data } = await apiClient.get<{ data: RecordingSessions[]; meta: unknown }>(
+  getSessionSegments: async (cameraId: string, params?: SessionSegmentsParams): Promise<SessionSegmentsResult> => {
+    const { data } = await apiClient.get<SessionSegmentsResult>(
       `/recording/${cameraId}/sessions`,
       { params }
     );
-    return data.data;
+    return data;
   },
 
   extractRecording: async (cameraId: string, request: ExtractionRequest): Promise<ExtractionJob> => {

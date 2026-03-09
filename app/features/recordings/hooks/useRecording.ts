@@ -16,9 +16,15 @@ export function useAvailableRange(uuid: string) {
 }
 
 export function useSessionSegments(cameraId: string, params?: SessionSegmentsParams) {
-  return useQuery({
+  const query = useQuery({
     queryKey: recordingKeys.getSessionSegments(cameraId, params),
     queryFn: () => recordingService.getSessionSegments(cameraId, params),
     staleTime: 5 * 60 * 1000,
   });
+
+  return {
+    ...query,
+    data: query.data?.data,
+    meta: query.data?.meta,
+  };
 }

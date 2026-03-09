@@ -14,8 +14,8 @@ export const permissionsService = {
     return data;
   },
   listPermissions: async (): Promise<Permission[]> => {
-    const { data } = await apiClient.get<Permission[]>('/authorization/permissions');
-    return data;
+    const { data } = await apiClient.get<{ data: Permission[]; meta: unknown }>('/authorization/permissions');
+    return data.data;
   },
   updateRole: async (roleId: number, payload: UpdateRoleDto): Promise<RolePermissions> => {
     const { data } = await apiClient.put<RolePermissions>(`/authorization/roles/${roleId}`, payload);

@@ -74,7 +74,7 @@ export function RoleForm({ role }: RoleFormProps) {
         });
         toast.success('Perfil criado com sucesso!');
       }
-      navigate('/roles');
+      navigate('/settings/roles');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Ocorreu um erro';
       toast.error(isEditMode ? 'Erro ao atualizar perfil' : 'Erro ao criar perfil', {
@@ -192,7 +192,7 @@ export function RoleForm({ role }: RoleFormProps) {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate('/roles')}
+          onClick={() => navigate('/settings/roles')}
           disabled={isPending}
         >
           Cancelar

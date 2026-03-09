@@ -16,10 +16,7 @@ interface RecordingDateFilterDialogProps {
   container?: HTMLElement | null;
 }
 
-export function RecordingDateFilterDialog({
-  value,
-  onChange,
-}: RecordingDateFilterDialogProps) {
+export function RecordingDateFilterDialog({ value, onChange }: RecordingDateFilterDialogProps) {
   const [open, setOpen] = useState(false);
   const [localRange, setLocalRange] = useState<DateRange>(value);
 
