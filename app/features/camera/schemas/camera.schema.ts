@@ -1,10 +1,10 @@
-import { record, z } from 'zod';
+import { z } from 'zod';
 
 export const cameraSchema = z.object({
   // Device Info
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   mode: z.enum(['start', 'stop', 'idle']).default('start'),
-  type: z.string().default('h264'),
+  type: z.enum(['rtsp', 'rtmp']).default('rtsp'),
   protocol: z.string().default('rtsp'),
   status: z.enum(['active', 'inactive', 'recording']).default('recording'),
 
@@ -27,7 +27,7 @@ export const cameraSchema = z.object({
       fps: z.coerce.number().min(1).max(120).optional(),
       width: z.coerce.number().min(1).optional(),
       height: z.coerce.number().min(1).optional(),
-      codec: z.string().optional().default('h264_cuvid'),
+      codec: z.enum(['copy', 'h264', 'h265', 'mjpeg', 'mjpeg-low']).optional().default('h264'),
       ext: z.string().default('mp4'),
     })
     .optional(),

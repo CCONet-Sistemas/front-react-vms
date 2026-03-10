@@ -30,9 +30,7 @@ export interface FilterDateRangeConfig {
   endKey?: string;
 }
 
-export type FilterFieldConfig =
-  | FilterSelectConfig
-  | FilterDateRangeConfig;
+export type FilterFieldConfig = FilterSelectConfig | FilterDateRangeConfig;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -95,9 +93,7 @@ export function FilterBar({
   });
 
   const hasActiveFilters =
-    !!params.search ||
-    !!params.sort ||
-    clearableFieldKeys.some((key) => !!searchParams.get(key));
+    !!params.search || !!params.sort || clearableFieldKeys.some((key) => !!searchParams.get(key));
 
   const handleClearAll = useCallback(() => {
     const newParams = new URLSearchParams(searchParams);
@@ -131,8 +127,8 @@ export function FilterBar({
             value={String(params.sort ?? '')}
             onChange={(e) => setSort(e.target.value || undefined)}
             className="w-[160px]"
+            label="Ordenar por"
           >
-            <SelectOption value="">Ordenar por</SelectOption>
             {sortOptions.map((opt) => (
               <SelectOption key={opt.value} value={opt.value}>
                 {opt.label}
@@ -163,8 +159,8 @@ export function FilterBar({
               value={value}
               onChange={(e) => updateFieldParams({ [field.key]: e.target.value || undefined })}
               className={cn('w-[160px]', field.className)}
+              label={field.placeholder}
             >
-              <SelectOption value="">{field.placeholder}</SelectOption>
               {field.options.map((opt) => (
                 <SelectOption key={opt.value} value={opt.value}>
                   {opt.label}
@@ -196,11 +192,11 @@ export function FilterBar({
 
       {/* Per page */}
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground whitespace-nowrap">Por página:</span>
         <Select
           value={String(params.per_page ?? 10)}
           onChange={(e) => setPerPage(Number(e.target.value))}
           className="w-20"
+          label="Por página"
         >
           {perPageOptions.map((opt) => (
             <SelectOption key={opt} value={String(opt)}>
@@ -215,7 +211,10 @@ export function FilterBar({
         <Button variant="outline" size="sm" onClick={handleClearAll} className="gap-1.5">
           <X className="h-3.5 w-3.5" />
           Limpar
-          <Badge variant="secondary" className="ml-0.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none">
+          <Badge
+            variant="secondary"
+            className="ml-0.5 h-4 min-w-4 rounded-full px-1 text-[10px] leading-none"
+          >
             {[
               params.search ? 1 : 0,
               params.sort ? 1 : 0,

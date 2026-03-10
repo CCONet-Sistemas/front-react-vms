@@ -76,5 +76,23 @@ export default [
       },
     },
   },
+  // Configuração específica para arquivos de teste
+  {
+    files: ['**/*.test.{ts,tsx}', 'app/test/**/*.{ts,tsx}'],
+    languageOptions: {
+      globals: {
+        // Vitest globals (disponíveis via globals: true no vitest.config.ts)
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        vi: 'readonly',
+      },
+    },
+  },
   prettier,
 ];

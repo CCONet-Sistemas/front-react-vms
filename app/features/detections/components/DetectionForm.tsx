@@ -8,7 +8,7 @@ import { FormSection } from '~/components/ui/form-section';
 import { Input } from '~/components/ui/input';
 import { Button } from '~/components/ui/button';
 import { Switch } from '~/components/ui/switch';
-import { Select } from '~/components/ui/select';
+import { Select, SelectOption } from '~/components/ui/select';
 import { Label } from '~/components/ui/label';
 import { ProtectedFeature } from '~/components/common';
 import { RegionEditor, rectToPoints } from './RegionEditor';
@@ -209,9 +209,9 @@ export function DetectionForm({ cameraId, camera }: DetectionFormProps) {
           </div>
           <div>
             <Select label="Método" id="method" error={!!errors.method} {...register('method')}>
-              <option value="motion">Movimento</option>
-              <option value="object">Objeto</option>
-              <option value="both">Ambos</option>
+              <SelectOption value="motion">Movimento</SelectOption>
+              <SelectOption value="object">Objeto</SelectOption>
+              <SelectOption value="both">Ambos</SelectOption>
             </Select>
             {errors.method && (
               <p className="mt-1 pl-3.5 text-sm text-destructive">{errors.method.message}</p>

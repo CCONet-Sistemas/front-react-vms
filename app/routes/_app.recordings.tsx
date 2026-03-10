@@ -1,6 +1,12 @@
 import { useRouteError, isRouteErrorResponse } from 'react-router';
 import type { Route } from './+types/_app.recordings';
-import { PageContent, PageHeader, Pagination, ProtectedRoute, FilterBar } from '~/components/common';
+import {
+  PageContent,
+  PageHeader,
+  Pagination,
+  ProtectedRoute,
+  FilterBar,
+} from '~/components/common';
 import { RecordingList } from '~/features/recordings/components/RecordingList';
 import { useCameras } from '~/features/cameras';
 import { useListParams } from '~/hooks/useListParams';
@@ -29,7 +35,11 @@ export function meta(_args: Route.MetaArgs) {
 export default function RecordingsPage() {
   const { params, setPage } = useListParams({ defaults: { per_page: 12 } });
 
-  const { data: cameraData, isLoading: cameraLoading, error: cameraError } = useCameras({
+  const {
+    data: cameraData,
+    isLoading: cameraLoading,
+    error: cameraError,
+  } = useCameras({
     page: Number(params.page),
     per_page: Number(params.per_page),
     search: params.search,

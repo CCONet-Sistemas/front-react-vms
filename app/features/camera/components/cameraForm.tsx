@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { cameraSchema, type CameraFormData } from '../schemas/camera.schema';
 import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCameras';
 import { useNavigate } from 'react-router';
-import { Select } from '~/components/ui/select';
+import { Select, SelectOption } from '~/components/ui/select';
 import { toast } from 'sonner';
 import { ProtectedFeature } from '~/components/common';
 
@@ -29,7 +29,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
       ? {
           name: camera.name,
           mode: camera.mode,
-          type: camera.type,
+          type: (camera.type as 'rtsp' | 'rtmp') || 'rtsp',
           protocol: camera.protocol,
           connection: {
             host: camera.connection?.host || '',
@@ -43,7 +43,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             fps: camera.video?.fps,
             width: camera.video?.width,
             height: camera.video?.height,
-            codec: camera.video?.codec,
+            codec: (camera.video?.codec as 'copy' | 'h264' | 'h265') || 'h264',
           },
           stream: {
             fps: camera.stream?.fps,
@@ -99,22 +99,25 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             helperText={errors.name?.message}
             {...register('name')}
           />
-          <Input
+          <Select
             label="Modo"
             error={!!errors.mode}
             helperText={errors.mode?.message}
             {...register('mode')}
-          />
-          <Input
-            label="Tipo"
-            error={!!errors.type}
-            helperText={errors.type?.message}
-            {...register('type')}
-          />
+          >
+            <SelectOption value="start">Start</SelectOption>
+            <SelectOption value="stop">Stop</SelectOption>
+          </Select>
+
           <div>
-            <Select id="protocol" {...register('protocol')}>
-              <option value="rtsp">RTSP</option>
-              <option value="http">RTMP</option>
+            <Select
+              label="Protocolo"
+              error={!!errors.protocol}
+              helperText={errors.protocol?.message}
+              {...register('protocol')}
+            >
+              <SelectOption value="rtsp">RTSP</SelectOption>
+              <SelectOption value="rtmp">RTMP</SelectOption>
             </Select>
             {errors.protocol && (
               <p className="text-sm text-destructive mt-1 pl-3.5">{errors.protocol.message}</p>
@@ -170,7 +173,11 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <Input label="FPS" type="number" {...register('video.fps')} />
           <Input label="Largura" type="number" {...register('video.width')} />
           <Input label="Altura" type="number" {...register('video.height')} />
-          <Input label="Codec" {...register('video.codec')} />
+          <Select label="Codec" {...register('video.codec')}>
+            <SelectOption value="copy">Copy</SelectOption>
+            <SelectOption value="h264">H.264</SelectOption>
+            <SelectOption value="h265">H.265</SelectOption>
+          </Select>
         </div>
       </FormSection>
 
