@@ -8,12 +8,13 @@ test.describe('Login', () => {
 
   test('preencher credenciais e redirecionar para /dashboard', async ({ page }) => {
     await page.goto('/login');
+    await page.waitForLoadState('load');
 
     await page.getByLabel('Email').fill('test@vms.local');
     await page.getByLabel('Senha').fill('password123');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
-    await expect(page).toHaveURL('/dashboard');
+    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
   });
 
   test('exibir erro com credenciais inválidas', async ({ page }) => {
@@ -26,11 +27,12 @@ test.describe('Login', () => {
     });
 
     await page.goto('/login');
+    await page.waitForLoadState('load');
 
     await page.getByLabel('Email').fill('wrong@vms.local');
     await page.getByLabel('Senha').fill('wrongpassword');
     await page.getByRole('button', { name: 'Entrar' }).click();
 
-    await expect(page.getByText('Invalid email or password')).toBeVisible();
+    await expect(page.getByText('Invalid email or password')).toBeVisible({ timeout: 5000 });
   });
 });

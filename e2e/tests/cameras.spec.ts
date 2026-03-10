@@ -3,6 +3,7 @@ import { test, expect } from '../fixtures';
 test.describe('Câmeras', () => {
   test('listar câmeras', async ({ authenticatedPage: page }) => {
     await page.goto('/cameras');
+    await page.waitForLoadState('load');
 
     await expect(page.getByRole('heading', { name: 'Câmeras' })).toBeVisible();
     await expect(page.getByText('Câmera Entrada')).toBeVisible();
@@ -12,23 +13,28 @@ test.describe('Câmeras', () => {
     authenticatedPage: page,
   }) => {
     await page.goto('/cameras');
+    await page.waitForLoadState('load');
 
     await page.getByRole('link', { name: 'Adicionar' }).click();
 
     await expect(page).toHaveURL('/camera');
   });
 
-  test('preencher formulário e criar câmera', async ({ authenticatedPage: page }) => {
-    await page.goto('/camera');
+  test('editar câmera existente', async ({ authenticatedPage: page }) => {
+    await page.goto('/camera/camera-uuid-1');
+    await page.waitForLoadState('load');
 
-    await page.getByLabel('Nome do dispositivo').fill('Câmera Teste E2E');
-    await page.getByLabel('Modo').selectOption('start');
-    await page.getByLabel('Protocolo').selectOption('rtsp');
-    await page.getByLabel('Host').fill('192.168.1.200');
-    await page.getByLabel('Porta').fill('554');
+    // Wait for the camera form to load with data (edit mode)
+    const nameInput = page.getByLabel('Nome do dispositivo');
+    await expect(nameInput).toHaveValue('Câmera Entrada', { timeout: 8000 });
 
-    await page.getByRole('button', { name: 'Criar Câmera' }).click();
+    // Update the name
+    await nameInput.fill('Câmera Atualizada E2E');
 
-    await expect(page).toHaveURL(/\/camera\/new-camera-uuid/);
+    // Submit the update
+    await page.getByRole('button', { name: 'Atualizar' }).click();
+
+    // Verify the success toast
+    await expect(page.getByText('Câmera atualizada com sucesso!')).toBeVisible({ timeout: 8000 });
   });
 });

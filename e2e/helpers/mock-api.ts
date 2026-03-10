@@ -5,7 +5,7 @@ const mockCamera = {
   uuid: 'camera-uuid-1',
   externalId: 'ext-001',
   name: 'Câmera Entrada',
-  type: 'ip',
+  type: 'rtsp',
   protocol: 'rtsp',
   mode: 'stop',
   status: 'stopped',
@@ -124,11 +124,22 @@ export async function mockApiRoutes(page: Page) {
     const pathname = url.pathname;
     const method = route.request().method();
 
+    // Auth endpoints
     if (pathname === '/authentication' && method === 'POST') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(TEST_TOKENS),
+      });
+      return;
+    }
+
+    // Prevent the 401 → refresh → logout loop: mock the refresh endpoint
+    if (pathname === '/authentication/refresh' && method === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ accessToken: 'refreshed-test-token' }),
       });
       return;
     }
@@ -142,6 +153,7 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
+    // Camera endpoints
     if (pathname === '/camera' && method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -179,7 +191,8 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
-    if (pathname === '/event') {
+    // Events endpoints (plural — eventService uses /events)
+    if (pathname === '/events' && method === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -188,6 +201,20 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
-    await route.continue();
+    if (pathname.startsWith('/events/')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(mockEvent),
+      });
+      return;
+    }
+
+    // Absorb all other requests with a generic 200 to prevent 401 refresh loops
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({}),
+    });
   });
 }
