@@ -560,12 +560,30 @@ select:disabled {
   white-space: nowrap;
 }
 
+/* Hide placeholder when idle so it doesn't overlap the centered label */
+.floating-input-wrapper input:not(:focus)::placeholder {
+  color: transparent;
+}
+
 /* Sobe quando focado OU quando já tem valor */
 .floating-input-wrapper:focus-within .floating-label,
 .floating-input-wrapper input:not(:placeholder-shown) ~ .floating-label {
   top: 8px;
   transform: translateY(0);
   font-size: 0.6875rem; /* 11px */
+  line-height: 1rem;
+}
+
+/* Date inputs with a leading icon: override the global input padding-left */
+.date-input-icon-left {
+  padding-left: 2.5rem; /* 40px — clears the 14–30px Calendar icon */
+}
+
+/* Date input: always float the label — browser always shows the format text (dd/mm/aaaa) */
+.floating-input-wrapper input[type="date"] ~ .floating-label {
+  top: 8px;
+  transform: translateY(0);
+  font-size: 0.6875rem;
   line-height: 1rem;
 }
 
@@ -604,6 +622,12 @@ select:disabled {
   font-size: 0.875rem;
 }
 
+/* Trigger button inside floating select: needs same extra top padding as native select */
+.floating-select-wrapper > button {
+  padding-top: 22px;
+  padding-bottom: 8px;
+}
+
 /* Sobe quando focado, tem valor ou está aberto */
 .floating-select-wrapper:focus-within .floating-label,
 .floating-select-wrapper.select-has-value .floating-label,
@@ -614,8 +638,14 @@ select:disabled {
   line-height: 1rem;
 }
 
-.floating-select-wrapper:focus-within .floating-label {
+.floating-select-wrapper:focus-within .floating-label,
+.floating-select-wrapper.floating-select-open .floating-label {
   color: var(--color-primary);
+}
+
+/* Border turns primary when the select/datepicker popover is open */
+.floating-select-wrapper.floating-select-open > button {
+  border-bottom-color: var(--color-primary);
 }
 
 .floating-select-error .floating-label,
@@ -777,6 +807,12 @@ input[type='number'] {
 /* Label position when left icon is present (14px pl + ~16px icon + 12px pr = 42px) */
 .floating-input-wrapper.has-left-icon .floating-label {
   left: 42px;
+}
+
+/* Left icon in floating inputs: align with content area, not the full 54px height */
+.floating-input-wrapper > .left-icon {
+  padding-top: 22px;
+  padding-bottom: 8px;
 }
 
 /* Input with right icon only */

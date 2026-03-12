@@ -81,7 +81,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             )}
             ref={ref}
             {...props}
-            placeholder=" "
+            placeholder={props.placeholder ?? ' '}
           />
           <label htmlFor={inputId} className={cn('floating-label', rightIcon && 'right-10 overflow-hidden')}>
             {label}

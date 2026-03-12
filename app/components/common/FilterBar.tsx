@@ -114,6 +114,7 @@ export function FilterBar({
       <div className="flex-1 min-w-[200px] max-w-sm">
         <Input
           label={placeholder}
+          placeholder="Buscar..."
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           leftIcon={<Search className="h-4 w-4" />}
@@ -176,6 +177,8 @@ export function FilterBar({
           return (
             <DateRangePicker
               key={`daterange-${i}`}
+              labels={{ start: 'Data (Início)', end: 'Data (Fim)' }}
+              placeholder={{ start: 'DD/MM/YYYY', end: 'DD/MM/YYYY' }}
               value={{
                 startDate: searchParams.get(startKey) ?? undefined,
                 endDate: searchParams.get(endKey) ?? undefined,
