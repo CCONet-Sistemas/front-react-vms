@@ -181,3 +181,9 @@ export interface CameraStreamInfo {
   streamUrl: string;
   type: 'mjpeg' | 'hls' | 'jpeg' | 'flv';
 }
+
+export interface CameraStreamUrl {
+  hlsUrl: string;
+  expiresAt: string; // ISO date
+  state: StreamState;
+}

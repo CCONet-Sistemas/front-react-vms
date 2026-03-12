@@ -50,12 +50,14 @@ export function CameraSelector({
     }
   }, [isOpen]);
 
-  const { data, isLoading } = useCameras(
-    { page, limit: ITEMS_PER_PAGE, search: debouncedSearch || undefined },
-  );
+  const { data, isLoading } = useCameras({
+    page,
+    limit: ITEMS_PER_PAGE,
+    search: debouncedSearch || undefined,
+  });
 
   const cameras = data?.data ?? [];
-  const total = data?.total ?? 0;
+  const total = data?.meta?.total ?? 0;
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   const selectedUuids = selectedCameras.filter(Boolean).map((c) => c!.uuid);
@@ -185,15 +187,15 @@ export function CameraSelector({
           {/* Available cameras list */}
           <div className="w-1/2 p-4 flex flex-col">
             <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
+              {/* <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-medium">Câmeras Disponíveis</h3>
                 <span className="text-xs text-muted-foreground">{total} câmeras</span>
-              </div>
+              </div> */}
               <Input
-                placeholder="Buscar câmera..."
+                label="Buscar câmera"
+                leftIcon={<Search className="h-4 w-4" />}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                leftIcon={<Search className="h-4 w-4" />}
               />
             </div>
 

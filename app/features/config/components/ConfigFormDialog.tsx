@@ -69,7 +69,6 @@ export function ConfigFormDialog({
 }: ConfigFormDialogProps) {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<FormErrors>({});
-  console.log(config);
   const isEditing = !!config;
 
   useEffect(() => {

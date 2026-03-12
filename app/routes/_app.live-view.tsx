@@ -123,9 +123,7 @@ export default function LiveViewPage() {
     if (!isInitialized) return;
     saveConfig({
       gridSize,
-      selectedCameras: selectedCameras.map((c) =>
-        c ? { uuid: c.uuid, name: c.name } : null
-      ),
+      selectedCameras: selectedCameras.map((c) => (c ? { uuid: c.uuid, name: c.name } : null)),
     });
   }, [gridSize, selectedCameras, isInitialized]);
 
@@ -193,7 +191,7 @@ export default function LiveViewPage() {
 
   return (
     <ProtectedRoute resource="stream" action="read">
-      <PageContent variant="list" className="flex flex-col h-[calc(100vh-4rem)]">
+      <PageContent variant="list" className="flex overflow-hidden flex-col">
         <PageHeader
           title="Visualização ao Vivo"
           description={`${selectedCount} de ${maxCameras} câmeras no mosaico`}

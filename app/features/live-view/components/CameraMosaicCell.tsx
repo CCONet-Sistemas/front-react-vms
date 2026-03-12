@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Maximize2, Volume2, VolumeX, Video } from 'lucide-react';
+import { Maximize2, Volume2, VolumeX, Video, Loader2 } from 'lucide-react';
 import { VideoPlayer } from './VideoPlayer';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { cn } from '~/lib/utils';
 import type { Camera, StreamState } from '~/types';
 import { streamStatusConfig } from '~/features/cameras/constants/streamStatus';
+import { useStreamUrl } from '~/hooks/useStreamUrl';
 
 interface CameraMosaicCellProps {
   camera?: Camera;
-  streamUrl?: string;
   onFullscreen?: (camera: Camera) => void;
   className?: string;
   showControls?: boolean;
@@ -17,7 +17,6 @@ interface CameraMosaicCellProps {
 
 export function CameraMosaicCell({
   camera,
-  streamUrl,
   onFullscreen,
   className,
   showControls = true,
@@ -25,11 +24,9 @@ export function CameraMosaicCell({
   const [muted, setMuted] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Build HLS URL if camera is provided but no streamUrl
-  const hlsUrl =
-    streamUrl || (camera ? `${import.meta.env.VITE_API_URL}/stream/${camera.uuid}/hls` : '');
+  const { url: streamUrl, isLoading, error } = useStreamUrl(camera?.uuid);
 
-  if (!camera && !streamUrl) {
+  if (!camera) {
     return (
       <div
         className={cn(
@@ -44,32 +41,48 @@ export function CameraMosaicCell({
       </div>
     );
   }
-  const streamState = camera?.streamStatus
-    ? (camera?.streamStatus.state as StreamState)
+
+  const streamState = camera.streamStatus
+    ? (camera.streamStatus.state as StreamState)
     : 'created';
   const status = streamStatusConfig[streamState] ?? streamStatusConfig.stopped;
+
   return (
     <div
       className={cn('relative bg-black border border-border overflow-hidden', className)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Loading state */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10">
+          <Loader2 className="h-6 w-6 text-white/60 animate-spin" />
+        </div>
+      )}
+
+      {/* Error state */}
+      {error && !isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-10">
+          <p className="text-xs text-red-400 text-center px-2">Falha ao iniciar stream</p>
+        </div>
+      )}
+
       {/* Video player */}
-      <VideoPlayer
-        camera={camera}
-        src={hlsUrl}
-        muted={muted}
-        className="w-full h-full"
-        enableFallback={false}
-      />
+      {streamUrl && (
+        <VideoPlayer
+          camera={camera}
+          src={streamUrl}
+          muted={muted}
+          className="w-full h-full"
+          enableFallback={false}
+        />
+      )}
 
       {/* Camera name overlay */}
       <div className="absolute top-0 left-0 right-0 p-2 bg-gradient-to-b from-black/70 to-transparent">
         <div className="flex items-center justify-between">
-          <span className="text-white text-xs font-medium truncate">
-            {camera?.name || 'Stream'}
-          </span>
-          {camera?.streamStatus && (
+          <span className="text-white text-xs font-medium truncate">{camera.name}</span>
+          {camera.streamStatus && (
             <Badge variant={status.variant} className="text-[10px] px-1.5 py-0">
               {camera.streamStatus.state}
             </Badge>
@@ -96,7 +109,7 @@ export function CameraMosaicCell({
             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </Button>
 
-          {onFullscreen && camera && (
+          {onFullscreen && (
             <Button
               variant="ghost"
               size="icon-sm"
@@ -110,7 +123,7 @@ export function CameraMosaicCell({
       )}
 
       {/* Stream info (shown on hover) */}
-      {isHovered && camera?.streamStatus && (
+      {isHovered && camera.streamStatus && (
         <div className="absolute bottom-10 left-2 text-[10px] text-white/70">
           {camera.streamStatus.fps} FPS • {camera.streamStatus.resolutionWidth}x
           {camera.streamStatus.resolutionHeight}

@@ -774,6 +774,11 @@ input[type='number'] {
   border-bottom-left-radius: 0px;
 }
 
+/* Label position when left icon is present (14px pl + ~16px icon + 12px pr = 42px) */
+.floating-input-wrapper.has-left-icon .floating-label {
+  left: 42px;
+}
+
 /* Input with right icon only */
 .input-icon-wrapper.has-right-icon:not(.has-left-icon) input {
   border-top-right-radius: 0px;

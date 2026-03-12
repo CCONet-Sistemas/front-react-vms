@@ -1,5 +1,12 @@
 import { apiClient } from './client';
-import type { Camera, CameraListResponse, CreateCameraDto, UpdateCameraDto, SearchParams } from '~/types';
+import type {
+  Camera,
+  CameraListResponse,
+  CreateCameraDto,
+  UpdateCameraDto,
+  SearchParams,
+  CameraStreamUrl,
+} from '~/types';
 
 export type PtzCommand = 'up' | 'down' | 'left' | 'right' | 'zoom_in' | 'zoom_out';
 
@@ -29,7 +36,6 @@ export const cameraService = {
   },
 
   update: async (uuid: string, payload: UpdateCameraDto): Promise<Camera> => {
-    console.log('Updating camera with payload:', payload);
     const { data } = await apiClient.put<Camera>(`/camera/${uuid}`, payload);
     return data;
   },
@@ -48,5 +54,10 @@ export const cameraService = {
 
   ptz: async (uuid: string, command: PtzCommand): Promise<void> => {
     await apiClient.post(`/camera/${uuid}/ptz`, { command });
+  },
+
+  startStream: async (cameraId: string): Promise<CameraStreamUrl> => {
+    const { data } = await apiClient.get<CameraStreamUrl>(`/stream/${cameraId}/start`);
+    return data;
   },
 };

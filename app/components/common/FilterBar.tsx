@@ -113,7 +113,7 @@ export function FilterBar({
       {/* Search */}
       <div className="flex-1 min-w-[200px] max-w-sm">
         <Input
-          placeholder={placeholder}
+          label={placeholder}
           value={inputValue}
           onChange={(e) => handleSearchChange(e.target.value)}
           leftIcon={<Search className="h-4 w-4" />}

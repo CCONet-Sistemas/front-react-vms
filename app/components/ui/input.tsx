@@ -36,7 +36,22 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, variant, inputSize, leftIcon, rightIcon, error, label, helperText, id, ...props }, ref) => {
+  (
+    {
+      className,
+      type,
+      variant,
+      inputSize,
+      leftIcon,
+      rightIcon,
+      error,
+      label,
+      helperText,
+      id,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = React.useId();
     const inputId = id ?? generatedId;
     const inputVariant = error ? 'error' : variant;
@@ -44,16 +59,31 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     if (label) {
       return (
-        <div className={cn('floating-input-wrapper relative', isError && 'floating-input-error')}>
+        <div
+          className={cn(
+            'relative flex items-center input-icon-wrapper floating-input-wrapper',
+            leftIcon && 'has-left-icon',
+            rightIcon && 'has-right-icon'
+          )}
+        >
+          {leftIcon && (
+            <div className="text-muted-foreground border-b bg-transparent left-icon pr-5">
+              {leftIcon}
+            </div>
+          )}
           <input
             id={inputId}
             type={type}
-            className={cn(inputVariants({ variant: inputVariant, inputSize }), rightIcon && 'pr-10', className)}
+            className={cn(
+              inputVariants({ variant: inputVariant, inputSize }),
+              rightIcon && 'pr-10',
+              className
+            )}
             ref={ref}
             {...props}
             placeholder=" "
           />
-          <label htmlFor={inputId} className="floating-label">
+          <label htmlFor={inputId} className={cn('floating-label', rightIcon && 'right-10 overflow-hidden')}>
             {label}
           </label>
           {rightIcon && (
@@ -113,9 +143,9 @@ export interface FloatingInputProps extends Omit<InputProps, 'label'> {
   label: string;
 }
 
-const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>(
-  (props, ref) => <Input ref={ref} {...props} />
-);
+const FloatingInput = React.forwardRef<HTMLInputElement, FloatingInputProps>((props, ref) => (
+  <Input ref={ref} {...props} />
+));
 FloatingInput.displayName = 'FloatingInput';
 
 export { Input, FloatingInput, inputVariants };

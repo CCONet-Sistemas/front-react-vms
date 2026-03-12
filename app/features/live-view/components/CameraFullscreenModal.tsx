@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
+import { useStreamUrl } from '~/hooks/useStreamUrl';
 import { Button } from '~/components/ui/button';
 import { VideoPlayer } from './VideoPlayer';
 import { PTZControls } from './PTZControls';
@@ -116,10 +117,11 @@ export function CameraFullscreenModal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !camera) return null;
+  const { url: streamUrl, isLoading: streamLoading } = useStreamUrl(
+    isOpen ? camera?.uuid : undefined
+  );
 
-  // Build stream URL - VideoPlayer will handle type detection
-  const streamUrl = `${import.meta.env.VITE_API_URL}/stream/${camera.uuid}/hls`;
+  if (!isOpen || !camera) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black">
@@ -146,14 +148,18 @@ export function CameraFullscreenModal({
 
       {/* Video */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <VideoPlayer
-          camera={camera}
-          src={streamUrl}
-          autoPlay
-          muted
-          className="w-full h-full object-contain"
-          enableFallback={false}
-        />
+        {streamLoading ? (
+          <Loader2 className="h-10 w-10 text-white/40 animate-spin" />
+        ) : (
+          <VideoPlayer
+            camera={camera}
+            src={streamUrl}
+            autoPlay
+            muted
+            className="w-full h-full object-contain"
+            enableFallback={false}
+          />
+        )}
       </div>
 
       {/* Navigation arrows */}
