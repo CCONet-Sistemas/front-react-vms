@@ -42,9 +42,7 @@ export function CameraMosaicCell({
     );
   }
 
-  const streamState = camera.streamStatus
-    ? (camera.streamStatus.state as StreamState)
-    : 'created';
+  const streamState = camera.streamStatus ? (camera.streamStatus.state as StreamState) : 'created';
   const status = streamStatusConfig[streamState] ?? streamStatusConfig.stopped;
 
   return (
