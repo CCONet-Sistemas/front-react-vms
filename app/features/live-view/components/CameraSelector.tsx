@@ -15,7 +15,6 @@ interface CameraSelectorProps {
   maxCameras: number;
   isOpen: boolean;
   onClose: () => void;
-  initialCameras?: CameraType[]; // For auto-fill functionality
 }
 
 export function CameraSelector({
@@ -24,7 +23,6 @@ export function CameraSelector({
   maxCameras,
   isOpen,
   onClose,
-  initialCameras = [],
 }: CameraSelectorProps) {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -49,11 +47,11 @@ export function CameraSelector({
       setEditingSlot(null);
     }
   }, [isOpen]);
-
   const { data, isLoading } = useCameras({
     page,
     limit: ITEMS_PER_PAGE,
     search: debouncedSearch || undefined,
+    enabled: isOpen,
   });
 
   const cameras = data?.data ?? [];
@@ -93,12 +91,10 @@ export function CameraSelector({
   };
 
   const handleAutoFill = () => {
-    // Use initialCameras if available, otherwise use current page cameras
-    const sourceCameras = initialCameras.length > 0 ? initialCameras : cameras;
-    const newSelection: (CameraType | null)[] = [];
-    for (let i = 0; i < maxCameras; i++) {
-      newSelection.push(sourceCameras[i] || null);
-    }
+    const newSelection: (CameraType | null)[] = Array.from(
+      { length: maxCameras },
+      (_, i) => cameras[i] ?? null
+    );
     onSelectionChange(newSelection);
   };
 

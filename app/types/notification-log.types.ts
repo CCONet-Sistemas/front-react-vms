@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from './api.types';
 
-export type NotificationLogStatus = 'pending' | 'sent' | 'failed';
+export type NotificationLogStatus = 'pending' | 'sent' | 'failed' | 'retry';
 export type NotificationChannel = 'email' | 'sms' | 'push' | 'webhook';
 export type NotificationPriority = 'low' | 'normal' | 'high';
 
@@ -48,7 +48,7 @@ export interface SendNotificationDto {
   channel: NotificationChannel;
   recipient: string;
   subject?: string;
-  body: string;
+  body?: string;
   priority?: NotificationPriority;
   templateId?: number;
   templateVariables?: Record<string, unknown>;

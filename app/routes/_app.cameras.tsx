@@ -46,7 +46,7 @@ export default function CamerasPage() {
     sort: params.sort,
     order: params.order,
   });
-  console.log('Cameras data:', data); // Log para depuração
+
   const cameras = data?.data ?? [];
   const total = data?.meta?.total ?? 0;
   const totalPages = data?.meta?.last_page ?? 0;

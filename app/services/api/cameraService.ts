@@ -57,7 +57,7 @@ export const cameraService = {
   },
 
   startStream: async (cameraId: string): Promise<CameraStreamUrl> => {
-    const { data } = await apiClient.get<CameraStreamUrl>(`/stream/${cameraId}/start`);
+    const { data } = await apiClient.get<CameraStreamUrl>(`/camera/${cameraId}/ingest/start`);
     return data;
   },
 };

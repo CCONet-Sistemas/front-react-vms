@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useWatch, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Send, FileCode, CalendarClock } from 'lucide-react';
+import { ArrowLeft, Send, FileCode, CalendarClock, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageContent, PageHeader, ProtectedRoute } from '~/components/common';
 import { Button } from '~/components/ui/button';
@@ -15,6 +15,10 @@ import {
   sendNotificationSchema,
   type SendNotificationFormData,
 } from '~/features/notification-logs/schemas/send-notification.schema';
+import {
+  useNotificationTemplateList,
+  useNotificationTemplateDefaults,
+} from '~/features/notification-templates';
 import type { SendNotificationDto } from '~/types/notification-log.types';
 
 export function meta() {
@@ -27,6 +31,21 @@ export function meta() {
 export default function SendNotificationPage() {
   const navigate = useNavigate();
   const sendNotification = useSendNotification();
+
+  const { data: defaultTemplates = [] } = useNotificationTemplateDefaults();
+  const { data: customData } = useNotificationTemplateList({ limit: 1000 });
+  const customTemplates = customData?.data ?? [];
+
+  const templateOptions = useMemo(() => {
+    const customNames = new Set(customTemplates.map((t) => t.name));
+    const defaults = defaultTemplates
+      .filter((d) => !customNames.has(d.name) && d.id != null)
+      .map((d) => ({ id: d.id!, name: d.name, isDefault: true }));
+    const customs = customTemplates
+      .filter((t) => t.id != null)
+      .map((t) => ({ id: t.id!, name: t.name, isDefault: false }));
+    return [...customs, ...defaults].sort((a, b) => a.name.localeCompare(b.name));
+  }, [customTemplates, defaultTemplates]);
 
   const {
     register,
@@ -42,23 +61,38 @@ export default function SendNotificationPage() {
       subject: '',
       body: '',
       templateId: undefined,
-      templateVariables: '',
+      templateVariables: [{ key: '', value: '' }],
       scheduledAt: '',
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'templateVariables',
+  });
+
+  const watchedBody = useWatch({ control, name: 'body' });
+  const watchedTemplateId = useWatch({ control, name: 'templateId' });
+  const hasBody = !!watchedBody?.trim();
+  const hasTemplate = !!watchedTemplateId;
+
   const onSubmit = useCallback(
     async (formData: SendNotificationFormData) => {
+      const variables = (formData.templateVariables ?? [])
+        .filter((r) => r.key.trim())
+        .reduce<Record<string, unknown>>((acc, r) => {
+          acc[r.key.trim()] = r.value;
+          return acc;
+        }, {});
+
       const dto: SendNotificationDto = {
         channel: formData.channel,
         recipient: formData.recipient,
         subject: formData.subject || undefined,
-        body: formData.body,
+        body: hasTemplate ? undefined : formData.body,
         priority: formData.priority,
         templateId: formData.templateId,
-        templateVariables: formData.templateVariables?.trim()
-          ? (JSON.parse(formData.templateVariables) as Record<string, unknown>)
-          : undefined,
+        templateVariables: Object.keys(variables).length > 0 ? variables : undefined,
         scheduledAt: formData.scheduledAt || undefined,
       };
 
@@ -70,7 +104,7 @@ export default function SendNotificationPage() {
         toast.error('Erro ao enviar notificação');
       }
     },
-    [sendNotification, navigate]
+    [sendNotification, navigate, hasTemplate]
   );
 
   const isPending = sendNotification.isPending;
@@ -160,8 +194,12 @@ export default function SendNotificationPage() {
             <Textarea
               label="Corpo da mensagem"
               {...register('body')}
-              placeholder="Conteúdo da notificação..."
-              disabled={isPending}
+              placeholder={
+                hasTemplate
+                  ? 'O corpo será definido pelo template selecionado'
+                  : 'Conteúdo da notificação...'
+              }
+              disabled={isPending || hasTemplate}
               error={!!errors.body}
               helperText={errors.body?.message}
               className="min-h-[220px]"
@@ -175,24 +213,78 @@ export default function SendNotificationPage() {
               <span className="text-xs font-medium">Use um template pré-definido</span>
             </div>
             <div className="grid gap-4">
-              <Input
-                label="Template ID"
-                type="number"
-                min={0}
-                {...register('templateId', { setValueAs: (v) => v === '' ? undefined : Number(v) })}
-                disabled={isPending}
-                error={!!errors.templateId}
-                helperText={errors.templateId?.message}
+              <Controller
+                name="templateId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Template"
+                    value={field.value?.toString() ?? ''}
+                    onChange={(e) =>
+                      field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                    }
+                    disabled={isPending || hasBody}
+                    error={!!errors.templateId}
+                    helperText={errors.templateId?.message}
+                  >
+                    <SelectOption value="">Nenhum</SelectOption>
+                    {templateOptions.map((t) => (
+                      <SelectOption key={t.id} value={t.id.toString()}>
+                        {t.name}
+                        {t.isDefault ? ' (padrão)' : ''}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                )}
               />
-              <Textarea
-                label="Variáveis do template (JSON)"
-                {...register('templateVariables')}
-                placeholder={'{\n  "nome": "João",\n  "link": "https://..."\n}'}
-                disabled={isPending}
-                error={!!errors.templateVariables}
-                helperText={errors.templateVariables?.message}
-                className="min-h-[120px] font-mono text-xs"
-              />
+
+              {/* Variáveis do template — chave/valor */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Variáveis do template
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ key: '', value: '' })}
+                    disabled={isPending || !hasTemplate}
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" />
+                    Adicionar
+                  </Button>
+                </div>
+
+                {fields.map((field, i) => (
+                  <div key={field.id} className="flex gap-2 items-end">
+                    <Input
+                      label={i === 0 ? 'Variável' : undefined}
+                      {...register(`templateVariables.${i}.key`)}
+                      placeholder="nomeVariavel"
+                      disabled={isPending || !hasTemplate}
+                      className="flex-1"
+                    />
+                    <Input
+                      label={i === 0 ? 'Valor' : undefined}
+                      {...register(`templateVariables.${i}.value`)}
+                      placeholder="valor"
+                      disabled={isPending || !hasTemplate}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => remove(i)}
+                      disabled={isPending || !hasTemplate || fields.length === 1}
+                      className="text-destructive hover:text-destructive mb-0.5"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           </FormSection>
 

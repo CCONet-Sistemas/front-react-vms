@@ -103,6 +103,7 @@ export default function SettingsNotificationsPage() {
                   { label: 'Pendente', value: 'pending' },
                   { label: 'Enviado', value: 'sent' },
                   { label: 'Falhou', value: 'failed' },
+                  { label: 'Reprocessando', value: 'retry' },
                 ],
               },
               { type: 'daterange' },

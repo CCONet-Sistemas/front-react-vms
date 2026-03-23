@@ -12,11 +12,13 @@ export const cameraKeys = {
   status: (uuid: string) => [...cameraKeys.all, 'status', uuid] as const,
 };
 
-export function useCameras(params?: CameraListParams) {
+export function useCameras(params?: CameraListParams & { enabled?: boolean }) {
+  const { enabled = true, ...listParams } = params ?? {};
   return useQuery({
-    queryKey: cameraKeys.list(params),
-    queryFn: () => cameraService.list(params),
+    queryKey: cameraKeys.list(listParams),
+    queryFn: () => cameraService.list(listParams),
     staleTime: 30000,
+    enabled,
   });
 }
 

@@ -3,6 +3,7 @@ import type { PaginatedResponse } from './api.types';
 export type NotificationTemplateType = 'email' | 'sms' | 'push' | 'webhook';
 
 export interface DefaultNotificationTemplate {
+  id?: number;
   name: string;
   channel: NotificationTemplateType;
   description?: string;

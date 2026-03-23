@@ -42,8 +42,8 @@ export default function EditRecordingPage({ params }: Route.ComponentProps) {
 
   const handleDateRangeChange = (range: DateRange) => {
     updateParams({
-      start_date: range.startDate ? `${range.startDate}T00:00:00Z` : undefined,
-      end_date: range.endDate ? `${range.endDate}T23:59:59Z` : undefined,
+      start_date: range.startDate ? `${range.startDate.split('T')[0]}T00:00:00Z` : undefined,
+      end_date: range.endDate ? `${range.endDate.split('T')[0]}T23:59:59Z` : undefined,
     });
   };
 

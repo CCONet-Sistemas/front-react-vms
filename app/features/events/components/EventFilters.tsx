@@ -35,6 +35,7 @@ export function EventFilters({
   const viewMode = (searchParams.get('view') as ViewMode) || 'grid';
 
   const { data: camerasData } = useCameras({ limit: 100 });
+
   const cameras = camerasData?.data ?? [];
 
   const updateParams = useCallback(
@@ -109,9 +110,7 @@ export function EventFilters({
       {showDateRange && (
         <DateRangePicker
           value={{ startDate, endDate }}
-          onChange={(range) =>
-            updateParams({ startDate: range.startDate, endDate: range.endDate })
-          }
+          onChange={(range) => updateParams({ startDate: range.startDate, endDate: range.endDate })}
         />
       )}
 

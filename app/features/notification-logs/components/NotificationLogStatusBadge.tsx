@@ -5,6 +5,7 @@ const statusConfig: Record<NotificationLogStatus, { label: string; variant: Reac
   pending: { label: 'Pendente', variant: 'warning' },
   sent: { label: 'Enviado', variant: 'success' },
   failed: { label: 'Falhou', variant: 'destructive' },
+  retry: { label: 'Reprocessando', variant: 'secondary' },
 };
 
 interface NotificationLogStatusBadgeProps {

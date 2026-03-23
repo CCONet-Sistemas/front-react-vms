@@ -60,7 +60,30 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             storageDays: camera.recording?.storageDays,
           },
         }
-      : undefined,
+      : {
+          mode: 'start',
+          type: 'rtsp',
+          protocol: 'rtsp',
+          status: 'recording',
+          connection: {
+            host: '',
+            port: 554,
+            username: '',
+            password: '',
+            path: '/',
+            protocol: 'rtsp',
+            auto_host_enable: false,
+            auto_host: '',
+            rtsp_transport: 'tcp',
+          },
+          recording: {
+            vcodec: 'copy',
+            acodec: 'no',
+            crf: 1,
+            cutoff: '15',
+            storageDays: 7,
+          },
+        },
   });
 
   const onSubmit = async (data: CameraFormData) => {
@@ -170,9 +193,9 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de vídeo</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Input label="FPS" type="number" {...register('video.fps')} />
-          <Input label="Largura" type="number" {...register('video.width')} />
-          <Input label="Altura" type="number" {...register('video.height')} />
+          <Input label="FPS" type="number" {...register('video.fps', { setValueAs: v => v === '' ? undefined : Number(v) })} />
+          <Input label="Largura" type="number" {...register('video.width', { setValueAs: v => v === '' ? undefined : Number(v) })} />
+          <Input label="Altura" type="number" {...register('video.height', { setValueAs: v => v === '' ? undefined : Number(v) })} />
           <Select label="Codec" {...register('video.codec')}>
             <SelectOption value="copy">Copy</SelectOption>
             <SelectOption value="h264">H.264</SelectOption>
@@ -190,9 +213,9 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de transmissão</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Input label="FPS Stream" type="number" {...register('stream.fps')} />
-          <Input label="Scale X" type="number" {...register('stream.scale.x')} />
-          <Input label="Scale Y" type="number" {...register('stream.scale.y')} />
+          <Input label="FPS Stream" type="number" {...register('stream.fps', { setValueAs: v => v === '' ? undefined : Number(v) })} />
+          <Input label="Scale X" type="number" {...register('stream.scale.x', { setValueAs: v => v === '' ? undefined : Number(v) })} />
+          <Input label="Scale Y" type="number" {...register('stream.scale.y', { setValueAs: v => v === '' ? undefined : Number(v) })} />
         </div>
       </FormSection>
 
