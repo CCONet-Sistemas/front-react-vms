@@ -8,8 +8,21 @@ type AuthFixtures = {
 
 export const test = base.extend<AuthFixtures>({
   authenticatedPage: async ({ page }, use) => {
-    await injectAuthState(page);
+    // Setup API mocks
     await mockApiRoutes(page);
+
+    // Do actual login through UI (using mocked API)
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByLabel('Email').fill('test@vms.local');
+    await page.getByLabel('Senha').fill('password123');
+    await page.getByRole('button', { name: 'Entrar' }).click();
+
+    // Wait for redirect to dashboard
+    await page.waitForURL('/dashboard', { timeout: 10000 });
+
+    // Use the authenticated page
     await use(page);
   },
 });

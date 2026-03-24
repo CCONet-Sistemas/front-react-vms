@@ -8,23 +8,37 @@ test.describe('Login', () => {
 
   test('preencher credenciais e redirecionar para /dashboard', async ({ page }) => {
     await page.goto('/login');
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
 
     await page.getByLabel('Email').fill('test@vms.local');
     await page.getByLabel('Senha').fill('password123');
-    await page.getByRole('button', { name: 'Entrar' }).click();
 
-    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
+    const navigationPromise = page.waitForURL('/dashboard', { timeout: 10000 });
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await navigationPromise;
+
+    await expect(page).toHaveURL('/dashboard');
   });
 
   test('exibir erro com credenciais inválidas', async ({ page }) => {
-    await page.route('http://localhost:3000/authentication', async (route) => {
-      await route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'Unauthorized' }),
-      });
-    });
+    // Setup base mocks first
+    await mockApiRoutes(page);
+
+    // Then override authentication to return 401
+    await page.route(
+      (url) => url.pathname === '/authentication' && url.searchParams.get('override') !== 'true',
+      async (route) => {
+        if (route.request().method() === 'POST') {
+          await route.fulfill({
+            status: 401,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Unauthorized' }),
+          });
+        } else {
+          await route.continue();
+        }
+      }
+    );
 
     await page.goto('/login');
     await page.waitForLoadState('load');

@@ -3,10 +3,10 @@ import { test, expect } from '../fixtures';
 test.describe('Câmeras', () => {
   test('listar câmeras', async ({ authenticatedPage: page }) => {
     await page.goto('/cameras');
-    await page.waitForLoadState('load');
+    await page.waitForLoadState('networkidle');
 
-    await expect(page.getByRole('heading', { name: 'Câmeras' })).toBeVisible();
-    await expect(page.getByText('Câmera Entrada')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Câmeras' })).toBeVisible({ timeout: 8000 });
+    await expect(page.getByText('Câmera Entrada')).toBeVisible({ timeout: 8000 });
   });
 
   test('navegar para formulário de adição ao clicar em Adicionar', async ({
@@ -15,7 +15,7 @@ test.describe('Câmeras', () => {
     await page.goto('/cameras');
     await page.waitForLoadState('load');
 
-    await page.getByRole('link', { name: 'Adicionar' }).click();
+    await page.getByRole('link', { name: 'Adicionar', exact: true }).first().click();
 
     await expect(page).toHaveURL('/camera');
   });

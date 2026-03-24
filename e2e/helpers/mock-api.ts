@@ -134,7 +134,6 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
-    // Prevent the 401 → refresh → logout loop: mock the refresh endpoint
     if (pathname === '/authentication/refresh' && method === 'POST') {
       await route.fulfill({
         status: 200,
@@ -191,7 +190,7 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
-    // Events endpoints (plural — eventService uses /events)
+    // Events endpoints
     if (pathname === '/events' && method === 'GET') {
       await route.fulfill({
         status: 200,
@@ -210,7 +209,7 @@ export async function mockApiRoutes(page: Page) {
       return;
     }
 
-    // Absorb all other requests with a generic 200 to prevent 401 refresh loops
+    // Default: return empty 200 for any other API call
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
