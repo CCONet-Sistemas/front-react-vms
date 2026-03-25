@@ -7,8 +7,9 @@ import { streamStatusConfig } from '~/features/cameras/constants';
 import { RecordingControlPanel } from '~/features/recordings';
 import { DetectionForm } from '~/features/detections';
 import { TriggerForm } from '~/features/triggers';
+import { PTZConfigForm } from '~/features/camera';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '~/components/ui/tabs';
-import { Settings, Video, ScanSearch, Zap } from 'lucide-react';
+import { Settings, Video, ScanSearch, Zap, Navigation } from 'lucide-react';
 
 export function meta(_args: Route.MetaArgs) {
   return [
@@ -63,6 +64,10 @@ export default function EditCameraPage({ params }: Route.ComponentProps) {
                 <Zap className="h-3.5 w-3.5" />
                 Triggers
               </TabsTrigger>
+              <TabsTrigger value="ptz" className="gap-1.5">
+                <Navigation className="h-3.5 w-3.5" />
+                ONVIF
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="config">
@@ -79,6 +84,10 @@ export default function EditCameraPage({ params }: Route.ComponentProps) {
 
             <TabsContent value="triggers">
               <TriggerForm cameraId={uuid} />
+            </TabsContent>
+
+            <TabsContent value="ptz">
+              <PTZConfigForm cameraId={uuid} camera={camera} />
             </TabsContent>
           </Tabs>
         ) : (

@@ -162,12 +162,7 @@ export function DetectionForm({ cameraId, camera }: DetectionFormProps) {
         await createDetection.mutateAsync({ cameraId, dto });
         toast.success('Detecção criada com sucesso!');
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ocorreu um erro';
-      toast.error(isEditMode ? 'Erro ao atualizar detecção' : 'Erro ao criar detecção', {
-        description: message,
-      });
-    }
+    } catch (error) {}
   };
 
   const handleDelete = async () => {
@@ -176,9 +171,7 @@ export function DetectionForm({ cameraId, camera }: DetectionFormProps) {
       await deleteDetection.mutateAsync({ uuid: detection.uuid, cameraId });
       toast.success('Configuração de detecção removida');
       reset();
-    } catch {
-      toast.error('Erro ao remover detecção');
-    }
+    } catch {}
   };
 
   if (isLoading) {
@@ -208,11 +201,23 @@ export function DetectionForm({ cameraId, camera }: DetectionFormProps) {
             </Label>
           </div>
           <div>
-            <Select label="Método" id="method" error={!!errors.method} {...register('method')}>
-              <SelectOption value="motion">Movimento</SelectOption>
-              <SelectOption value="object">Objeto</SelectOption>
-              <SelectOption value="both">Ambos</SelectOption>
-            </Select>
+            <Controller
+              name="method"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label="Método"
+                  id="method"
+                  error={!!errors.method}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  <SelectOption value="motion">Movimento</SelectOption>
+                  <SelectOption value="object">Objeto</SelectOption>
+                  <SelectOption value="both">Ambos</SelectOption>
+                </Select>
+              )}
+            />
             {errors.method && (
               <p className="mt-1 pl-3.5 text-sm text-destructive">{errors.method.message}</p>
             )}

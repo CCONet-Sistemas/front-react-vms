@@ -75,13 +75,7 @@ export function RoleForm({ role }: RoleFormProps) {
         toast.success('Perfil criado com sucesso!');
       }
       navigate('/settings/roles');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ocorreu um erro';
-      toast.error(isEditMode ? 'Erro ao atualizar perfil' : 'Erro ao criar perfil', {
-        description: message,
-      });
-      console.error(error);
-    }
+    } catch (error) {}
   };
 
   const isSystemRole = role?.isSystem;

@@ -1,5 +1,17 @@
+import { toast } from 'sonner';
 import { apiClient } from './client';
 import { useAuthStore } from '~/store';
+
+const STATUS_MESSAGES: Record<number, string> = {
+  400: 'Requisição inválida.',
+  403: 'Você não tem permissão para realizar esta ação.',
+  404: 'Recurso não encontrado.',
+  409: 'Este registro já existe.',
+  422: 'Dados inválidos. Verifique as informações e tente novamente.',
+  500: 'Erro interno do servidor. Tente novamente mais tarde.',
+  502: 'Serviço indisponível. Tente novamente mais tarde.',
+  503: 'Serviço temporariamente indisponível.',
+};
 
 let isRefreshing = false;
 let failedQueue: Array<{
@@ -19,6 +31,9 @@ const processQueue = (error: unknown = null) => {
 };
 
 export function setupInterceptors() {
+  // Limpa interceptors existentes antes de registrar (evita duplicação com HMR)
+  apiClient.interceptors.request.clear();
+  apiClient.interceptors.response.clear();
 
   // Request interceptor - add Authorization header
   apiClient.interceptors.request.use(
@@ -74,6 +89,25 @@ export function setupInterceptors() {
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
+        }
+      }
+
+      // Exibe toast para todos os outros erros (exceto 401 que é tratado acima)
+      const status = error.response?.status;
+      const silent = error.config?._silentError;
+
+      if (status && status !== 401 && !silent) {
+        const apiMessage = error.response?.data?.message;
+        const raw = Array.isArray(apiMessage) ? apiMessage[0] : apiMessage;
+        const message =
+          typeof raw === 'string' && raw
+            ? raw
+            : (STATUS_MESSAGES[status] ?? 'Ocorreu um erro inesperado.');
+
+        if (status >= 500) {
+          toast.error(message);
+        } else {
+          toast.warning(message);
         }
       }
 

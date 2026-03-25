@@ -13,9 +13,7 @@ export function useSyncEvents() {
       toast.success('Sincronização concluída!', { description: data.message });
       queryClient.invalidateQueries({ queryKey: eventKeys.lists() });
     },
-    onError: (error: Error) => {
-      toast.error('Erro na sincronização', { description: error.message ?? 'Erro desconhecido' });
-    },
+    onError: (error: Error) => {},
   });
 }
 

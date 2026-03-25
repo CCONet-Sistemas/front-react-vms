@@ -75,6 +75,9 @@ export interface CameraRecording {
 }
 
 // PTZ Control
+export type PtzProtocol = 'http_cgi' | 'onvif';
+export type OnvifEventMode = 'pullpoint' | 'push' | 'both';
+
 export interface CameraPtzCommands {
   left: string;
   right: string;
@@ -86,8 +89,19 @@ export interface CameraPtzCommands {
 
 export interface CameraControl {
   enabled: boolean;
-  base_url: string;
-  commands: CameraPtzCommands;
+  base_url?: string | null;
+  ptz_protocol?: PtzProtocol;
+  onvif_port?: number;
+  onvif_event_mode?: OnvifEventMode | null;
+  commands?: CameraPtzCommands | null;
+}
+
+export interface UpdatePtzConfigDto {
+  enabled: boolean;
+  base_url?: string;
+  ptz_protocol?: PtzProtocol;
+  onvif_port?: number;
+  onvif_event_mode?: OnvifEventMode | null;
 }
 
 // Logs

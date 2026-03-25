@@ -12,9 +12,7 @@ export function BackupSection() {
     try {
       await createBackup.mutateAsync();
       toast.success('Backup gerado com sucesso!');
-    } catch {
-      toast.error('Erro ao gerar backup');
-    }
+    } catch {}
   };
 
   return (
@@ -25,11 +23,7 @@ export function BackupSection() {
           usado posteriormente para restaurar as configurações.
         </p>
         <ProtectedFeature resource="configuration" action="update">
-          <Button
-            onClick={handleBackup}
-            disabled={createBackup.isPending}
-            variant="secondary"
-          >
+          <Button onClick={handleBackup} disabled={createBackup.isPending} variant="secondary">
             <Download className="h-4 w-4 mr-2" />
             {createBackup.isPending ? 'Gerando...' : 'Gerar Backup'}
           </Button>

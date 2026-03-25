@@ -87,9 +87,7 @@ export default function SettingsBackupsIndexPage() {
         await createBackupRecord.mutateAsync(dto);
         toast.success('Backup criado com sucesso!');
         setIsCreateOpen(false);
-      } catch {
-        toast.error('Erro ao criar backup');
-      }
+      } catch {}
     },
     [createBackupRecord]
   );
@@ -99,9 +97,7 @@ export default function SettingsBackupsIndexPage() {
       try {
         await deleteBackup.mutateAsync(backup.uuid);
         toast.success('Backup excluído com sucesso!');
-      } catch {
-        toast.error('Erro ao excluir backup');
-      }
+      } catch {}
     },
     [deleteBackup]
   );
@@ -117,9 +113,7 @@ export default function SettingsBackupsIndexPage() {
             description: result.errors?.join(', ') ?? result.message,
           });
         }
-      } catch {
-        toast.error('Erro ao validar backup');
-      }
+      } catch {}
     },
     [validateBackup]
   );
@@ -129,9 +123,7 @@ export default function SettingsBackupsIndexPage() {
       try {
         await restoreBackupById.mutateAsync(backup.uuid);
         toast.success('Backup restaurado com sucesso!');
-      } catch {
-        toast.error('Erro ao restaurar backup');
-      }
+      } catch {}
     },
     [restoreBackupById]
   );
@@ -144,9 +136,7 @@ export default function SettingsBackupsIndexPage() {
         a.href = downloadInfo.url;
         a.download = `${downloadInfo.fileName}.zip`;
         a.click();
-      } catch {
-        toast.error('Erro ao baixar backup');
-      }
+      } catch {}
     },
     [downloadBackup]
   );

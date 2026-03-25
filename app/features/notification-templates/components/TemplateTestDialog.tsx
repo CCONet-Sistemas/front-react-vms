@@ -10,7 +10,10 @@ import {
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { useTestNotificationTemplate } from '../hooks/useNotificationTemplate';
-import type { NotificationTemplate, TestTemplateResponse } from '~/types/notification-template.types';
+import type {
+  NotificationTemplate,
+  TestTemplateResponse,
+} from '~/types/notification-template.types';
 import { toast } from 'sonner';
 
 interface VariableRow {
@@ -64,9 +67,7 @@ export function TemplateTestDialog({ template, isOpen, onClose }: TemplateTestDi
         dto: Object.keys(dto).length > 0 ? dto : undefined,
       });
       setResult(response);
-    } catch {
-      toast.error('Erro ao gerar preview do template');
-    }
+    } catch {}
   };
 
   if (!template) return null;
@@ -164,7 +165,12 @@ export function TemplateTestDialog({ template, isOpen, onClose }: TemplateTestDi
             </>
           ) : (
             <>
-              <Button type="button" variant="outline" onClick={handleClose} disabled={testMutation.isPending}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={testMutation.isPending}
+              >
                 Cancelar
               </Button>
               <Button onClick={handleSend} disabled={testMutation.isPending}>

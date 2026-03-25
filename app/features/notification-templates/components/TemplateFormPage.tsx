@@ -70,9 +70,9 @@ export function TemplateFormPage({ template }: TemplateFormPageProps) {
   const watchedChannel = watch('channel');
   const watchedBody = watch('bodyTemplate') ?? '';
 
-  const bodyVariables = [...new Set(
-    [...watchedBody.matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1].trim())
-  )];
+  const bodyVariables = [
+    ...new Set([...watchedBody.matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1].trim())),
+  ];
 
   const isSubmitting = createTemplate.isPending || updateTemplate.isPending;
 
@@ -86,9 +86,7 @@ export function TemplateFormPage({ template }: TemplateFormPageProps) {
         toast.success('Template criado com sucesso!');
       }
       navigate('/settings/notifications/templates');
-    } catch {
-      toast.error(isEditing ? 'Erro ao atualizar template' : 'Erro ao criar template');
-    }
+    } catch {}
   };
 
   return (

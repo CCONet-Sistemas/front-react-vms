@@ -3,7 +3,7 @@ import { Button } from '~/components/ui/button';
 import { FormSection } from '~/components/ui/form-section';
 import { Camera, Wifi, Video, Radio } from 'lucide-react';
 import type { Camera as CameraType } from '~/types';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cameraSchema, type CameraFormData } from '../schemas/camera.schema';
 import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCameras';
@@ -22,6 +22,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CameraFormData>({
     resolver: zodResolver(cameraSchema),
@@ -96,13 +97,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
         toast.success('Câmera criada com sucesso!');
         navigate(`/camera/${created.uuid}`);
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Ocorreu um erro';
-      toast.error(isEditMode ? 'Erro ao atualizar câmera' : 'Erro ao criar câmera', {
-        description: message,
-      });
-      console.error(error);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -122,26 +117,39 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             helperText={errors.name?.message}
             {...register('name')}
           />
-          <Select
-            label="Modo"
-            error={!!errors.mode}
-            helperText={errors.mode?.message}
-            {...register('mode')}
-          >
-            <SelectOption value="start">Start</SelectOption>
-            <SelectOption value="stop">Stop</SelectOption>
-          </Select>
+          <Controller
+            name="mode"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Modo"
+                error={!!errors.mode}
+                helperText={errors.mode?.message}
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <SelectOption value="start">Start</SelectOption>
+                <SelectOption value="stop">Stop</SelectOption>
+              </Select>
+            )}
+          />
 
           <div>
-            <Select
-              label="Protocolo"
-              error={!!errors.protocol}
-              helperText={errors.protocol?.message}
-              {...register('protocol')}
-            >
-              <SelectOption value="rtsp">RTSP</SelectOption>
-              <SelectOption value="rtmp">RTMP</SelectOption>
-            </Select>
+            <Controller
+              name="protocol"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label="Protocolo"
+                  error={!!errors.protocol}
+                  value={field.value}
+                  onChange={(e) => field.onChange(e.target.value)}
+                >
+                  <SelectOption value="rtsp">RTSP</SelectOption>
+                  <SelectOption value="rtmp">RTMP</SelectOption>
+                </Select>
+              )}
+            />
             {errors.protocol && (
               <p className="text-sm text-destructive mt-1 pl-3.5">{errors.protocol.message}</p>
             )}
@@ -193,14 +201,36 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de vídeo</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Input label="FPS" type="number" {...register('video.fps', { setValueAs: v => v === '' ? undefined : Number(v) })} />
-          <Input label="Largura" type="number" {...register('video.width', { setValueAs: v => v === '' ? undefined : Number(v) })} />
-          <Input label="Altura" type="number" {...register('video.height', { setValueAs: v => v === '' ? undefined : Number(v) })} />
-          <Select label="Codec" {...register('video.codec')}>
-            <SelectOption value="copy">Copy</SelectOption>
-            <SelectOption value="h264">H.264</SelectOption>
-            <SelectOption value="h265">H.265</SelectOption>
-          </Select>
+          <Input
+            label="FPS"
+            type="number"
+            {...register('video.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+          />
+          <Input
+            label="Largura"
+            type="number"
+            {...register('video.width', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+          />
+          <Input
+            label="Altura"
+            type="number"
+            {...register('video.height', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+          />
+          <Controller
+            name="video.codec"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Codec"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <SelectOption value="copy">Copy</SelectOption>
+                <SelectOption value="h264">H.264</SelectOption>
+                <SelectOption value="h265">H.265</SelectOption>
+              </Select>
+            )}
+          />
         </div>
       </FormSection>
 
@@ -213,9 +243,25 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <span className="text-xs font-medium">Configurações de transmissão</span>
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Input label="FPS Stream" type="number" {...register('stream.fps', { setValueAs: v => v === '' ? undefined : Number(v) })} />
-          <Input label="Scale X" type="number" {...register('stream.scale.x', { setValueAs: v => v === '' ? undefined : Number(v) })} />
-          <Input label="Scale Y" type="number" {...register('stream.scale.y', { setValueAs: v => v === '' ? undefined : Number(v) })} />
+          <Input
+            label="FPS Stream"
+            type="number"
+            {...register('stream.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+          />
+          <Input
+            label="Scale X"
+            type="number"
+            {...register('stream.scale.x', {
+              setValueAs: (v) => (v === '' ? undefined : Number(v)),
+            })}
+          />
+          <Input
+            label="Scale Y"
+            type="number"
+            {...register('stream.scale.y', {
+              setValueAs: (v) => (v === '' ? undefined : Number(v)),
+            })}
+          />
         </div>
       </FormSection>
 

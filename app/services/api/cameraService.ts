@@ -4,6 +4,7 @@ import type {
   CameraListResponse,
   CreateCameraDto,
   UpdateCameraDto,
+  UpdatePtzConfigDto,
   SearchParams,
   CameraStreamUrl,
 } from '~/types';
@@ -54,6 +55,11 @@ export const cameraService = {
 
   ptz: async (uuid: string, command: PtzCommand): Promise<void> => {
     await apiClient.post(`/camera/${uuid}/ptz`, { command });
+  },
+
+  updatePtzConfig: async (uuid: string, config: UpdatePtzConfigDto): Promise<Camera> => {
+    const { data } = await apiClient.put<Camera>(`/camera/${uuid}/onvif-ptz`, config);
+    return data;
   },
 
   startStream: async (cameraId: string): Promise<CameraStreamUrl> => {
