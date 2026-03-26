@@ -41,7 +41,7 @@ export function RecordingControlPanel({ cameraId, camera }: RecordingControlPane
   const resumeRecording = useResumeRecording();
   const updateCamera = useUpdateCamera();
 
-  const [retentionDays, setRetentionDays] = useState<number>(camera.recording?.storageDays ?? 7);
+  const [retentionDays, setRetentionDays] = useState<number>(camera.recording?.retentionDays ?? 7);
 
   const state = status?.controlState ?? 'idle';
   const stateInfo = stateConfig[state];
@@ -52,8 +52,8 @@ export function RecordingControlPanel({ cameraId, camera }: RecordingControlPane
     resumeRecording.isPending;
   function handleSaveRetention() {
     const recording = camera.recording
-      ? { ...camera.recording, storageDays: retentionDays }
-      : { storageDays: retentionDays };
+      ? { ...camera.recording, retentionDays: retentionDays }
+      : { retentionDays: retentionDays };
     updateCamera.mutate({
       uuid: cameraId,
       data: { ...camera, recording },

@@ -59,38 +59,43 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     if (label) {
       return (
-        <div
-          className={cn(
-            'relative flex items-center input-icon-wrapper floating-input-wrapper',
-            leftIcon && 'has-left-icon',
-            rightIcon && 'has-right-icon'
-          )}
-        >
-          {leftIcon && (
-            <div className="text-muted-foreground border-b bg-transparent left-icon pr-5">
-              {leftIcon}
-            </div>
-          )}
-          <input
-            id={inputId}
-            type={type}
+        <div className={cn(error && 'floating-input-error')}>
+          <div
             className={cn(
-              inputVariants({ variant: inputVariant, inputSize }),
-              rightIcon && 'pr-10',
-              className
+              'relative flex items-center input-icon-wrapper floating-input-wrapper',
+              leftIcon && 'has-left-icon',
+              rightIcon && 'has-right-icon'
             )}
-            ref={ref}
-            {...props}
-            placeholder={props.placeholder ?? ' '}
-          />
-          <label htmlFor={inputId} className={cn('floating-label', rightIcon && 'right-10 overflow-hidden')}>
-            {label}
-          </label>
-          {rightIcon && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              {rightIcon}
-            </div>
-          )}
+          >
+            {leftIcon && (
+              <div className="text-muted-foreground border-b bg-transparent left-icon pr-5">
+                {leftIcon}
+              </div>
+            )}
+            <input
+              id={inputId}
+              type={type}
+              className={cn(
+                inputVariants({ variant: inputVariant, inputSize }),
+                rightIcon && 'pr-10',
+                className
+              )}
+              ref={ref}
+              {...props}
+              placeholder={props.placeholder ?? ' '}
+            />
+            <label
+              htmlFor={inputId}
+              className={cn('floating-label', rightIcon && 'right-10 overflow-hidden')}
+            >
+              {label}
+            </label>
+            {rightIcon && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                {rightIcon}
+              </div>
+            )}
+          </div>
           {helperText && <p className="floating-helper-text">{helperText}</p>}
         </div>
       );
@@ -98,42 +103,48 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     if (leftIcon || rightIcon) {
       return (
-        <div
-          className={cn(
-            'relative flex items-center input-icon-wrapper',
-            leftIcon && 'has-left-icon',
-            rightIcon && 'has-right-icon'
-          )}
-        >
-          {leftIcon && (
-            <div className="text-muted-foreground border-b bg-transparent left-icon">
-              {leftIcon}
-            </div>
-          )}
-          <input
-            id={id}
-            type={type}
-            className={cn(inputVariants({ variant: inputVariant, inputSize }), className)}
-            ref={ref}
-            {...props}
-          />
-          {rightIcon && (
-            <div className="text-muted-foreground border-b bg-transparent right-icon">
-              {rightIcon}
-            </div>
-          )}
+        <div className={cn(error && 'floating-input-error')}>
+          <div
+            className={cn(
+              'relative flex items-center input-icon-wrapper',
+              leftIcon && 'has-left-icon',
+              rightIcon && 'has-right-icon'
+            )}
+          >
+            {leftIcon && (
+              <div className="text-muted-foreground border-b bg-transparent left-icon">
+                {leftIcon}
+              </div>
+            )}
+            <input
+              id={id}
+              type={type}
+              className={cn(inputVariants({ variant: inputVariant, inputSize }), className)}
+              ref={ref}
+              {...props}
+            />
+            {rightIcon && (
+              <div className="text-muted-foreground border-b bg-transparent right-icon">
+                {rightIcon}
+              </div>
+            )}
+          </div>
+          {helperText && <p className="floating-helper-text">{helperText}</p>}
         </div>
       );
     }
 
     return (
-      <input
-        id={id}
-        type={type}
-        className={cn(inputVariants({ variant: inputVariant, inputSize }), className)}
-        ref={ref}
-        {...props}
-      />
+      <>
+        <input
+          id={id}
+          type={type}
+          className={cn(inputVariants({ variant: inputVariant, inputSize }), className)}
+          ref={ref}
+          {...props}
+        />
+        {helperText && <p className="floating-helper-text">{helperText}</p>}
+      </>
     );
   }
 );

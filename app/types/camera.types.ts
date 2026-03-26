@@ -26,10 +26,10 @@ export interface CameraHwaccel {
 }
 
 export interface CameraStream {
-  type: string;
-  flv_type: string;
-  vcodec: string;
-  acodec: string;
+  streamType: string;
+  flvTransportType: string;
+  videoCodec: string;
+  audioCodec: string;
   quality: string;
   fps: number;
 }
@@ -44,6 +44,8 @@ export interface CameraVideo {
   fps: number;
   quality: string;
   codec: string;
+  width?: number;
+  height?: number;
   hwaccel: CameraHwaccel;
   stream: CameraStream;
   snapshot: CameraSnapshot;
@@ -57,11 +59,11 @@ export interface CameraWatermark {
 }
 
 export interface CameraRecording {
-  vcodec: string;
-  acodec: string;
+  videoCodec: string;
+  audioCodec: string;
   crf: number;
-  cutoff: string;
-  storageDays: number;
+  segmentDuration: number;
+  retentionDays: number;
   watermark: CameraWatermark;
 }
 
@@ -158,7 +160,6 @@ export interface Camera {
   images: CameraImages[];
   metadata: CameraMetadata;
   streamStatus: StreamStatus;
-  stream: CameraStream;
 }
 
 // API Response

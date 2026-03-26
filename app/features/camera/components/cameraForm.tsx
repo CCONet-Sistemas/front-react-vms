@@ -34,7 +34,6 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
       ? {
           name: camera.name,
           mode: camera.mode,
-          type: (camera.type as 'rtsp' | 'rtmp') || 'rtsp',
           protocol: camera.protocol,
           connection: {
             host: camera.connection?.host || '',
@@ -45,25 +44,38 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             protocol: camera.connection?.protocol || 'rtsp',
           },
           video: {
+            ext: camera.video?.ext || 'mp4',
             fps: camera.video?.fps,
-            quality: camera.video?.quality as '4k' | 'fullhd' | 'hd' | 'sd' | 'low',
-            codec: (camera.video?.codec as 'copy' | 'h264' | 'h265') || 'h264',
-          },
-          stream: {
-            fps: camera.stream?.fps,
-            quality: camera.stream?.quality as '4k' | 'fullhd' | 'hd' | 'sd' | 'low',
+
+            codec: (camera.video?.codec as 'copy' | 'h264' | 'h265') || 'copy',
+            hwaccel: {
+              enabled: camera.video?.hwaccel?.enabled || false,
+              method: camera.video?.hwaccel?.method || '',
+              device: camera.video?.hwaccel?.device || '',
+            },
+            stream: {
+              streamType: camera.video?.stream?.streamType,
+              flvTransportType: camera.video?.stream?.flvTransportType,
+              videoCodec: camera.video?.stream?.videoCodec,
+              audioCodec: camera.video?.stream?.audioCodec,
+              quality: camera.video?.stream?.quality,
+              fps: camera.video?.stream?.fps,
+            },
+            snapshot: {
+              enabled: camera.video?.snapshot?.enabled || false,
+              fps: camera.video?.snapshot?.fps || 1,
+            },
           },
           recording: {
-            vcodec: camera.recording?.vcodec,
-            acodec: camera.recording?.acodec,
+            videoCodec: camera.recording?.videoCodec,
+            audioCodec: camera.recording?.audioCodec,
             crf: camera.recording?.crf,
-            cutoff: camera.recording?.cutoff,
-            storageDays: camera.recording?.storageDays,
+            segmentDuration: camera.recording?.segmentDuration,
+            retentionDays: camera.recording?.retentionDays,
           },
         }
       : {
           mode: 'start',
-          type: 'rtsp',
           protocol: 'rtsp',
           status: 'recording',
           connection: {
@@ -78,21 +90,37 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             rtsp_transport: 'tcp',
           },
           video: {
+            ext: 'mp4',
             quality: 'fullhd',
-          },
-          stream: {
-            quality: 'hd',
+            codec: 'copy',
+            hwaccel: {
+              enabled: false,
+              method: '',
+              device: '',
+            },
+            stream: {
+              streamType: 'hls',
+              flvTransportType: 'tcp',
+              videoCodec: 'h264',
+              audioCodec: 'aac',
+              fps: 15,
+              quality: 'hd',
+            },
+            snapshot: {
+              enabled: false,
+              fps: 1,
+            },
           },
           recording: {
-            vcodec: 'copy',
-            acodec: 'no',
+            videoCodec: 'copy',
+            audioCodec: 'no',
             crf: 1,
-            cutoff: '15',
-            storageDays: 7,
+            segmentDuration: 15,
+            retentionDays: 7,
           },
         },
   });
-  console.log('Form errors:', errors);
+  console.log(errors);
   const onSubmit = async (data: CameraFormData) => {
     try {
       // Convert quality presets back to width/height and scale for API
@@ -222,23 +250,7 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             type="number"
             {...register('video.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
           />
-          <Controller
-            name="video.quality"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Qualidade"
-                value={field.value}
-                onChange={(e) => field.onChange(e.target.value)}
-              >
-                {qualityOptions.map((option) => (
-                  <SelectOption key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectOption>
-                ))}
-              </Select>
-            )}
-          />
+
           <Controller
             name="video.codec"
             control={control}
@@ -256,7 +268,6 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           />
         </div>
       </FormSection>
-
       {/* ===================== */}
       {/* STREAM */}
       {/* ===================== */}
@@ -265,21 +276,69 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           <Radio className="h-4 w-4" />
           <span className="text-xs font-medium">Configurações de transmissão ao vivo</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Controller
+            name="video.stream.flvTransportType"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="FLV Transport"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <SelectOption value="tcp">TCP</SelectOption>
+                <SelectOption value="udp">UDP</SelectOption>
+                <SelectOption value="http">HTTP</SelectOption>
+              </Select>
+            )}
+          />
+          <Controller
+            name="video.stream.videoCodec"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Codec de Vídeo"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <SelectOption value="h264">H.264</SelectOption>
+                <SelectOption value="h265">H.265</SelectOption>
+                <SelectOption value="copy">Copy</SelectOption>
+              </Select>
+            )}
+          />
+          <Controller
+            name="video.stream.audioCodec"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Codec de Áudio"
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                <SelectOption value="aac">AAC</SelectOption>
+                <SelectOption value="mp3">MP3</SelectOption>
+                <SelectOption value="no">Sem áudio</SelectOption>
+              </Select>
+            )}
+          />
           <Input
             label="FPS Stream"
             type="number"
-            {...register('stream.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+            {...register('video.stream.fps', {
+              setValueAs: (v) => (v === '' ? undefined : Number(v)),
+            })}
           />
           <Controller
-            name="stream.quality"
+            name="video.stream.quality"
             control={control}
             render={({ field }) => (
               <Select
                 label="Qualidade Stream"
-                value={field.value}
+                value={field.value || ''}
                 onChange={(e) => field.onChange(e.target.value)}
               >
+                <SelectOption value="">Padrão</SelectOption>
                 {qualityOptions.map((option) => (
                   <SelectOption key={option.value} value={option.value}>
                     {option.label}
@@ -290,7 +349,6 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           />
         </div>
       </FormSection>
-
       {/* ===================== */}
       {/* ACTIONS */}
       {/* ===================== */}

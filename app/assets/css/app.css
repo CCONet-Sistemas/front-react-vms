@@ -580,7 +580,7 @@ select:disabled {
 }
 
 /* Date input: always float the label — browser always shows the format text (dd/mm/aaaa) */
-.floating-input-wrapper input[type="date"] ~ .floating-label {
+.floating-input-wrapper input[type='date'] ~ .floating-label {
   top: 8px;
   transform: translateY(0);
   font-size: 0.6875rem;
@@ -728,12 +728,14 @@ select:disabled {
 .floating-helper-text {
   display: block;
   font-size: 0.75rem;
-  margin-top: 4px;
+  margin-top: 2px;
   padding-left: 14px;
+  line-height: 1.25rem;
   color: var(--color-muted-foreground);
 }
 
-.floating-input-error .floating-helper-text {
+.floating-input-error .floating-helper-text,
+.floating-select-error .floating-helper-text {
   color: var(--color-destructive);
 }
 

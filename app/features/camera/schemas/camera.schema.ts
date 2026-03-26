@@ -23,35 +23,43 @@ export const cameraSchema = z.object({
   // Video (opcional para criação)
   video: z
     .object({
-      fps: z.coerce.number().min(1).max(120).optional(),
-      quality: z.enum(['4k', 'fullhd', 'hd', 'sd', 'low']).default('fullhd'),
-      codec: z.enum(['copy', 'h264', 'h265', 'mjpeg', 'mjpeg-low']).optional().default('h264'),
       ext: z.string().default('mp4'),
-    })
-    .optional(),
-
-  // Stream (opcional para criação)
-  stream: z
-    .object({
-      fps: z.coerce.number().min(1).max(60).optional(),
-      quality: z.enum(['4k', 'fullhd', 'hd', 'sd', 'low']).default('hd'),
+      fps: z.coerce.number().min(1).max(120).optional(),
+      codec: z.enum(['copy', 'h264', 'h265', 'mjpeg', 'mjpeg-low']).optional(),
+      hwaccel: z
+        .object({
+          enabled: z.boolean().default(false),
+          method: z.string().default(''),
+          device: z.string().default(''),
+        })
+        .optional(),
+      stream: z
+        .object({
+          streamType: z.string().default('hls'),
+          flvTransportType: z.string().default('tcp'),
+          videoCodec: z.string().default('h264'),
+          audioCodec: z.string().default('aac'),
+          quality: z.string().optional(),
+          fps: z.coerce.number().min(1).max(60).optional(),
+        })
+        .optional(),
     })
     .optional(),
 
   recording: z
     .object({
-      vcodec: z.string().default('copy'),
-      acodec: z.string().default('no'),
+      videoCodec: z.string().default('copy'),
+      audioCodec: z.string().default('no'),
       crf: z.coerce.number().min(0).max(51).default(1),
-      cutoff: z.string().default('15'),
-      storageDays: z.coerce.number().min(1).max(30).default(7),
+      segmentDuration: z.coerce.number().min(1).max(60).default(15),
+      retentionDays: z.coerce.number().min(1).max(365).default(7),
     })
     .default({
-      vcodec: 'copy',
-      acodec: 'no',
+      videoCodec: 'copy',
+      audioCodec: 'no',
       crf: 1,
-      cutoff: '15',
-      storageDays: 7,
+      segmentDuration: 15,
+      retentionDays: 7,
     }),
 });
 

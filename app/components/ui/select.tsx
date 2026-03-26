@@ -87,7 +87,12 @@ function parseChildren(
         if ((gc.type as React.FC).displayName === 'SelectOption') {
           const p = gc.props as OptionElementProps;
           const optValue = String(p.value ?? '');
-          groupOptions.push({ type: 'option', value: optValue, label: p.children, disabled: p.disabled });
+          groupOptions.push({
+            type: 'option',
+            value: optValue,
+            label: p.children,
+            disabled: p.disabled,
+          });
           if (optValue === currentValue) selectedLabel = p.children;
         }
       });
@@ -101,7 +106,24 @@ function parseChildren(
 // ─── Select component ──────────────────────────────────────────────────────────
 
 const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, variant, selectSize, error, label, helperText, id, children, value, defaultValue, onChange, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      selectSize,
+      error,
+      label,
+      helperText,
+      id,
+      children,
+      value,
+      defaultValue,
+      onChange,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const generatedId = React.useId();
     const selectId = id ?? generatedId;
     const selectVariant = error ? 'error' : variant;
@@ -169,7 +191,23 @@ interface SelectFloatingProps {
 }
 
 const SelectFloating = React.forwardRef<HTMLSelectElement, SelectFloatingProps>(
-  ({ id, label, helperText, isError, variant, selectSize, className, value, defaultValue, onChange, disabled, children }, ref) => {
+  (
+    {
+      id,
+      label,
+      helperText,
+      isError,
+      variant,
+      selectSize,
+      className,
+      value,
+      defaultValue,
+      onChange,
+      disabled,
+      children,
+    },
+    ref
+  ) => {
     const isControlled = value !== undefined;
     const [internalValue, setInternalValue] = React.useState(
       isControlled ? (value ?? '') : (defaultValue ?? '')
@@ -209,89 +247,84 @@ const SelectFloating = React.forwardRef<HTMLSelectElement, SelectFloatingProps>(
     );
 
     return (
-      <div
-        ref={wrapperRef}
-        className={cn(
-          'floating-select-wrapper',
-          isError && 'floating-select-error',
-          hasValue && 'select-has-value',
-          open && 'floating-select-open'
-        )}
-      >
-        <Popover open={open} onOpenChange={handleOpenChange}>
-          <PopoverTrigger asChild>
-            <button
-              type="button"
-              id={id}
-              disabled={disabled}
-              className={triggerClass}
-            >
-              <span className="truncate">{selectedLabel ?? '\u00A0'}</span>
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            className="p-0 max-h-60 overflow-y-auto rounded-t-none"
-            align="start"
-            sideOffset={0}
-            style={popoverWidth ? { width: popoverWidth } : undefined}
-          >
-            {items.map((item, i) => {
-              if (item.type === 'group') {
-                return (
-                  <div key={i}>
-                    <p className="px-2 pt-1 pb-0.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      {item.label}
-                    </p>
-                    {item.options.map((opt) => (
-                      <SelectDropdownItem
-                        key={opt.value}
-                        value={opt.value}
-                        label={opt.label}
-                        disabled={opt.disabled}
-                        selected={currentValue === opt.value}
-                        onSelect={handleSelect}
-                      />
-                    ))}
-                  </div>
-                );
-              }
-              return (
-                <SelectDropdownItem
-                  key={item.value}
-                  value={item.value}
-                  label={item.label}
-                  disabled={item.disabled}
-                  selected={currentValue === item.value}
-                  onSelect={handleSelect}
-                />
-              );
-            })}
-          </PopoverContent>
-        </Popover>
-
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 pointer-events-none" />
-
-        <label htmlFor={id} className="floating-label pointer-events-none">
-          {label}
-        </label>
-
-        {helperText && <p className="floating-helper-text">{helperText}</p>}
-
-        {/* Hidden native select for ref/form compat */}
-        <select
-          ref={ref}
-          value={currentValue}
-          onChange={(e) => {
-            if (!isControlled) setInternalValue(e.target.value);
-            onChange?.(e);
-          }}
-          disabled={disabled}
-          className="sr-only"
-          tabIndex={-1}
-          aria-hidden
+      <div className={cn(isError && 'floating-select-error')}>
+        <div
+          ref={wrapperRef}
+          className={cn(
+            'floating-select-wrapper',
+            hasValue && 'select-has-value',
+            open && 'floating-select-open'
+          )}
         >
-          {children}
-        </select>
+          <Popover open={open} onOpenChange={handleOpenChange}>
+            <PopoverTrigger asChild>
+              <button type="button" id={id} disabled={disabled} className={triggerClass}>
+                <span className="truncate">{selectedLabel ?? '\u00A0'}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="p-0 max-h-60 overflow-y-auto rounded-t-none"
+              align="start"
+              sideOffset={0}
+              style={popoverWidth ? { width: popoverWidth } : undefined}
+            >
+              {items.map((item, i) => {
+                if (item.type === 'group') {
+                  return (
+                    <div key={i}>
+                      <p className="px-2 pt-1 pb-0.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                        {item.label}
+                      </p>
+                      {item.options.map((opt) => (
+                        <SelectDropdownItem
+                          key={opt.value}
+                          value={opt.value}
+                          label={opt.label}
+                          disabled={opt.disabled}
+                          selected={currentValue === opt.value}
+                          onSelect={handleSelect}
+                        />
+                      ))}
+                    </div>
+                  );
+                }
+                return (
+                  <SelectDropdownItem
+                    key={item.value}
+                    value={item.value}
+                    label={item.label}
+                    disabled={item.disabled}
+                    selected={currentValue === item.value}
+                    onSelect={handleSelect}
+                  />
+                );
+              })}
+            </PopoverContent>
+          </Popover>
+
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50 pointer-events-none" />
+
+          <label htmlFor={id} className="floating-label pointer-events-none">
+            {label}
+          </label>
+
+          {/* Hidden native select for ref/form compat */}
+          <select
+            ref={ref}
+            value={currentValue}
+            onChange={(e) => {
+              if (!isControlled) setInternalValue(e.target.value);
+              onChange?.(e);
+            }}
+            disabled={disabled}
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden
+          >
+            {children}
+          </select>
+        </div>
+        {helperText && <p className="floating-helper-text">{helperText}</p>}
       </div>
     );
   }
