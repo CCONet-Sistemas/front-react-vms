@@ -5,6 +5,7 @@ import { Badge } from '~/components/ui/badge';
 import { cn } from '~/lib/utils';
 import { useTheme, useAuthImage } from '~/hooks';
 import type { Camera, StreamState } from '~/types';
+import { getQualityLabel } from '~/utils/video-quality.utils';
 import placeholderLight from '~/assets/images/placeholder-camera.png';
 import placeholderDark from '~/assets/images/placeholder-camera-darkmode.png';
 
@@ -109,7 +110,7 @@ export function CameraCard({ camera, variant = 'grid', className }: CameraCardPr
           {variant === 'grid' && camera.video?.width && camera.video?.height && (
             <div className="absolute bottom-2 left-2">
               <Badge variant="outline" className="bg-black/50 text-white border-none text-xs">
-                {camera.video.width}x{camera.video.height}
+                {getQualityLabel(camera.video.width, camera.video.height)}
               </Badge>
             </div>
           )}
@@ -141,9 +142,7 @@ export function CameraCard({ camera, variant = 'grid', className }: CameraCardPr
           {/* Extra info for list view */}
           {variant === 'list' && camera.video?.width && camera.video?.height && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-              <span>
-                {camera.video.width}x{camera.video.height}
-              </span>
+              <span>{getQualityLabel(camera.video.width, camera.video.height)}</span>
             </div>
           )}
         </div>

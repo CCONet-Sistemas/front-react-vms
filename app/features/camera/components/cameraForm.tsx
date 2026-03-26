@@ -5,12 +5,13 @@ import { Camera, Wifi, Video, Radio } from 'lucide-react';
 import type { Camera as CameraType } from '~/types';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { cameraSchema, type CameraFormData } from '../schemas/camera.schema';
+import { cameraSchema, type CameraFormData, type CameraFormInput } from '../schemas/camera.schema';
 import { useCreateCamera, useUpdateCamera } from '~/features/cameras/hooks/useCameras';
 import { useNavigate } from 'react-router';
 import { Select, SelectOption } from '~/components/ui/select';
 import { toast } from 'sonner';
 import { ProtectedFeature } from '~/components/common';
+import { getVideoQualityOptions } from '~/types';
 
 export default function CameraForm({ camera }: { camera?: CameraType }) {
   const navigate = useNavigate();
@@ -19,12 +20,15 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
   const createMutation = useCreateCamera();
   const updateMutation = useUpdateCamera();
 
+  // Get quality options for dropdowns
+  const qualityOptions = getVideoQualityOptions();
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<CameraFormData>({
+  } = useForm<CameraFormInput, unknown, CameraFormData>({
     resolver: zodResolver(cameraSchema),
     defaultValues: camera
       ? {
@@ -42,16 +46,12 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           },
           video: {
             fps: camera.video?.fps,
-            width: camera.video?.width,
-            height: camera.video?.height,
+            quality: camera.video?.quality as '4k' | 'fullhd' | 'hd' | 'sd' | 'low',
             codec: (camera.video?.codec as 'copy' | 'h264' | 'h265') || 'h264',
           },
           stream: {
             fps: camera.stream?.fps,
-            scale: {
-              x: camera.stream?.scale?.x,
-              y: camera.stream?.scale?.y,
-            },
+            quality: camera.stream?.quality as '4k' | 'fullhd' | 'hd' | 'sd' | 'low',
           },
           recording: {
             vcodec: camera.recording?.vcodec,
@@ -77,6 +77,12 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
             auto_host: '',
             rtsp_transport: 'tcp',
           },
+          video: {
+            quality: 'fullhd',
+          },
+          stream: {
+            quality: 'hd',
+          },
           recording: {
             vcodec: 'copy',
             acodec: 'no',
@@ -86,9 +92,10 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
           },
         },
   });
-
+  console.log('Form errors:', errors);
   const onSubmit = async (data: CameraFormData) => {
     try {
+      // Convert quality presets back to width/height and scale for API
       if (isEditMode) {
         await updateMutation.mutateAsync({ uuid: camera.uuid, data: data as any });
         toast.success('Câmera atualizada com sucesso!');
@@ -97,7 +104,16 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
         toast.success('Câmera criada com sucesso!');
         navigate(`/camera/${created.uuid}`);
       }
-    } catch (error) {}
+    } catch (error: any) {
+      const raw = error?.response?.data?.message ?? error?.message;
+      const message =
+        typeof raw === 'string'
+          ? raw
+          : Array.isArray(raw)
+            ? raw.join(', ')
+            : 'Erro ao salvar câmera';
+      toast.error(message);
+    }
   };
 
   return (
@@ -198,23 +214,30 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
       <FormSection title="Vídeo">
         <div className="mb-3 flex items-center gap-2 text-primary">
           <Video className="h-4 w-4" />
-          <span className="text-xs font-medium">Configurações de vídeo</span>
+          <span className="text-xs font-medium">Configurações de vídeo (gravação)</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-3">
           <Input
             label="FPS"
             type="number"
             {...register('video.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
           />
-          <Input
-            label="Largura"
-            type="number"
-            {...register('video.width', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
-          />
-          <Input
-            label="Altura"
-            type="number"
-            {...register('video.height', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
+          <Controller
+            name="video.quality"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Qualidade"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                {qualityOptions.map((option) => (
+                  <SelectOption key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectOption>
+                ))}
+              </Select>
+            )}
           />
           <Controller
             name="video.codec"
@@ -240,27 +263,30 @@ export default function CameraForm({ camera }: { camera?: CameraType }) {
       <FormSection title="Stream">
         <div className="mb-3 flex items-center gap-2 text-primary">
           <Radio className="h-4 w-4" />
-          <span className="text-xs font-medium">Configurações de transmissão</span>
+          <span className="text-xs font-medium">Configurações de transmissão ao vivo</span>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Input
             label="FPS Stream"
             type="number"
             {...register('stream.fps', { setValueAs: (v) => (v === '' ? undefined : Number(v)) })}
           />
-          <Input
-            label="Scale X"
-            type="number"
-            {...register('stream.scale.x', {
-              setValueAs: (v) => (v === '' ? undefined : Number(v)),
-            })}
-          />
-          <Input
-            label="Scale Y"
-            type="number"
-            {...register('stream.scale.y', {
-              setValueAs: (v) => (v === '' ? undefined : Number(v)),
-            })}
+          <Controller
+            name="stream.quality"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Qualidade Stream"
+                value={field.value}
+                onChange={(e) => field.onChange(e.target.value)}
+              >
+                {qualityOptions.map((option) => (
+                  <SelectOption key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectOption>
+                ))}
+              </Select>
+            )}
           />
         </div>
       </FormSection>

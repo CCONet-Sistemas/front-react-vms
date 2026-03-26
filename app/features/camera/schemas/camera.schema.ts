@@ -4,7 +4,6 @@ export const cameraSchema = z.object({
   // Device Info
   name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   mode: z.enum(['start', 'stop', 'idle']).default('start'),
-  type: z.enum(['rtsp', 'rtmp']).default('rtsp'),
   protocol: z.string().default('rtsp'),
   status: z.enum(['active', 'inactive', 'recording']).default('recording'),
 
@@ -25,8 +24,7 @@ export const cameraSchema = z.object({
   video: z
     .object({
       fps: z.coerce.number().min(1).max(120).optional(),
-      width: z.coerce.number().min(1).optional(),
-      height: z.coerce.number().min(1).optional(),
+      quality: z.enum(['4k', 'fullhd', 'hd', 'sd', 'low']).default('fullhd'),
       codec: z.enum(['copy', 'h264', 'h265', 'mjpeg', 'mjpeg-low']).optional().default('h264'),
       ext: z.string().default('mp4'),
     })
@@ -36,14 +34,10 @@ export const cameraSchema = z.object({
   stream: z
     .object({
       fps: z.coerce.number().min(1).max(60).optional(),
-      scale: z
-        .object({
-          x: z.coerce.number().min(1).optional(),
-          y: z.coerce.number().min(1).optional(),
-        })
-        .optional(),
+      quality: z.enum(['4k', 'fullhd', 'hd', 'sd', 'low']).default('hd'),
     })
     .optional(),
+
   recording: z
     .object({
       vcodec: z.string().default('copy'),
@@ -62,3 +56,4 @@ export const cameraSchema = z.object({
 });
 
 export type CameraFormData = z.infer<typeof cameraSchema>;
+export type CameraFormInput = z.input<typeof cameraSchema>;

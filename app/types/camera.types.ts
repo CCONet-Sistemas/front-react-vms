@@ -19,12 +19,6 @@ export interface CameraConnection {
   p2pSerialNumber: string;
 }
 
-// Video settings
-export interface CameraVideoScale {
-  x: number;
-  y: number;
-}
-
 export interface CameraHwaccel {
   enabled: boolean;
   method: string;
@@ -36,22 +30,19 @@ export interface CameraStream {
   flv_type: string;
   vcodec: string;
   acodec: string;
-  quality: number;
+  quality: string;
   fps: number;
-  scale: CameraVideoScale;
 }
 
 export interface CameraSnapshot {
   enabled: boolean;
   fps: number;
-  scale: CameraVideoScale;
 }
 
 export interface CameraVideo {
   ext: string;
   fps: number;
-  width: number;
-  height: number;
+  quality: string;
   codec: string;
   hwaccel: CameraHwaccel;
   stream: CameraStream;

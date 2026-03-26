@@ -11,3 +11,4 @@ export * from './trigger.types';
 export * from './backup.types';
 export * from './notification-log.types';
 export * from './notification-template.types';
+export * from './video-quality.types';
